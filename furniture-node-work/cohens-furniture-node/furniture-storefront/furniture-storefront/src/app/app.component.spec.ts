@@ -14,16 +14,16 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have the Cohen's Furniture Direct title`, () => {
+  it(`should have the Cohen's Furniture in Elkton title`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual("Cohen's Furniture Direct");
+    expect(app.title).toEqual("Cohen's Furniture in Elkton");
   });
 
   it('should render title', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain("Cohen's Furniture Direct");
+    expect(compiled.querySelector('h1')?.textContent).toContain("Cohen's Furniture in Elkton");
   });
 });

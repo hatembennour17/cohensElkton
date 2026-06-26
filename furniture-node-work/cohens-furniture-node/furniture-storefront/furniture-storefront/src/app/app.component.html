@@ -11,7 +11,7 @@
 
   <header class="main-header">
     <div class="wrap header-grid">
-      <a class="brand" [href]="links.home" aria-label="Cohen's Furniture Direct home">
+      <a class="brand" [href]="links.home" aria-label="Cohen's Furniture in Elkton home">
         <img [src]="logoUrl" alt="Cohen's Furniture" />
       </a>
 
@@ -38,19 +38,32 @@
 
   <main>
     <section class="hero" aria-labelledby="hero-title">
-      <div class="hero__media">
-        <img [src]="heroImages[0]" alt="Living room furniture sale" />
-      </div>
       <div class="wrap hero__content">
-        <p class="eyebrow">Direct prices. Local service.</p>
-        <h1 id="hero-title">Cohen's Furniture Direct</h1>
+        <p class="eyebrow">Discount prices. Local service.</p>
+        <h1 id="hero-title">{{ title }}</h1>
         <p class="hero__copy">
-          Shop high quality bargain furniture, mattresses, dining, bedroom, and living room pieces for less.
+          Shop high quality bargain furniture, mattresses, dining, bedroom, and living room pieces for less at our Elkton showroom.
         </p>
+        <address class="hero__location">
+          <strong>{{ location.street }}</strong>
+          <span>{{ location.cityLine }}</span>
+          <a [href]="location.phoneHref">{{ location.phone }}</a>
+        </address>
         <div class="hero__actions">
           <a class="btn btn--primary" [href]="links.livingRoom">Shop Living Room</a>
-          <a class="btn btn--light" [href]="links.clearance">View Deals</a>
+          <a class="btn btn--light" [href]="links.directions">Get Directions</a>
+          <a class="btn btn--outline" [href]="location.phoneHref">Call Store</a>
         </div>
+        <div class="social-links" aria-label="Cohen's Furniture social media">
+          @for (social of socialLinks; track social.label) {
+            <a [href]="social.href" target="_blank" rel="noopener" [attr.aria-label]="social.label">
+              <img [src]="social.icon" [alt]="social.label" />
+            </a>
+          }
+        </div>
+      </div>
+      <div class="hero__media">
+        <img [src]="heroImages[0]" alt="Stylish living room furniture at Cohen's Furniture" />
       </div>
     </section>
 

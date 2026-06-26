@@ -7,12 +7,12 @@ import { Component } from '@angular/core';
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
-  title = "Cohen's Furniture Direct";
+  title = "Cohen's Furniture in Elkton";
 
   private readonly siteUrl = 'https://www.cohensfurnituredirect.com';
 
   location = {
-    name: 'Cohen\'s Furniture Elkton',
+    name: 'Cohen\'s Furniture in Elkton',
     shortName: 'Elkton',
     cityState: 'Elkton, MD',
     street: '901 E. Pulaski Highway',
@@ -53,8 +53,36 @@ export class AppComponent {
   ];
 
   heroImages = [
-    'https://cdn.rencdn.com/Cohensfurniture/uploads/images/banners/6a2c6477d7bc7.jpg',
-    'https://s3.amazonaws.com/cdn.rencdn.com/Cohensfurniture/uploads/images/banners/1718305886.jpg'
+    'https://cdn.rencdn.com/Cohensfurniture/uploads/images/living-room-main_1.jpg',
+    'https://cdn.rencdn.com/Cohensfurniture/uploads/images/sofas.jpg'
+  ];
+
+  socialLinks = [
+    {
+      label: 'Facebook',
+      href: 'https://www.facebook.com/CohensFurnitureDE/',
+      icon: 'https://www.cohensfurnituredirect.com/assets/uploads/images/Real%20FB2.png'
+    },
+    {
+      label: 'Instagram',
+      href: 'https://www.instagram.com/cohensfurniture/',
+      icon: 'https://www.cohensfurnituredirect.com/assets/uploads/images/Real%20Insta2.png'
+    },
+    {
+      label: 'YouTube',
+      href: 'https://www.youtube.com/channel/UCDBrVOuWoaOhMX_iZch36Xg',
+      icon: 'https://www.cohensfurnituredirect.com/assets/uploads/images/youtube-icon.png'
+    },
+    {
+      label: 'Pinterest',
+      href: 'https://www.pinterest.com/CohensFurniture/',
+      icon: 'https://www.cohensfurnituredirect.com/assets/uploads/images/pinterest-icon.png'
+    },
+    {
+      label: 'Twitter',
+      href: 'https://twitter.com/CohensFurniture',
+      icon: 'https://www.cohensfurnituredirect.com/assets/uploads/images/twitter-icon.png'
+    }
   ];
 
   promos = [

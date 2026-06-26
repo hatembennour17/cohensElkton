@@ -1,0 +1,151 @@
+<div class="site-shell">
+  <header class="topbar">
+    <div class="wrap topbar__inner">
+      <a [href]="links.contact">Furniture store in New Castle, DE</a>
+      <a href="tel:+13026549916">(302) 654-9916</a>
+      <a [href]="links.financing">Financing</a>
+      <a [href]="links.storePolicy">Delivery</a>
+      <a [href]="links.wishlist">Wishlist</a>
+    </div>
+  </header>
+
+  <header class="main-header">
+    <div class="wrap header-grid">
+      <a class="brand" [href]="links.home" aria-label="Cohen's Furniture Direct home">
+        <img [src]="logoUrl" alt="Cohen's Furniture" />
+      </a>
+
+      <form class="search" [action]="links.search" method="get" aria-label="Search products">
+        <span>Search</span>
+        <input type="search" name="q" placeholder="Search furniture, mattresses, decor" />
+        <button type="submit">Go</button>
+      </form>
+
+      <div class="header-actions">
+        <a [href]="links.login">My Account</a>
+        <a [href]="links.cart">Cart</a>
+      </div>
+    </div>
+
+    <nav class="category-nav" aria-label="Main categories">
+      <div class="wrap nav-scroll">
+        @for (item of navItems; track item.label) {
+          <a [href]="item.href">{{ item.label }}</a>
+        }
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero__media">
+        <img [src]="heroImages[0]" alt="Living room furniture sale" />
+      </div>
+      <div class="wrap hero__content">
+        <p class="eyebrow">Direct prices. Local service.</p>
+        <h1 id="hero-title">Cohen's Furniture Direct</h1>
+        <p class="hero__copy">
+          Shop high quality bargain furniture, mattresses, dining, bedroom, and living room pieces for less.
+        </p>
+        <div class="hero__actions">
+          <a class="btn btn--primary" [href]="links.livingRoom">Shop Living Room</a>
+          <a class="btn btn--light" [href]="links.clearance">View Deals</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="promo-strip" aria-label="Store benefits">
+      @for (promo of promos; track promo.title) {
+        <article>
+          <strong>{{ promo.title }}</strong>
+          <span>{{ promo.text }}</span>
+        </article>
+      }
+    </section>
+
+    <section class="wrap section">
+      <div class="section-heading">
+        <h2>Shop By Room</h2>
+        <a [href]="links.home">View all departments</a>
+      </div>
+      <div class="category-grid">
+        @for (category of roomCategories; track category.name) {
+          <a class="category-card" [href]="category.href">
+            <img [src]="category.image" [alt]="category.name" />
+            <span>{{ category.name }}</span>
+          </a>
+        }
+      </div>
+    </section>
+
+    <section class="financing">
+      <div class="wrap financing__inner">
+        <img [src]="creditImage" alt="Credit card financing" />
+        <div>
+          <p class="eyebrow">Flexible payment options</p>
+          <h2>Take home the room you love today.</h2>
+          <p>Apply for special financing and get value pricing across Cohen's most requested styles.</p>
+        </div>
+        <a class="btn btn--primary" [href]="links.financing">Apply Now</a>
+      </div>
+    </section>
+
+    <section class="wrap section feature-layout">
+      <div class="feature-copy">
+        <p class="eyebrow">Dining room favorites</p>
+        <h2>Gather around a better deal.</h2>
+        <p>
+          Bring home tables, chairs, benches, and complete dining sets with the value-first shopping experience Cohen's is known for.
+        </p>
+        <a class="btn btn--dark" [href]="links.diningRoom">Shop Dining</a>
+      </div>
+      <div class="tile-grid">
+        @for (item of diningTiles; track item.name) {
+          <a class="product-tile" [href]="item.href">
+            <img [src]="item.image" [alt]="item.name" />
+            <span>{{ item.name }}</span>
+          </a>
+        }
+      </div>
+    </section>
+
+    <section class="wrap section">
+      <div class="section-heading">
+        <h2>Living Room Deals</h2>
+        <a [href]="links.livingRoom">Shop all living room</a>
+      </div>
+      <div class="deal-grid">
+        @for (deal of livingDeals; track deal.name) {
+          <a class="deal-card" [href]="deal.href">
+            <img [src]="deal.image" [alt]="deal.name" />
+            <div>
+              <span>{{ deal.kicker }}</span>
+              <h3>{{ deal.name }}</h3>
+              <em>Shop now</em>
+            </div>
+          </a>
+        }
+      </div>
+    </section>
+
+    <section class="location-band">
+      <div class="wrap location-band__inner">
+        <div>
+          <p class="eyebrow">Visit the showroom</p>
+          <h2>4014 N. Dupont Hwy, New Castle, DE 19720</h2>
+          <p>Open Monday-Saturday 9:30 AM-8:30 PM and Sunday 11:00 AM-6:00 PM.</p>
+        </div>
+        <a class="btn btn--light" [href]="links.directions">Get Directions</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap footer-grid">
+      <a [href]="links.home"><strong>Cohen's Furniture</strong></a>
+      @for (item of footerLinks; track item.label) {
+        <a [href]="item.href">{{ item.label }}</a>
+      }
+    </div>
+  </footer>
+</div>

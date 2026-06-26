@@ -11,6 +11,17 @@ export class AppComponent {
 
   private readonly siteUrl = 'https://www.cohensfurnituredirect.com';
 
+  location = {
+    name: 'Cohen\'s Furniture Elkton',
+    shortName: 'Elkton',
+    cityState: 'Elkton, MD',
+    street: '901 E. Pulaski Highway',
+    cityLine: 'Elkton, MD 21921',
+    phone: '(443) 406-3575',
+    phoneHref: 'tel:+14434063575',
+    mapsQuery: '901 E. Pulaski Highway, Elkton, MD 21921'
+  };
+
   links = {
     home: this.siteUrl,
     search: `${this.siteUrl}/search`,
@@ -18,7 +29,7 @@ export class AppComponent {
     wishlist: `${this.siteUrl}/login`,
     cart: `${this.siteUrl}/cart`,
     contact: `${this.siteUrl}/contact`,
-    directions: 'https://www.google.com/maps/search/?api=1&query=4014%20N.%20Dupont%20Hwy%2C%20New%20Castle%2C%20DE%2019720',
+    directions: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(this.location.mapsQuery)}`,
     financing: `${this.siteUrl}/page/financing-leasing-options`,
     storePolicy: `${this.siteUrl}/page/store-policy`,
     livingRoom: `${this.siteUrl}/c/living-room`,
@@ -48,7 +59,7 @@ export class AppComponent {
 
   promos = [
     { title: 'Huge Price Breaks', text: 'Value pricing on home furniture and mattresses.' },
-    { title: 'New Castle Showroom', text: 'Local help from a Delaware furniture team.' },
+    { title: 'Elkton Showroom', text: 'Local help from the Cohen\'s Elkton furniture team.' },
     { title: 'Financing Available', text: 'Flexible options for qualified shoppers.' }
   ];
 

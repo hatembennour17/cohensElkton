@@ -1,8 +1,8 @@
 <div class="site-shell">
   <header class="topbar">
     <div class="wrap topbar__inner">
-      <a [href]="links.contact">Furniture store in New Castle, DE</a>
-      <a href="tel:+13026549916">(302) 654-9916</a>
+      <a [href]="links.contact">Furniture store in {{ location.cityState }}</a>
+      <a [href]="location.phoneHref">{{ location.phone }}</a>
       <a [href]="links.financing">Financing</a>
       <a [href]="links.storePolicy">Delivery</a>
       <a [href]="links.wishlist">Wishlist</a>
@@ -132,7 +132,7 @@
       <div class="wrap location-band__inner">
         <div>
           <p class="eyebrow">Visit the showroom</p>
-          <h2>4014 N. Dupont Hwy, New Castle, DE 19720</h2>
+          <h2>{{ location.street }}, {{ location.cityLine }}</h2>
           <p>Open Monday-Saturday 9:30 AM-8:30 PM and Sunday 11:00 AM-6:00 PM.</p>
         </div>
         <a class="btn btn--light" [href]="links.directions">Get Directions</a>

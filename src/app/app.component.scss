@@ -92,6 +92,15 @@ img {
   cursor: pointer;
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
 .search button {
   height: 100%;
   padding: 0 22px;
@@ -381,6 +390,10 @@ h3 {
   background: linear-gradient(transparent, rgba(0, 0, 0, 0.78));
 }
 
+.product-tile span {
+  bottom: 58px;
+}
+
 .financing {
   padding: 28px 0;
   background: #efefef;
@@ -461,6 +474,37 @@ h3 {
   text-decoration: underline;
 }
 
+.deal-card button,
+.product-actions button {
+  min-height: 38px;
+  border: 0;
+  padding: 0 14px;
+  color: #fff;
+  background: #b42024;
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.deal-card strong {
+  display: block;
+  margin-bottom: 12px;
+}
+
+.product-actions {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px;
+  color: #111;
+  background: rgba(255, 255, 255, 0.92);
+}
+
 .location-band {
   color: #fff;
   background: #191919;
@@ -516,7 +560,7 @@ h3 {
 
 .cart-row {
   display: grid;
-  grid-template-columns: 120px minmax(220px, 1fr) 130px 110px 130px;
+  grid-template-columns: 120px minmax(220px, 1fr) 130px 110px 130px auto;
   gap: 18px;
   align-items: center;
   padding: 18px;
@@ -537,6 +581,34 @@ h3 {
   width: 120px;
   aspect-ratio: 1.45;
   object-fit: cover;
+}
+
+.cart-row input {
+  width: 76px;
+  height: 40px;
+  border: 1px solid #cfcfcf;
+  padding: 0 8px;
+  font: inherit;
+}
+
+.empty-cart {
+  padding: 32px;
+}
+
+.empty-cart p {
+  color: #555;
+}
+
+.text-button {
+  width: fit-content;
+  border: 0;
+  padding: 0;
+  color: #b42024;
+  background: transparent;
+  font: inherit;
+  font-weight: 900;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 .checkout-form {
@@ -640,6 +712,14 @@ h3 {
   font-size: 18px;
 }
 
+.form-message {
+  margin-bottom: 0;
+  padding: 14px;
+  color: #111;
+  background: #f3f3f3;
+  border-left: 4px solid #b42024;
+}
+
 footer {
   background: #f3f3f3;
   border-top: 1px solid #ddd;
@@ -724,7 +804,6 @@ footer {
     grid-template-columns: 100px minmax(180px, 1fr);
   }
 
-  .cart-row > span,
   .cart-row--head {
     display: none;
   }

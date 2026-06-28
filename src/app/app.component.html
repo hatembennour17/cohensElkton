@@ -23,7 +23,7 @@
 
       <div class="header-actions">
         <a [href]="links.login">My Account</a>
-        <a [href]="links.cart">Cart</a>
+        <a [href]="links.cart">Cart ({{ cartCount }})</a>
       </div>
     </div>
 
@@ -57,14 +57,31 @@
             <span>Quantity</span>
             <span>Total</span>
           </div>
-          @for (item of cartItems; track item.sku) {
-            <article class="cart-row">
-              <img [src]="item.image" [alt]="item.name" />
-              <strong>{{ item.name }}</strong>
-              <span>{{ item.sku }}</span>
-              <span>{{ item.quantity }}</span>
-              <span>{{ formatPrice(item.unitPrice * item.quantity) }}</span>
-            </article>
+          @if (cartItems.length) {
+            @for (item of cartItems; track item.sku) {
+              <article class="cart-row">
+                <img [src]="item.image" [alt]="item.name" />
+                <strong>{{ item.name }}</strong>
+                <span>{{ item.sku }}</span>
+                <label>
+                  <span class="sr-only">Quantity for {{ item.name }}</span>
+                  <input
+                    type="number"
+                    min="1"
+                    [value]="item.quantity"
+                    (change)="updateQuantity(item.sku, $any($event.target).value)"
+                  />
+                </label>
+                <span>{{ formatPrice(item.unitPrice * item.quantity) }}</span>
+                <button class="text-button" type="button" (click)="removeFromCart(item.sku)">Remove</button>
+              </article>
+            }
+          } @else {
+            <div class="empty-cart">
+              <h2>Your Elkton cart is empty.</h2>
+              <p>Add a living room or dining room item below to build an Elkton-only order request.</p>
+              <a class="btn btn--primary" href="/">Continue Shopping</a>
+            </div>
           }
         </div>
 
@@ -78,6 +95,9 @@
             <strong>{{ formatPrice(cartSubtotal) }}</strong>
           </div>
           <a class="btn btn--primary" [href]="links.checkout">Continue to Elkton Checkout</a>
+          @if (cartItems.length) {
+            <button class="text-button" type="button" (click)="clearCart()">Clear Cart</button>
+          }
         </aside>
       </section>
     } @else if (isCheckoutPage) {
@@ -92,7 +112,7 @@
       </section>
 
       <section class="wrap checkout-grid">
-        <form class="checkout-form" aria-label="Elkton checkout form">
+        <form class="checkout-form" aria-label="Elkton checkout form" (submit)="submitOrder($event)">
           <fieldset>
             <legend>Store location</legend>
             <label class="store-lock">
@@ -130,6 +150,9 @@
           </fieldset>
 
           <button class="btn btn--primary" type="submit">Submit Elkton Order Request</button>
+          @if (orderMessage) {
+            <p class="form-message">{{ orderMessage }}</p>
+          }
         </form>
 
         <aside class="order-card">
@@ -221,10 +244,14 @@
       </div>
       <div class="tile-grid">
         @for (item of diningTiles; track item.name) {
-          <a class="product-tile" [href]="item.href">
+          <article class="product-tile">
             <img [src]="item.image" [alt]="item.name" />
             <span>{{ item.name }}</span>
-          </a>
+            <div class="product-actions">
+              <strong>{{ formatPrice(item.unitPrice) }}</strong>
+              <button type="button" (click)="addToCart(item)">Add to Cart</button>
+            </div>
+          </article>
         }
       </div>
     </section>
@@ -236,14 +263,15 @@
       </div>
       <div class="deal-grid">
         @for (deal of livingDeals; track deal.name) {
-          <a class="deal-card" [href]="deal.href">
+          <article class="deal-card">
             <img [src]="deal.image" [alt]="deal.name" />
             <div>
               <span>{{ deal.kicker }}</span>
               <h3>{{ deal.name }}</h3>
-              <em>Shop now</em>
+              <strong>{{ formatPrice(deal.unitPrice) }}</strong>
+              <button type="button" (click)="addToCart(deal)">Add to Cart</button>
             </div>
-          </a>
+          </article>
         }
       </div>
     </section>

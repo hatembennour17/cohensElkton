@@ -1,5 +1,18 @@
 import { Component } from '@angular/core';
 
+type Product = {
+  sku: string;
+  name: string;
+  image: string;
+  unitPrice: number;
+  href: string;
+  kicker?: string;
+};
+
+type CartItem = Product & {
+  quantity: number;
+};
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -11,6 +24,7 @@ export class AppComponent {
 
   private readonly siteUrl = 'https://www.cohensfurnituredirect.com';
   private readonly currentPath = globalThis.location?.pathname ?? '/';
+  private readonly cartStorageKey = 'cohens-elkton-cart';
 
   location = {
     name: 'Cohen\'s Furniture in Elkton',
@@ -105,37 +119,45 @@ export class AppComponent {
     image: `https://www.cohensfurnituredirect.com${item.image}`
   }));
 
-  diningTiles = [
-    { name: 'Dining Room Sets', href: `${this.siteUrl}/c/dining-room-sets`, image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/dining-room-sets.jpg' },
-    { name: 'Dining Tables', href: `${this.siteUrl}/c/dining-tables`, image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/dining-table.jpg' },
-    { name: 'Dining Chairs', href: `${this.siteUrl}/c/dining-chairs`, image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/dining-chairs.jpg' },
-    { name: 'Bar Stools', href: `${this.siteUrl}/c/bar-stools`, image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/bar-stools-front.jpg' }
+  diningTiles: Product[] = [
+    { sku: 'DIN-SET-01', name: 'Dining Room Sets', href: `${this.siteUrl}/c/dining-room-sets`, image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/dining-room-sets.jpg', unitPrice: 899.99 },
+    { sku: 'DIN-TBL-01', name: 'Dining Tables', href: `${this.siteUrl}/c/dining-tables`, image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/dining-table.jpg', unitPrice: 499.99 },
+    { sku: 'DIN-CHR-01', name: 'Dining Chairs', href: `${this.siteUrl}/c/dining-chairs`, image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/dining-chairs.jpg', unitPrice: 149.99 },
+    { sku: 'BAR-STL-01', name: 'Bar Stools', href: `${this.siteUrl}/c/bar-stools`, image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/bar-stools-front.jpg', unitPrice: 129.99 }
   ];
 
-  livingDeals = [
+  livingDeals: Product[] = [
     {
       kicker: 'Room-ready comfort',
       name: 'Sofas',
+      sku: 'SOFA-ELK-01',
       href: `${this.siteUrl}/c/sofas`,
-      image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/sofas.jpg'
+      image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/sofas.jpg',
+      unitPrice: 799.99
     },
     {
       kicker: 'Family-sized seating',
       name: 'Sectionals',
+      sku: 'SECT-ELK-01',
       href: `${this.siteUrl}/c/sectionals`,
-      image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/sectionals.jpg'
+      image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/sectionals.jpg',
+      unitPrice: 1299.99
     },
     {
       kicker: 'Small-space pairings',
       name: 'Loveseats',
+      sku: 'LOVE-ELK-01',
       href: `${this.siteUrl}/c/loveseats`,
-      image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/loveseats.jpg'
+      image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/loveseats.jpg',
+      unitPrice: 599.99
     },
     {
       kicker: 'Finishing pieces',
       name: 'Coffee Tables',
+      sku: 'CTBL-ELK-01',
       href: `${this.siteUrl}/c/coffee-tables`,
-      image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/coffee-tables.jpg'
+      image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/coffee-tables.jpg',
+      unitPrice: 249.99
     }
   ];
 
@@ -147,15 +169,8 @@ export class AppComponent {
     { label: 'Home Decor', href: `${this.siteUrl}/c/home-decor` }
   ];
 
-  cartItems = [
-    {
-      name: 'Lawrence 3-piece Upholstered Reclining Sofa Set Charcoal',
-      sku: '603504-S3',
-      image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/sofas.jpg',
-      quantity: 1,
-      unitPrice: 2579.99
-    }
-  ];
+  cartItems: CartItem[] = this.loadCart();
+  orderMessage = '';
 
   get isCartPage() {
     return this.currentPath === '/cart';
@@ -169,7 +184,70 @@ export class AppComponent {
     return this.cartItems.reduce((total, item) => total + item.unitPrice * item.quantity, 0);
   }
 
+  get cartCount() {
+    return this.cartItems.reduce((total, item) => total + item.quantity, 0);
+  }
+
   formatPrice(value: number) {
     return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+  }
+
+  addToCart(product: Product) {
+    const existing = this.cartItems.find((item) => item.sku === product.sku);
+
+    if (existing) {
+      existing.quantity += 1;
+    } else {
+      this.cartItems = [...this.cartItems, { ...product, quantity: 1 }];
+    }
+
+    this.saveCart();
+  }
+
+  updateQuantity(sku: string, quantity: number) {
+    const normalizedQuantity = Math.max(1, Number(quantity) || 1);
+
+    this.cartItems = this.cartItems.map((item) =>
+      item.sku === sku ? { ...item, quantity: normalizedQuantity } : item
+    );
+    this.saveCart();
+  }
+
+  removeFromCart(sku: string) {
+    this.cartItems = this.cartItems.filter((item) => item.sku !== sku);
+    this.saveCart();
+  }
+
+  clearCart() {
+    this.cartItems = [];
+    this.saveCart();
+  }
+
+  submitOrder(event: Event) {
+    event.preventDefault();
+
+    if (!this.cartItems.length) {
+      this.orderMessage = 'Add an item to your Elkton cart before submitting an order request.';
+      return;
+    }
+
+    this.orderMessage = `Order request ready for ${this.location.name}. The next step is connecting this form to email, SMS, or a backend order inbox.`;
+  }
+
+  private loadCart(): CartItem[] {
+    try {
+      const storedCart = globalThis.localStorage?.getItem(this.cartStorageKey);
+      return storedCart ? JSON.parse(storedCart) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  private saveCart() {
+    try {
+      globalThis.localStorage?.setItem(this.cartStorageKey, JSON.stringify(this.cartItems));
+    } catch {
+      // Cart still works for the current page view if storage is unavailable.
+    }
   }
 }

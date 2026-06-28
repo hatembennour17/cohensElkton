@@ -10,6 +10,7 @@ export class AppComponent {
   title = "Cohen's Furniture in Elkton";
 
   private readonly siteUrl = 'https://www.cohensfurnituredirect.com';
+  private readonly currentPath = globalThis.location?.pathname ?? '/';
 
   location = {
     name: 'Cohen\'s Furniture in Elkton',
@@ -27,7 +28,8 @@ export class AppComponent {
     search: `${this.siteUrl}/search`,
     login: `${this.siteUrl}/login`,
     wishlist: `${this.siteUrl}/login`,
-    cart: `${this.siteUrl}/cart`,
+    cart: '/cart',
+    checkout: '/checkout',
     contact: `${this.siteUrl}/contact`,
     directions: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(this.location.mapsQuery)}`,
     financing: `${this.siteUrl}/page/financing-leasing-options`,
@@ -144,4 +146,30 @@ export class AppComponent {
     { label: 'Mattresses', href: `${this.siteUrl}/c/mattresses` },
     { label: 'Home Decor', href: `${this.siteUrl}/c/home-decor` }
   ];
+
+  cartItems = [
+    {
+      name: 'Lawrence 3-piece Upholstered Reclining Sofa Set Charcoal',
+      sku: '603504-S3',
+      image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/sofas.jpg',
+      quantity: 1,
+      unitPrice: 2579.99
+    }
+  ];
+
+  get isCartPage() {
+    return this.currentPath === '/cart';
+  }
+
+  get isCheckoutPage() {
+    return this.currentPath === '/checkout';
+  }
+
+  get cartSubtotal() {
+    return this.cartItems.reduce((total, item) => total + item.unitPrice * item.quantity, 0);
+  }
+
+  formatPrice(value: number) {
+    return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+  }
 }

@@ -37,6 +37,113 @@
   </header>
 
   <main>
+    @if (isCartPage) {
+      <section class="checkout-hero">
+        <div class="wrap checkout-hero__inner">
+          <p class="eyebrow">Elkton cart</p>
+          <h1>Your cart is handled by Cohen's Furniture in Elkton.</h1>
+          <p>
+            Orders from this site are routed to the Elkton showroom only, so customers are not sent into the shared multi-location checkout.
+          </p>
+        </div>
+      </section>
+
+      <section class="wrap checkout-grid">
+        <div class="cart-panel">
+          <div class="cart-row cart-row--head">
+            <span>Product</span>
+            <span>Description</span>
+            <span>SKU</span>
+            <span>Quantity</span>
+            <span>Total</span>
+          </div>
+          @for (item of cartItems; track item.sku) {
+            <article class="cart-row">
+              <img [src]="item.image" [alt]="item.name" />
+              <strong>{{ item.name }}</strong>
+              <span>{{ item.sku }}</span>
+              <span>{{ item.quantity }}</span>
+              <span>{{ formatPrice(item.unitPrice * item.quantity) }}</span>
+            </article>
+          }
+        </div>
+
+        <aside class="order-card">
+          <p class="eyebrow">Order location</p>
+          <h2>{{ location.name }}</h2>
+          <p>{{ location.street }}<br />{{ location.cityLine }}</p>
+          <a [href]="location.phoneHref">{{ location.phone }}</a>
+          <div class="order-total">
+            <span>Subtotal</span>
+            <strong>{{ formatPrice(cartSubtotal) }}</strong>
+          </div>
+          <a class="btn btn--primary" [href]="links.checkout">Continue to Elkton Checkout</a>
+        </aside>
+      </section>
+    } @else if (isCheckoutPage) {
+      <section class="checkout-hero">
+        <div class="wrap checkout-hero__inner">
+          <p class="eyebrow">Elkton checkout</p>
+          <h1>Checkout with the Elkton location only.</h1>
+          <p>
+            This checkout intentionally shows a single store location: Cohen's Furniture at 901 E. Pulaski Highway in Elkton.
+          </p>
+        </div>
+      </section>
+
+      <section class="wrap checkout-grid">
+        <form class="checkout-form" aria-label="Elkton checkout form">
+          <fieldset>
+            <legend>Store location</legend>
+            <label class="store-lock">
+              <input type="radio" name="storeLocation" value="elkton" checked />
+              <span>
+                <strong>{{ location.name }}</strong>
+                <em>{{ location.street }}, {{ location.cityLine }}</em>
+                <small>Only checkout location available on this Elkton site</small>
+              </span>
+            </label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Delivery address</legend>
+            <div class="form-grid">
+              <label>First Name *<input type="text" name="firstName" autocomplete="given-name" /></label>
+              <label>Last Name *<input type="text" name="lastName" autocomplete="family-name" /></label>
+              <label>Email *<input type="email" name="email" autocomplete="email" /></label>
+              <label>Phone *<input type="tel" name="phone" autocomplete="tel" /></label>
+            </div>
+            <label>Street Address *<input type="text" name="address" autocomplete="street-address" /></label>
+            <div class="form-grid">
+              <label>City *<input type="text" name="city" /></label>
+              <label>State *<input type="text" name="state" value="MD" /></label>
+              <label>ZIP *<input type="text" name="zip" autocomplete="postal-code" /></label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Fulfillment</legend>
+            <div class="choice-grid">
+              <label><input type="radio" name="fulfillment" value="delivery" checked /> Delivery from Elkton</label>
+              <label><input type="radio" name="fulfillment" value="pickup" /> Pickup at Elkton</label>
+            </div>
+          </fieldset>
+
+          <button class="btn btn--primary" type="submit">Submit Elkton Order Request</button>
+        </form>
+
+        <aside class="order-card">
+          <p class="eyebrow">Your order details</p>
+          <h2>{{ location.shortName }} showroom</h2>
+          <p>{{ location.street }}<br />{{ location.cityLine }}</p>
+          <a [href]="location.phoneHref">{{ location.phone }}</a>
+          <div class="order-total">
+            <span>Subtotal</span>
+            <strong>{{ formatPrice(cartSubtotal) }}</strong>
+          </div>
+        </aside>
+      </section>
+    } @else {
     <section class="hero" aria-labelledby="hero-title">
       <div class="wrap hero__content">
         <p class="eyebrow">Discount prices. Local service.</p>
@@ -151,6 +258,7 @@
         <a class="btn btn--light" [href]="links.directions">Get Directions</a>
       </div>
     </section>
+    }
   </main>
 
   <footer>

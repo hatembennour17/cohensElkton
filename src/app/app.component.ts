@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
 type Product = {
   sku: string;
@@ -19,7 +19,7 @@ type CartItem = Product & {
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = "Cohen's Furniture in Elkton";
 
   private readonly siteUrl = 'https://www.cohensfurnituredirect.com';
@@ -171,6 +171,11 @@ export class AppComponent {
 
   cartItems: CartItem[] = this.loadCart();
   orderMessage = '';
+  catalogMessage = 'Showing starter Elkton products until the Ashley API is configured.';
+
+  ngOnInit() {
+    void this.loadAshleyProducts();
+  }
 
   get isCartPage() {
     return this.currentPath === '/cart';
@@ -248,6 +253,30 @@ export class AppComponent {
       globalThis.localStorage?.setItem(this.cartStorageKey, JSON.stringify(this.cartItems));
     } catch {
       // Cart still works for the current page view if storage is unavailable.
+    }
+  }
+
+  private async loadAshleyProducts() {
+    try {
+      const response = await fetch('/.netlify/functions/ashley-products?limit=12');
+
+      if (!response.ok) {
+        return;
+      }
+
+      const payload = await response.json();
+      const products = Array.isArray(payload.products) ? payload.products : [];
+      const usableProducts = products.filter((product: Product) => product.sku && product.name);
+
+      if (!usableProducts.length) {
+        return;
+      }
+
+      this.livingDeals = usableProducts.slice(0, 4);
+      this.diningTiles = usableProducts.slice(4, 8).length ? usableProducts.slice(4, 8) : usableProducts.slice(0, 4);
+      this.catalogMessage = 'Showing live Ashley catalog products for the Elkton site.';
+    } catch {
+      this.catalogMessage = 'Showing starter Elkton products until the Ashley API is configured.';
     }
   }
 }

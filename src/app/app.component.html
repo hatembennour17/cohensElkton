@@ -261,6 +261,7 @@
         <h2>Living Room Deals</h2>
         <a [href]="links.livingRoom">Shop all living room</a>
       </div>
+      <p class="catalog-status">{{ catalogMessage }}</p>
       <div class="deal-grid">
         @for (deal of livingDeals; track deal.name) {
           <article class="deal-card">

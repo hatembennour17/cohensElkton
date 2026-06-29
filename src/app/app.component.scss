@@ -647,12 +647,24 @@ h3 {
 
 .checkout-form input[type="text"],
 .checkout-form input[type="email"],
-.checkout-form input[type="tel"] {
+.checkout-form input[type="tel"],
+.checkout-form textarea {
   min-width: 0;
-  height: 44px;
   border: 1px solid #cfcfcf;
   padding: 0 12px;
   font: inherit;
+}
+
+.checkout-form input[type="text"],
+.checkout-form input[type="email"],
+.checkout-form input[type="tel"] {
+  height: 44px;
+}
+
+.checkout-form textarea {
+  min-height: 120px;
+  padding-top: 10px;
+  resize: vertical;
 }
 
 .form-grid,
@@ -725,6 +737,65 @@ h3 {
   color: #111;
   background: #f3f3f3;
   border-left: 4px solid #b42024;
+}
+
+.finance-hero {
+  background: #202020;
+}
+
+.finance-grid {
+  grid-template-columns: minmax(0, 1fr) 380px;
+}
+
+.finance-card {
+  gap: 18px;
+}
+
+.finance-reference {
+  display: grid;
+  gap: 10px;
+  margin: 4px 0 0;
+}
+
+.finance-reference div {
+  padding: 12px;
+  border: 1px solid #dedede;
+  background: #f7f7f7;
+}
+
+.finance-reference dt {
+  margin-bottom: 3px;
+  color: #555;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.finance-reference dd {
+  margin: 0;
+  color: #111;
+  font-weight: 900;
+  overflow-wrap: anywhere;
+}
+
+.finance-steps {
+  display: grid;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px solid #ddd;
+}
+
+.finance-steps strong {
+  font-size: 18px;
+}
+
+.finance-steps ol {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 20px;
+  color: #555;
+  line-height: 1.5;
 }
 
 footer {
@@ -803,6 +874,7 @@ footer {
   .category-grid,
   .feature-layout,
   .checkout-grid,
+  .finance-grid,
   .deal-grid {
     grid-template-columns: 1fr 1fr;
   }
@@ -862,6 +934,7 @@ footer {
   .feature-layout,
   .tile-grid,
   .checkout-grid,
+  .finance-grid,
   .form-grid,
   .choice-grid,
   .deal-grid {

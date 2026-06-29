@@ -166,6 +166,86 @@
           </div>
         </aside>
       </section>
+    } @else if (isFinancingPage) {
+      <section class="checkout-hero finance-hero">
+        <div class="wrap checkout-hero__inner">
+          <p class="eyebrow">Elkton financing</p>
+          <h1>Finance your furniture through Cohen's Furniture in Elkton.</h1>
+          <p>
+            Financing requests from this page are prepared for the Elkton showroom, using the Elkton location and reference details.
+          </p>
+        </div>
+      </section>
+
+      <section class="wrap checkout-grid finance-grid">
+        <form class="checkout-form finance-form" aria-label="Elkton financing request form" (submit)="submitFinancingRequest($event)">
+          <fieldset>
+            <legend>Financing request</legend>
+            <div class="form-grid">
+              <label>First Name *<input type="text" name="firstName" autocomplete="given-name" /></label>
+              <label>Last Name *<input type="text" name="lastName" autocomplete="family-name" /></label>
+              <label>Email *<input type="email" name="email" autocomplete="email" /></label>
+              <label>Phone *<input type="tel" name="phone" autocomplete="tel" /></label>
+            </div>
+            <div class="form-grid">
+              <label>Estimated Purchase Amount<input type="text" name="purchaseAmount" placeholder="$" /></label>
+              <label>Preferred Room or Items<input type="text" name="items" placeholder="Living room, bedroom, mattress" /></label>
+            </div>
+            <label>
+              Notes
+              <textarea name="notes" rows="5" placeholder="Tell the Elkton team what you are shopping for"></textarea>
+            </label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Store reference</legend>
+            <label class="store-lock">
+              <input type="radio" name="financeLocation" value="elkton" checked />
+              <span>
+                <strong>{{ location.name }}</strong>
+                <em>{{ location.street }}, {{ location.cityLine }}</em>
+                <small>Financing page locked to the Elkton business location</small>
+              </span>
+            </label>
+          </fieldset>
+
+          <button class="btn btn--primary" type="submit">Submit Financing Request</button>
+          @if (financingMessage) {
+            <p class="form-message">{{ financingMessage }}</p>
+          }
+        </form>
+
+        <aside class="order-card finance-card">
+          <p class="eyebrow">Elkton finance codes</p>
+          <h2>{{ location.shortName }} showroom</h2>
+          <p>{{ location.street }}<br />{{ location.cityLine }}</p>
+          <a [href]="location.phoneHref">{{ location.phone }}</a>
+
+          <dl class="finance-reference">
+            <div>
+              <dt>Location ID</dt>
+              <dd>{{ financeReference.locationId }}</dd>
+            </div>
+            <div>
+              <dt>Reference Code</dt>
+              <dd>{{ financeReference.referenceCode }}</dd>
+            </div>
+            <div>
+              <dt>Dealer Code</dt>
+              <dd>{{ financeReference.dealerCode }}</dd>
+            </div>
+          </dl>
+
+          <div class="finance-steps">
+            <strong>Next steps</strong>
+            <ol>
+              <li>Confirm the Elkton finance provider and location codes.</li>
+              <li>Connect this form to the Elkton inbox or provider application link.</li>
+              <li>Keep checkout and finance traffic assigned to the Elkton store.</li>
+            </ol>
+          </div>
+        </aside>
+      </section>
     } @else {
     <section class="hero" aria-labelledby="hero-title">
       <div class="wrap hero__content">

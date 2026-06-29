@@ -46,7 +46,7 @@ export class AppComponent implements OnInit {
     checkout: '/checkout',
     contact: `${this.siteUrl}/contact`,
     directions: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(this.location.mapsQuery)}`,
-    financing: `${this.siteUrl}/page/financing-leasing-options`,
+    financing: '/financing',
     storePolicy: `${this.siteUrl}/page/store-policy`,
     livingRoom: `${this.siteUrl}/c/living-room`,
     diningRoom: `${this.siteUrl}/c/dining-room`,
@@ -171,7 +171,14 @@ export class AppComponent implements OnInit {
 
   cartItems: CartItem[] = this.loadCart();
   orderMessage = '';
+  financingMessage = '';
   catalogMessage = 'Showing starter Elkton products until the Ashley API is configured.';
+
+  financeReference = {
+    locationId: 'ELKTON-LOCATION-ID',
+    referenceCode: 'ELKTON-FINANCE-REF',
+    dealerCode: 'ELKTON-STORE-CODE'
+  };
 
   ngOnInit() {
     void this.loadAshleyProducts();
@@ -183,6 +190,10 @@ export class AppComponent implements OnInit {
 
   get isCheckoutPage() {
     return this.currentPath === '/checkout';
+  }
+
+  get isFinancingPage() {
+    return this.currentPath === '/financing';
   }
 
   get cartSubtotal() {
@@ -237,6 +248,11 @@ export class AppComponent implements OnInit {
     }
 
     this.orderMessage = `Order request ready for ${this.location.name}. The next step is connecting this form to email, SMS, or a backend order inbox.`;
+  }
+
+  submitFinancingRequest(event: Event) {
+    event.preventDefault();
+    this.financingMessage = `Financing request ready for ${this.location.name}. The next step is connecting this form to the Elkton financing inbox or provider endpoint.`;
   }
 
   private loadCart(): CartItem[] {

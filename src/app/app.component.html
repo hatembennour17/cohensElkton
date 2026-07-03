@@ -246,6 +246,45 @@
           </div>
         </aside>
       </section>
+    } @else if (isCategoryPage) {
+      <section class="category-hero">
+        <div class="wrap category-hero__inner">
+          <p class="eyebrow">Elkton catalog</p>
+          <h1>{{ categoryTitle }}</h1>
+          <p>{{ categoryDescription }}</p>
+          <address>
+            <strong>{{ location.name }}</strong>
+            <span>{{ location.street }}, {{ location.cityLine }}</span>
+            <a [href]="location.phoneHref">{{ location.phone }}</a>
+          </address>
+        </div>
+      </section>
+
+      <section class="wrap section category-page">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Available through Elkton</p>
+            <h2>{{ categoryTitle }} Products</h2>
+          </div>
+          <a [href]="links.cart">View Cart ({{ cartCount }})</a>
+        </div>
+        <p class="catalog-status">{{ catalogMessage }}</p>
+
+        <div class="catalog-grid">
+          @for (product of categoryProducts; track product.sku) {
+            <article class="catalog-card">
+              <img [src]="product.image" [alt]="product.name" />
+              <div>
+                <span>{{ product.kicker || product.sku }}</span>
+                <h3>{{ product.name }}</h3>
+                <p>{{ product.sku }}</p>
+                <strong>{{ formatPrice(product.unitPrice) }}</strong>
+                <button type="button" (click)="addToCart(product)">Add to Cart</button>
+              </div>
+            </article>
+          }
+        </div>
+      </section>
     } @else {
     <section class="hero" aria-labelledby="hero-title">
       <div class="wrap hero__content">

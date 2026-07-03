@@ -531,6 +531,97 @@ h3 {
   color: #d6d6d6;
 }
 
+.category-hero {
+  color: #fff;
+  background: #181818;
+}
+
+.category-hero__inner {
+  min-height: 300px;
+  display: grid;
+  align-content: center;
+  padding: 48px 0;
+}
+
+.category-hero__inner p:not(.eyebrow) {
+  max-width: 760px;
+  color: #ededed;
+  font-size: 19px;
+  line-height: 1.6;
+}
+
+.category-hero address {
+  display: grid;
+  gap: 4px;
+  margin-top: 16px;
+  color: #ededed;
+  font-style: normal;
+}
+
+.category-hero address a {
+  width: fit-content;
+  color: #ffd44d;
+  font-weight: 900;
+}
+
+.catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+
+.catalog-card {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  border: 1px solid #e1e1e1;
+  background: #fff;
+}
+
+.catalog-card img {
+  width: 100%;
+  aspect-ratio: 1.22;
+  object-fit: cover;
+  background: #eee;
+}
+
+.catalog-card div {
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+}
+
+.catalog-card span {
+  color: #b42024;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.catalog-card h3 {
+  margin-bottom: 0;
+}
+
+.catalog-card p {
+  margin-bottom: 0;
+  color: #666;
+  font-weight: 700;
+}
+
+.catalog-card strong {
+  font-size: 18px;
+}
+
+.catalog-card button {
+  min-height: 38px;
+  border: 0;
+  padding: 0 14px;
+  color: #fff;
+  background: #b42024;
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
 .checkout-hero {
   color: #fff;
   background: #181818;
@@ -875,6 +966,7 @@ footer {
   .feature-layout,
   .checkout-grid,
   .finance-grid,
+  .catalog-grid,
   .deal-grid {
     grid-template-columns: 1fr 1fr;
   }
@@ -935,6 +1027,7 @@ footer {
   .tile-grid,
   .checkout-grid,
   .finance-grid,
+  .catalog-grid,
   .form-grid,
   .choice-grid,
   .deal-grid {

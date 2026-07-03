@@ -13,6 +13,12 @@ type CartItem = Product & {
   quantity: number;
 };
 
+type CategoryPage = {
+  label: string;
+  path: string;
+  description: string;
+};
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -67,17 +73,22 @@ export class AppComponent implements OnInit {
   logoUrl = 'https://s3.amazonaws.com/cdn.rencdn.com/Cohensfurniture/uploads/storelogo/store-logo-1692973990.jpeg';
   creditImage = 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/credit-card.png';
 
-  navItems = [
-    { label: 'Living Room', href: this.categoryUrls.livingRoom },
-    { label: 'Bedroom', href: this.categoryUrls.bedrooms },
-    { label: 'Dining Room', href: this.categoryUrls.diningRoom },
-    { label: 'Mattresses', href: this.categoryUrls.mattresses },
-    { label: 'Kids', href: this.categoryUrls.kids },
-    { label: 'Office', href: this.categoryUrls.office },
-    { label: 'Home Decor', href: this.categoryUrls.homeDecor },
-    { label: 'Outdoor', href: this.categoryUrls.outdoor },
-    { label: 'Clearance', href: this.categoryUrls.clearance }
+  categoryPages: CategoryPage[] = [
+    { label: 'Living Room', path: this.categoryUrls.livingRoom, description: 'Shop sofas, sectionals, loveseats, tables, and living room accents through the Elkton showroom.' },
+    { label: 'Bedroom', path: this.categoryUrls.bedrooms, description: 'Browse beds, dressers, nightstands, chests, and complete bedroom pieces for Elkton shoppers.' },
+    { label: 'Dining Room', path: this.categoryUrls.diningRoom, description: 'Find dining tables, chairs, benches, servers, and gathering-room furniture for your home.' },
+    { label: 'Mattresses', path: this.categoryUrls.mattresses, description: 'Compare mattress options and bedroom comfort pieces with local Elkton store help.' },
+    { label: 'Kids', path: this.categoryUrls.kids, description: 'Shop kids furniture, youth bedroom pieces, storage, and practical room solutions.' },
+    { label: 'Office', path: this.categoryUrls.office, description: 'Bring home desks, office chairs, bookcases, and work-from-home furniture.' },
+    { label: 'Home Decor', path: this.categoryUrls.homeDecor, description: 'Finish the room with decor, wall art, rugs, lamps, and accent pieces.' },
+    { label: 'Outdoor', path: this.categoryUrls.outdoor, description: 'Browse patio and outdoor furniture options available through Cohen\'s Furniture in Elkton.' },
+    { label: 'Clearance', path: this.categoryUrls.clearance, description: 'Check value-priced furniture selections and showroom deals from the Elkton location.' }
   ];
+
+  navItems = this.categoryPages.map((category) => ({
+    label: category.label,
+    href: category.path
+  }));
 
   heroImages = [
     'https://cdn.rencdn.com/Cohensfurniture/uploads/images/living-room-main_1.jpg',
@@ -181,6 +192,7 @@ export class AppComponent implements OnInit {
   ];
 
   cartItems: CartItem[] = this.loadCart();
+  catalogProducts: Product[] = [];
   orderMessage = '';
   financingMessage = '';
   catalogMessage = 'Showing starter Elkton products until the Ashley API is configured.';
@@ -205,6 +217,36 @@ export class AppComponent implements OnInit {
 
   get isFinancingPage() {
     return this.currentPath === '/financing';
+  }
+
+  get isCategoryPage() {
+    return this.currentPath.startsWith('/c/');
+  }
+
+  get activeCategory() {
+    return this.categoryPages.find((category) => category.path === this.currentPath);
+  }
+
+  get categoryTitle() {
+    return this.activeCategory?.label || 'Furniture';
+  }
+
+  get categoryDescription() {
+    return this.activeCategory?.description || 'Shop furniture products through Cohen\'s Furniture in Elkton.';
+  }
+
+  get categoryProducts() {
+    const products = this.catalogProducts.length ? this.catalogProducts : [...this.livingDeals, ...this.diningTiles];
+    const seenSkus = new Set<string>();
+
+    return products.filter((product) => {
+      if (seenSkus.has(product.sku)) {
+        return false;
+      }
+
+      seenSkus.add(product.sku);
+      return true;
+    });
   }
 
   get cartSubtotal() {
@@ -299,6 +341,7 @@ export class AppComponent implements OnInit {
         return;
       }
 
+      this.catalogProducts = usableProducts;
       this.livingDeals = usableProducts.slice(0, 4);
       this.diningTiles = usableProducts.slice(4, 8).length ? usableProducts.slice(4, 8) : usableProducts.slice(0, 4);
       this.catalogMessage = 'Showing live Ashley catalog products for the Elkton site.';

@@ -23,6 +23,17 @@ export class AppComponent implements OnInit {
   title = "Cohen's Furniture in Elkton";
 
   private readonly siteUrl = 'https://www.cohensfurnituredirect.com';
+  private readonly categoryUrls = {
+    livingRoom: '/c/living-room',
+    bedrooms: '/c/bedrooms',
+    diningRoom: '/c/dining-room',
+    mattresses: '/c/mattresses',
+    kids: '/c/kids',
+    office: '/c/office',
+    homeDecor: '/c/home-decor',
+    outdoor: '/c/outdoor',
+    clearance: '/c/clearance'
+  };
   private readonly currentPath = globalThis.location?.pathname ?? '/';
   private readonly cartStorageKey = 'cohens-elkton-cart';
 
@@ -48,24 +59,24 @@ export class AppComponent implements OnInit {
     directions: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(this.location.mapsQuery)}`,
     financing: '/financing',
     storePolicy: `${this.siteUrl}/page/store-policy`,
-    livingRoom: `${this.siteUrl}/c/living-room`,
-    diningRoom: `${this.siteUrl}/c/dining-room`,
-    clearance: `${this.siteUrl}/c/clearance`
+    livingRoom: this.categoryUrls.livingRoom,
+    diningRoom: this.categoryUrls.diningRoom,
+    clearance: this.categoryUrls.clearance
   };
 
   logoUrl = 'https://s3.amazonaws.com/cdn.rencdn.com/Cohensfurniture/uploads/storelogo/store-logo-1692973990.jpeg';
   creditImage = 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/credit-card.png';
 
   navItems = [
-    { label: 'Living Room', href: `${this.siteUrl}/c/living-room` },
-    { label: 'Bedroom', href: `${this.siteUrl}/c/bedrooms` },
-    { label: 'Dining Room', href: `${this.siteUrl}/c/dining-room` },
-    { label: 'Mattresses', href: `${this.siteUrl}/c/mattresses` },
-    { label: 'Kids', href: `${this.siteUrl}/c/kids` },
-    { label: 'Office', href: `${this.siteUrl}/c/office` },
-    { label: 'Home Decor', href: `${this.siteUrl}/c/home-decor` },
-    { label: 'Outdoor', href: `${this.siteUrl}/c/outdoor` },
-    { label: 'Clearance', href: `${this.siteUrl}/c/clearance` }
+    { label: 'Living Room', href: this.categoryUrls.livingRoom },
+    { label: 'Bedroom', href: this.categoryUrls.bedrooms },
+    { label: 'Dining Room', href: this.categoryUrls.diningRoom },
+    { label: 'Mattresses', href: this.categoryUrls.mattresses },
+    { label: 'Kids', href: this.categoryUrls.kids },
+    { label: 'Office', href: this.categoryUrls.office },
+    { label: 'Home Decor', href: this.categoryUrls.homeDecor },
+    { label: 'Outdoor', href: this.categoryUrls.outdoor },
+    { label: 'Clearance', href: this.categoryUrls.clearance }
   ];
 
   heroImages = [
@@ -108,12 +119,12 @@ export class AppComponent implements OnInit {
   ];
 
   roomCategories = [
-    { name: 'Living Room', href: `${this.siteUrl}/c/living-room`, image: '/assets/uploads/images/Menu%20Images/living-room-drop-down.jpg' },
-    { name: 'Bedroom', href: `${this.siteUrl}/c/bedrooms`, image: '/assets/uploads/images/Menu%20Images/bedroom-drop-down.jpg' },
-    { name: 'Dining Room', href: `${this.siteUrl}/c/dining-room`, image: '/assets/uploads/images/Menu%20Images/dining-room-drop-down.jpg' },
-    { name: 'Mattresses', href: `${this.siteUrl}/c/mattresses`, image: '/assets/uploads/images/Menu%20Images/mattresses-drop-down.jpg' },
-    { name: 'Office', href: `${this.siteUrl}/c/office`, image: '/assets/uploads/images/Menu%20Images/office-drop-down.jpg' },
-    { name: 'Home Decor', href: `${this.siteUrl}/c/home-decor`, image: '/assets/uploads/images/Menu%20Images/home-decor-drop-down.jpg' }
+    { name: 'Living Room', href: this.categoryUrls.livingRoom, image: '/assets/uploads/images/Menu%20Images/living-room-drop-down.jpg' },
+    { name: 'Bedroom', href: this.categoryUrls.bedrooms, image: '/assets/uploads/images/Menu%20Images/bedroom-drop-down.jpg' },
+    { name: 'Dining Room', href: this.categoryUrls.diningRoom, image: '/assets/uploads/images/Menu%20Images/dining-room-drop-down.jpg' },
+    { name: 'Mattresses', href: this.categoryUrls.mattresses, image: '/assets/uploads/images/Menu%20Images/mattresses-drop-down.jpg' },
+    { name: 'Office', href: this.categoryUrls.office, image: '/assets/uploads/images/Menu%20Images/office-drop-down.jpg' },
+    { name: 'Home Decor', href: this.categoryUrls.homeDecor, image: '/assets/uploads/images/Menu%20Images/home-decor-drop-down.jpg' }
   ].map((item) => ({
     ...item,
     image: `https://www.cohensfurnituredirect.com${item.image}`
@@ -162,11 +173,11 @@ export class AppComponent implements OnInit {
   ];
 
   footerLinks = [
-    { label: 'Living Room', href: `${this.siteUrl}/c/living-room` },
-    { label: 'Bedroom', href: `${this.siteUrl}/c/bedrooms` },
-    { label: 'Dining Room', href: `${this.siteUrl}/c/dining-room` },
-    { label: 'Mattresses', href: `${this.siteUrl}/c/mattresses` },
-    { label: 'Home Decor', href: `${this.siteUrl}/c/home-decor` }
+    { label: 'Living Room', href: this.categoryUrls.livingRoom },
+    { label: 'Bedroom', href: this.categoryUrls.bedrooms },
+    { label: 'Dining Room', href: this.categoryUrls.diningRoom },
+    { label: 'Mattresses', href: this.categoryUrls.mattresses },
+    { label: 'Home Decor', href: this.categoryUrls.homeDecor }
   ];
 
   cartItems: CartItem[] = this.loadCart();

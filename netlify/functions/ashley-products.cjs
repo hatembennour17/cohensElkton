@@ -100,7 +100,7 @@ function extractProducts(payload) {
     return payload;
   }
 
-  for (const key of ['products', 'items', 'data', 'results']) {
+  for (const key of ['products', 'entities', 'items', 'data', 'results']) {
     if (Array.isArray(payload?.[key])) {
       return payload[key];
     }
@@ -110,7 +110,7 @@ function extractProducts(payload) {
 }
 
 function extractMeta(payload) {
-  return payload?.meta || payload?.pagination || {
+  return payload?.metadata || payload?.meta || payload?.pagination || {
     page: payload?.page,
     limit: payload?.limit,
     total: payload?.total
@@ -118,15 +118,33 @@ function extractMeta(payload) {
 }
 
 function normalizeProduct(product) {
-  const sku = firstValue(product, ['sku', 'SKU', 'itemNumber', 'item_number', 'itemNo', 'item']);
-  const name = firstValue(product, ['name', 'productName', 'product_name', 'description', 'shortDescription']);
+  const sku = firstValue(product, ['sku', 'SKU', 'itemNumber', 'item_number', 'itemNo', 'item', 'seriesId']);
+  const name = firstValue(product, [
+    'name',
+    'productName',
+    'product_name',
+    'itemName',
+    'friendlyDescription',
+    'consumerDescription',
+    'description',
+    'shortDescription'
+  ]);
 
   if (!sku || !name) {
     return null;
   }
 
   const brand = firstValue(product, ['brand', 'brandName']);
-  const price = firstNumber(product, ['map', 'MAP', 'minimumAdvertisedPrice', 'msrp', 'MSRP', 'retailPrice', 'price']);
+  const price = firstNumber(product, [
+    'map',
+    'MAP',
+    'minimumAdvertisedPrice',
+    'msrp',
+    'MSRP',
+    'retailPrice',
+    'price',
+    'fobBasePrice'
+  ]);
   const image = firstImage(product);
 
   return {
@@ -157,13 +175,24 @@ function firstNumber(source, keys) {
 }
 
 function firstImage(product) {
-  const directImage = firstValue(product, ['image', 'imageUrl', 'imageURL', 'primaryImage', 'primaryImageUrl']);
+  const directImage = firstValue(product, [
+    'image',
+    'imageUrl',
+    'imageURL',
+    'primaryImage',
+    'primaryImageUrl',
+    'itemRoomImage',
+    'largeImageUrl',
+    'mediumImageUrl',
+    'knockout',
+    'dimensionSketch'
+  ]);
 
   if (directImage) {
     return String(directImage);
   }
 
-  const images = product?.images || product?.media || product?.assets;
+  const images = product?.imageSet || product?.images || product?.media || product?.assets;
 
   if (Array.isArray(images) && images.length) {
     const first = images[0];

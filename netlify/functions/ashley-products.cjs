@@ -50,6 +50,7 @@ exports.handler = async (event) => {
       method: 'GET',
       headers: {
         accept: 'application/json',
+        'accept-language': 'en-US',
         authorization: `Basic ${authToken}`,
         [clientIdHeaderName]: process.env.ASHLEY_CLIENT_ID
       }

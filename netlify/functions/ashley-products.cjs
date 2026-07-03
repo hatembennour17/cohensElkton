@@ -29,10 +29,12 @@ exports.handler = async (event) => {
 
   const query = event.queryStringParameters || {};
   const upstreamUrl = new URL(ASHLEY_PRODUCTS_URL);
+  const requestedLimit = normalizeLimit(query.limit);
+  const category = normalizeCategory(query.category);
 
   upstreamUrl.searchParams.set('customer', process.env.ASHLEY_CUSTOMER);
   upstreamUrl.searchParams.set('shipto', process.env.ASHLEY_SHIPTO);
-  upstreamUrl.searchParams.set('limit', normalizeLimit(query.limit));
+  upstreamUrl.searchParams.set('limit', category ? '1000' : requestedLimit);
 
   if (query.page) {
     upstreamUrl.searchParams.set('page', query.page);
@@ -72,11 +74,16 @@ exports.handler = async (event) => {
       });
     }
 
-    const products = extractProducts(payload).map(normalizeProduct).filter(Boolean);
+    const rawProducts = filterByCategory(extractProducts(payload), category);
+    const products = rawProducts.map(normalizeProduct).filter(Boolean).slice(0, Number(requestedLimit));
 
     return jsonResponse(200, {
       products,
-      meta: extractMeta(payload)
+      meta: {
+        ...extractMeta(payload),
+        category,
+        filteredRecords: rawProducts.length
+      }
     });
   } catch (error) {
     return jsonResponse(502, {
@@ -94,6 +101,128 @@ function normalizeLimit(value) {
   }
 
   return String(Math.min(Math.max(parsed, 1), 1000));
+}
+
+function normalizeCategory(value) {
+  return typeof value === 'string' ? value.trim().toLowerCase() : '';
+}
+
+function filterByCategory(products, category) {
+  if (!category) {
+    return products;
+  }
+
+  const rulesByCategory = {
+    'living-room': {
+      include: ['sofa', 'sectional', 'loveseat', 'recliner', 'ottoman', 'cocktail table', 'coffee table', 'end table', 'tv stand', 'entertainment', 'upholstery', 'living room'],
+      exclude: ['dining', 'bar stool', 'barstool', 'bedroom', 'mattress', 'lamp', 'wall art', 'mirror', 'rug', 'decor', 'storedisplay']
+    },
+    bedrooms: {
+      include: ['bedroom', 'bed', 'dresser', 'nightstand', 'chest', 'mirror', 'vanity'],
+      exclude: ['dining', 'sofa', 'sectional', 'outdoor', 'patio', 'storedisplay']
+    },
+    'dining-room': {
+      include: ['dining', 'dining room', 'dining table', 'dining chair', 'barstool', 'bar stool', 'bench', 'server', 'buffet'],
+      exclude: ['sofa', 'sectional', 'bedroom', 'mattress', 'lamp', 'wall art', 'storedisplay']
+    },
+    mattresses: {
+      include: ['mattress', 'foundation', 'box spring', 'pillow', 'sleep'],
+      exclude: ['dining', 'sofa', 'sectional', 'wall art', 'lamp', 'storedisplay']
+    },
+    kids: {
+      include: ['youth', 'kids', 'kid', 'bunk', 'crib', 'twin bed'],
+      exclude: ['dining', 'sofa', 'sectional', 'outdoor', 'storedisplay']
+    },
+    office: {
+      include: ['office', 'desk', 'bookcase', 'file', 'workstation'],
+      exclude: ['dining', 'sofa', 'sectional', 'mattress', 'storedisplay']
+    },
+    'home-decor': {
+      include: ['decor', 'rug', 'wall art', 'lamp', 'mirror', 'accessories', 'accent'],
+      exclude: ['sofa', 'sectional', 'mattress', 'bedroom set', 'dining set', 'storedisplay']
+    },
+    outdoor: {
+      include: ['outdoor', 'patio', 'fire pit', 'umbrella', 'conversation set'],
+      exclude: ['bedroom', 'mattress', 'wall art', 'storedisplay']
+    },
+    clearance: {
+      include: ['clearance', 'closeout', 'sale'],
+      exclude: ['storedisplay']
+    }
+  };
+
+  const rule = rulesByCategory[category];
+
+  if (!rule) {
+    return products;
+  }
+
+  return products
+    .map((product) => {
+      const searchableText = productSearchText(product);
+      const hasExcludedTerm = rule.exclude.some((keyword) => searchableText.includes(keyword));
+
+      if (hasExcludedTerm) {
+        return null;
+      }
+
+      const productName = String(product?.itemName || '').toLowerCase();
+      const score = rule.include.reduce((total, keyword) => {
+        if (!searchableText.includes(keyword)) {
+          return total;
+        }
+
+        const nameBoost = productName.includes(keyword) ? 2 : 1;
+        return total + keywordWeight(category, keyword) * nameBoost;
+      }, 0);
+
+      return score > 0 ? { product, score } : null;
+    })
+    .filter(Boolean)
+    .sort((left, right) => right.score - left.score)
+    .map((result) => result.product);
+}
+
+function keywordWeight(category, keyword) {
+  const weightsByCategory = {
+    'living-room': {
+      sofa: 120,
+      sectional: 120,
+      loveseat: 110,
+      recliner: 105,
+      upholstery: 95,
+      'tv stand': 70,
+      entertainment: 70,
+      'coffee table': 45,
+      'cocktail table': 45,
+      'end table': 35,
+      ottoman: 30,
+      'living room': 20
+    }
+  };
+
+  return weightsByCategory[category]?.[keyword] || keyword.length;
+}
+
+function productSearchText(product) {
+  return [
+    product?.itemName,
+    product?.friendlyDescription,
+    product?.consumerDescription,
+    product?.detailedDescription,
+    product?.retailType,
+    product?.itemClass,
+    product?.itemCode,
+    product?.itemDefaultGroupingLookupCode,
+    product?.itemSeriesName,
+    product?.seriesFeatures,
+    ...(Array.isArray(product?.intendedRooms) ? product.intendedRooms : []),
+    ...(Array.isArray(product?.navigableCategories) ? product.navigableCategories : []),
+    ...(Array.isArray(product?.microsites) ? product.microsites : [])
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
 }
 
 function extractProducts(payload) {

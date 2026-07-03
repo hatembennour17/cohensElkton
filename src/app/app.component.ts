@@ -227,6 +227,10 @@ export class AppComponent implements OnInit {
     return this.categoryPages.find((category) => category.path === this.currentPath);
   }
 
+  get activeCategorySlug() {
+    return this.activeCategory?.path.replace('/c/', '') || '';
+  }
+
   get categoryTitle() {
     return this.activeCategory?.label || 'Furniture';
   }
@@ -327,7 +331,13 @@ export class AppComponent implements OnInit {
 
   private async loadAshleyProducts() {
     try {
-      const response = await fetch('/.netlify/functions/ashley-products?limit=12');
+      const params = new URLSearchParams({ limit: this.isCategoryPage ? '24' : '12' });
+
+      if (this.activeCategorySlug) {
+        params.set('category', this.activeCategorySlug);
+      }
+
+      const response = await fetch(`/.netlify/functions/ashley-products?${params}`);
 
       if (!response.ok) {
         return;

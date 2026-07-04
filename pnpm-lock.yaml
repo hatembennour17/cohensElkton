@@ -35,6 +35,9 @@ importers:
       '@netlify/blobs':
         specifier: ^10.7.9
         version: 10.7.9
+      '@netlify/dev-utils':
+        specifier: ^4.4.6
+        version: 4.4.6
       rxjs:
         specifier: ~7.8.0
         version: 7.8.2
@@ -5425,7 +5428,7 @@ snapshots:
       proc-log: 4.2.0
       promise-inflight: 1.0.1
       promise-retry: 2.0.1
-      semver: 7.6.0
+      semver: 7.8.5
       which: 4.0.0
     transitivePeerDependencies:
       - bluebird
@@ -6304,7 +6307,7 @@ snapshots:
       postcss-modules-scope: 3.2.1(postcss@8.4.35)
       postcss-modules-values: 4.0.0(postcss@8.4.35)
       postcss-value-parser: 4.2.0
-      semver: 7.6.0
+      semver: 7.8.5
     optionalDependencies:
       webpack: 5.94.0(esbuild@0.20.1)(postcss@8.4.35)
 
@@ -7495,7 +7498,7 @@ snapshots:
 
   npm-install-checks@6.3.0:
     dependencies:
-      semver: 7.6.0
+      semver: 7.8.5
 
   npm-normalize-package-bin@3.0.1: {}
 
@@ -7503,7 +7506,7 @@ snapshots:
     dependencies:
       hosted-git-info: 7.0.2
       proc-log: 3.0.0
-      semver: 7.6.0
+      semver: 7.8.5
       validate-npm-package-name: 5.0.1
 
   npm-packlist@8.0.2:
@@ -7515,7 +7518,7 @@ snapshots:
       npm-install-checks: 6.3.0
       npm-normalize-package-bin: 3.0.1
       npm-package-arg: 11.0.1
-      semver: 7.6.0
+      semver: 7.8.5
 
   npm-registry-fetch@16.2.1:
     dependencies:
@@ -7707,7 +7710,7 @@ snapshots:
       cosmiconfig: 9.0.2(typescript@5.4.5)
       jiti: 1.21.7
       postcss: 8.4.35
-      semver: 7.6.0
+      semver: 7.8.5
     optionalDependencies:
       webpack: 5.94.0(esbuild@0.20.1)(postcss@8.4.35)
     transitivePeerDependencies:

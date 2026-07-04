@@ -4,7 +4,7 @@
       <a [href]="links.contact">Furniture store in {{ location.cityState }}</a>
       <a [href]="location.phoneHref">{{ location.phone }}</a>
       <a [href]="links.financing">Financing</a>
-      <a [href]="links.storePolicy">Delivery</a>
+      <a [href]="links.delivery">Delivery</a>
       <a [href]="links.wishlist">Wishlist</a>
     </div>
   </header>
@@ -375,6 +375,52 @@
           </div>
         </aside>
       </section>
+    } @else if (isDeliveryPage) {
+      <section class="checkout-hero delivery-hero">
+        <div class="wrap checkout-hero__inner">
+          <p class="eyebrow">Elkton delivery</p>
+          <h1>Delivery and pickup handled by Cohen's Furniture in Elkton.</h1>
+          <p>
+            Customers shopping this site work with the Elkton showroom only for local delivery, pickup, order questions, and store coordination.
+          </p>
+        </div>
+      </section>
+
+      <section class="wrap delivery-page">
+        <div class="delivery-panel">
+          <p class="eyebrow">Service area</p>
+          <h2>Start with the Elkton team.</h2>
+          <p>
+            Delivery availability, timing, and fees are confirmed by the Elkton location after the order request is reviewed.
+            The store can also help schedule pickup from the showroom when that is the better option.
+          </p>
+          <div class="delivery-actions">
+            <a class="btn btn--primary" [href]="location.phoneHref">Call {{ location.shortName }}</a>
+            <a class="btn btn--dark" [href]="links.directions">Get Directions</a>
+          </div>
+        </div>
+
+        <aside class="order-card delivery-card">
+          <p class="eyebrow">Store location</p>
+          <h2>{{ location.name }}</h2>
+          <p>{{ location.street }}<br />{{ location.cityLine }}</p>
+          <a [href]="location.phoneHref">{{ location.phone }}</a>
+          <dl class="delivery-list">
+            <div>
+              <dt>Orders</dt>
+              <dd>Routed to Elkton only</dd>
+            </div>
+            <div>
+              <dt>Pickup</dt>
+              <dd>Available through the Elkton showroom</dd>
+            </div>
+            <div>
+              <dt>Delivery</dt>
+              <dd>Confirmed by the local store team</dd>
+            </div>
+          </dl>
+        </aside>
+      </section>
     } @else if (isCategoryPage) {
       <section class="category-hero">
         <div class="wrap category-hero__inner">
@@ -399,8 +445,27 @@
         </div>
         <p class="catalog-status">{{ catalogMessage }}</p>
 
-        <div class="catalog-grid">
-          @for (product of categoryProducts; track product.sku) {
+        @if (catalogLoading) {
+          <div class="catalog-grid" aria-label="Loading products">
+            @for (placeholder of [1, 2, 3, 4, 5, 6, 7, 8]; track placeholder) {
+              <article class="catalog-card catalog-card--loading" aria-hidden="true">
+                <div class="product-loader">
+                  <span></span>
+                  <strong>Loading products</strong>
+                </div>
+                <div>
+                  <span></span>
+                  <h3></h3>
+                  <p></p>
+                  <strong></strong>
+                  <button type="button" tabindex="-1">Loading</button>
+                </div>
+              </article>
+            }
+          </div>
+        } @else {
+          <div class="catalog-grid">
+            @for (product of categoryProducts; track product.sku) {
             <article class="catalog-card">
               <img [src]="product.image" [alt]="product.name" />
               <div>
@@ -411,8 +476,9 @@
                 <button type="button" (click)="addToCart(product)">Add to Cart</button>
               </div>
             </article>
-          }
-        </div>
+            }
+          </div>
+        }
       </section>
     } @else {
     <section class="hero" aria-labelledby="hero-title">
@@ -491,7 +557,17 @@
         <a class="btn btn--dark" [href]="links.diningRoom">Shop Dining</a>
       </div>
       <div class="tile-grid">
-        @for (item of diningTiles; track item.name) {
+        @if (catalogLoading) {
+          @for (placeholder of [1, 2, 3, 4]; track placeholder) {
+            <article class="product-tile product-tile--loading" aria-hidden="true">
+              <div class="product-loader">
+                <span></span>
+                <strong>Loading products</strong>
+              </div>
+            </article>
+          }
+        } @else {
+          @for (item of diningTiles; track item.name) {
           <article class="product-tile">
             <img [src]="item.image" [alt]="item.name" />
             <span>{{ item.name }}</span>
@@ -500,6 +576,7 @@
               <button type="button" (click)="addToCart(item)">Add to Cart</button>
             </div>
           </article>
+          }
         }
       </div>
     </section>
@@ -511,7 +588,23 @@
       </div>
       <p class="catalog-status">{{ catalogMessage }}</p>
       <div class="deal-grid">
-        @for (deal of livingDeals; track deal.name) {
+        @if (catalogLoading) {
+          @for (placeholder of [1, 2, 3, 4]; track placeholder) {
+            <article class="deal-card deal-card--loading" aria-hidden="true">
+              <div class="product-loader">
+                <span></span>
+                <strong>Loading products</strong>
+              </div>
+              <div>
+                <span></span>
+                <h3></h3>
+                <strong></strong>
+                <button type="button" tabindex="-1">Loading</button>
+              </div>
+            </article>
+          }
+        } @else {
+          @for (deal of livingDeals; track deal.name) {
           <article class="deal-card">
             <img [src]="deal.image" [alt]="deal.name" />
             <div>
@@ -521,6 +614,7 @@
               <button type="button" (click)="addToCart(deal)">Add to Cart</button>
             </div>
           </article>
+          }
         }
       </div>
     </section>

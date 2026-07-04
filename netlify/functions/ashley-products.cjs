@@ -5,10 +5,28 @@ const jsonResponse = (statusCode, body) => ({
   statusCode,
   headers: {
     'content-type': 'application/json',
-    'cache-control': statusCode === 200 ? 'public, max-age=900' : 'no-store'
+    'cache-control': 'no-store'
   },
   body: JSON.stringify(body)
 });
+
+const defaultAdminCatalog = {
+  priceRules: {
+    defaultMarkupPercent: 55,
+    rounding: 'ending-99'
+  },
+  categories: {
+    'living-room': { markupPercent: 55, products: [] },
+    bedrooms: { markupPercent: 55, products: [] },
+    'dining-room': { markupPercent: 55, products: [] },
+    mattresses: { markupPercent: 55, products: [] },
+    kids: { markupPercent: 55, products: [] },
+    office: { markupPercent: 55, products: [] },
+    'home-decor': { markupPercent: 55, products: [] },
+    outdoor: { markupPercent: 55, products: [] },
+    clearance: { markupPercent: 55, products: [] }
+  }
+};
 
 const requiredEnv = [
   'ASHLEY_CLIENT_ID',
@@ -32,7 +50,7 @@ exports.handler = async (event) => {
   const upstreamUrl = new URL(ASHLEY_PRODUCTS_URL);
   const requestedLimit = normalizeLimit(query.limit);
   const category = normalizeCategory(query.category);
-  const adminCatalog = await readAdminCatalog();
+  const adminCatalog = normalizeAdminCatalog(await readAdminCatalog());
   const configuredProducts = getConfiguredProducts(adminCatalog, category);
 
   upstreamUrl.searchParams.set('customer', process.env.ASHLEY_CUSTOMER);
@@ -161,6 +179,28 @@ function gitHubHeaders() {
   }
 
   return headers;
+}
+
+function normalizeAdminCatalog(catalog) {
+  const source = catalog && typeof catalog === 'object' ? catalog : {};
+  const sourceRules = source.priceRules || {};
+  const categories = {};
+
+  for (const [slug, defaultCategory] of Object.entries(defaultAdminCatalog.categories)) {
+    const sourceCategory = source.categories?.[slug] || {};
+    categories[slug] = {
+      markupPercent: normalizeOptionalNumber(sourceCategory.markupPercent) ?? defaultCategory.markupPercent,
+      products: Array.isArray(sourceCategory.products) ? sourceCategory.products : []
+    };
+  }
+
+  return {
+    priceRules: {
+      defaultMarkupPercent: normalizeOptionalNumber(sourceRules.defaultMarkupPercent) ?? defaultAdminCatalog.priceRules.defaultMarkupPercent,
+      rounding: sourceRules.rounding === 'none' ? 'none' : 'ending-99'
+    },
+    categories
+  };
 }
 
 function getConfiguredProducts(adminCatalog, category) {

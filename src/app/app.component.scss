@@ -724,6 +724,65 @@ h3 {
   background: #eee;
 }
 
+.product-loader {
+  min-height: 190px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 12px;
+  color: #666;
+  background:
+    linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.65), transparent),
+    #ececec;
+  background-size: 220% 100%, 100% 100%;
+  animation: product-loading 1.25s linear infinite;
+}
+
+.product-loader span {
+  width: 38px;
+  height: 38px;
+  border: 4px solid #d1d1d1;
+  border-top-color: #b42024;
+  border-radius: 50%;
+  animation: product-spin 850ms linear infinite;
+}
+
+.product-loader strong {
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+.catalog-card--loading img,
+.deal-card--loading img,
+.product-tile--loading img {
+  display: none;
+}
+
+.catalog-card--loading div:last-child span,
+.catalog-card--loading h3,
+.catalog-card--loading p,
+.catalog-card--loading div:last-child strong,
+.deal-card--loading div:last-child span,
+.deal-card--loading h3,
+.deal-card--loading div:last-child strong {
+  min-height: 16px;
+  border-radius: 2px;
+  color: transparent;
+  background: #e7e7e7;
+}
+
+.catalog-card--loading h3,
+.deal-card--loading h3 {
+  min-height: 28px;
+}
+
+.catalog-card--loading button,
+.deal-card--loading button {
+  color: transparent;
+  background: #d7d7d7;
+  cursor: default;
+}
+
 .catalog-card div {
   display: grid;
   gap: 8px;
@@ -1029,6 +1088,79 @@ h3 {
   line-height: 1.5;
 }
 
+.delivery-hero {
+  background: #1d1d1d;
+}
+
+.delivery-page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 28px;
+  align-items: start;
+  padding: 42px 0 56px;
+}
+
+.delivery-panel {
+  min-height: 360px;
+  display: grid;
+  align-content: center;
+  border: 1px solid #dedede;
+  padding: 38px;
+  background: #fff;
+}
+
+.delivery-panel p:not(.eyebrow) {
+  max-width: 760px;
+  color: #555;
+  font-size: 18px;
+  line-height: 1.65;
+}
+
+.delivery-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.delivery-list {
+  display: grid;
+  gap: 10px;
+  margin: 8px 0 0;
+}
+
+.delivery-list div {
+  padding: 12px;
+  border: 1px solid #dedede;
+  background: #f7f7f7;
+}
+
+.delivery-list dt {
+  margin-bottom: 3px;
+  color: #555;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.delivery-list dd {
+  margin: 0;
+  color: #111;
+  font-weight: 800;
+}
+
+@keyframes product-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes product-loading {
+  to {
+    background-position: -220% 0, 0 0;
+  }
+}
+
 footer {
   background: #f3f3f3;
   border-top: 1px solid #ddd;
@@ -1107,6 +1239,7 @@ footer {
   .feature-layout,
   .checkout-grid,
   .finance-grid,
+  .delivery-page,
   .catalog-grid,
   .deal-grid {
     grid-template-columns: 1fr 1fr;
@@ -1170,6 +1303,7 @@ footer {
   .admin-import,
   .checkout-grid,
   .finance-grid,
+  .delivery-page,
   .catalog-grid,
   .form-grid,
   .choice-grid,

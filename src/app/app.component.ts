@@ -84,7 +84,7 @@ export class AppComponent implements OnInit {
     contact: `${this.siteUrl}/contact`,
     directions: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(this.location.mapsQuery)}`,
     financing: '/financing',
-    storePolicy: `${this.siteUrl}/page/store-policy`,
+    delivery: '/delivery',
     livingRoom: this.categoryUrls.livingRoom,
     diningRoom: this.categoryUrls.diningRoom,
     clearance: this.categoryUrls.clearance
@@ -221,7 +221,8 @@ export class AppComponent implements OnInit {
   adminDragIndex = -1;
   orderMessage = '';
   financingMessage = '';
-  catalogMessage = 'Showing starter Elkton products until the Ashley API is configured.';
+  catalogLoading = true;
+  catalogMessage = 'Loading Ashley catalog products for the Elkton site.';
 
   financeReference = {
     locationId: 'ELKTON-LOCATION-ID',
@@ -243,6 +244,10 @@ export class AppComponent implements OnInit {
 
   get isFinancingPage() {
     return this.currentPath === '/financing';
+  }
+
+  get isDeliveryPage() {
+    return this.currentPath === '/delivery';
   }
 
   get isAdminPage() {
@@ -270,6 +275,10 @@ export class AppComponent implements OnInit {
   }
 
   get categoryProducts() {
+    if (this.catalogLoading) {
+      return [];
+    }
+
     const products = this.catalogProducts.length ? this.catalogProducts : [...this.livingDeals, ...this.diningTiles];
     const seenSkus = new Set<string>();
 
@@ -621,6 +630,9 @@ export class AppComponent implements OnInit {
   }
 
   private async loadAshleyProducts() {
+    this.catalogLoading = true;
+    this.catalogMessage = 'Loading Ashley catalog products for the Elkton site.';
+
     try {
       const params = new URLSearchParams({ limit: this.isCategoryPage ? '24' : '12' });
 
@@ -631,6 +643,8 @@ export class AppComponent implements OnInit {
       const response = await fetch(`/.netlify/functions/ashley-products?${params}`);
 
       if (!response.ok) {
+        this.catalogLoading = false;
+        this.catalogMessage = 'Showing starter Elkton products until the Ashley API is configured.';
         return;
       }
 
@@ -639,6 +653,8 @@ export class AppComponent implements OnInit {
       const usableProducts = products.filter((product: Product) => product.sku && product.name);
 
       if (!usableProducts.length) {
+        this.catalogLoading = false;
+        this.catalogMessage = 'Showing starter Elkton products until the Ashley API is configured.';
         return;
       }
 
@@ -648,6 +664,8 @@ export class AppComponent implements OnInit {
       this.catalogMessage = 'Showing live Ashley catalog products for the Elkton site.';
     } catch {
       this.catalogMessage = 'Showing starter Elkton products until the Ashley API is configured.';
+    } finally {
+      this.catalogLoading = false;
     }
   }
 }

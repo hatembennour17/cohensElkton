@@ -56,7 +56,7 @@ exports.handler = async (event) => {
 
   upstreamUrl.searchParams.set('customer', process.env.ASHLEY_CUSTOMER);
   upstreamUrl.searchParams.set('shipto', process.env.ASHLEY_SHIPTO);
-  upstreamUrl.searchParams.set('limit', configuredProducts.length ? String(configuredProducts.length) : category ? '1000' : requestedLimit);
+  upstreamUrl.searchParams.set('limit', configuredProducts.length ? String(configuredProducts.length) : category || searchTerm ? '1000' : requestedLimit);
 
   if (query.page) {
     upstreamUrl.searchParams.set('page', query.page);
@@ -104,7 +104,7 @@ exports.handler = async (event) => {
     const categoryProducts = configuredProducts.length
       ? orderConfiguredProducts(extractedProducts, configuredProducts)
       : filterByCategory(extractedProducts, category);
-    const rawProducts = filterBySearch(categoryProducts, searchTerm);
+    const rawProducts = filterBySearch(categoryProducts, looksLikeSku(searchTerm) ? '' : searchTerm);
     const products = rawProducts
       .map((product) => normalizeProduct(product.item || product, product.config, adminCatalog, category))
       .filter(Boolean)

@@ -364,13 +364,18 @@ export class AppComponent implements OnInit {
   }
 
   get categoryLandingTilesForActiveCategory() {
-    return this.categoryLandingTiles[this.activeCategorySlug] || this.categoryPages
+    const tiles = this.categoryLandingTiles[this.activeCategorySlug] || this.categoryPages
       .filter((category) => category.path !== this.activeCategory?.path)
       .map((category) => ({
         label: category.label,
         href: `${category.path}?view=products`,
-        image: this.roomCategories.find((room) => room.href === category.path)?.image || this.heroImages[0]
+        image: ''
       }));
+
+    return tiles.map((tile) => ({
+      ...tile,
+      image: this.categoryImage(tile.label)
+    }));
   }
 
   get categoryTitle() {
@@ -406,9 +411,10 @@ export class AppComponent implements OnInit {
       return true;
     });
 
-    const filteredProducts = this.activeSubcategorySlug
+    const subcategoryProducts = this.activeSubcategorySlug
       ? uniqueProducts.filter((product) => this.productMatchesSubcategory(product, this.activeSubcategorySlug))
       : uniqueProducts;
+    const filteredProducts = this.activeSubcategorySlug && subcategoryProducts.length ? subcategoryProducts : uniqueProducts;
 
     return this.sortProducts(filteredProducts);
   }
@@ -854,5 +860,11 @@ export class AppComponent implements OnInit {
     const label = encodeURIComponent(text.toUpperCase());
     const background = encodeURIComponent(color);
     return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='${background}'/%3E%3Ctext x='32' y='39' text-anchor='middle' font-size='22' font-family='Arial,sans-serif' font-weight='700' fill='white'%3E${label}%3C/text%3E%3C/svg%3E`;
+  }
+
+  private categoryImage(label: string) {
+    const cleanLabel = label.replace(/&/g, 'and');
+    const encodedLabel = encodeURIComponent(cleanLabel.toUpperCase());
+    return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 420 320'%3E%3Crect width='420' height='320' rx='160' fill='%23f1f1f1'/%3E%3Cg fill='none' stroke='%23666' stroke-width='14' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M98 180h224v64H98z' fill='%23d8d8d8'/%3E%3Cpath d='M122 130h176c24 0 44 20 44 44v6H78v-6c0-24 20-44 44-44z' fill='%23eeeeee'/%3E%3Cpath d='M98 244v28M322 244v28M146 180v64M274 180v64'/%3E%3C/g%3E%3Ctext x='210' y='62' text-anchor='middle' font-family='Arial,sans-serif' font-size='24' font-weight='700' fill='%23333'%3E${encodedLabel}%3C/text%3E%3C/svg%3E`;
   }
 }

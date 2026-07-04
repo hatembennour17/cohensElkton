@@ -471,7 +471,7 @@
           @for (tile of categoryLandingTilesForActiveCategory; track tile.label) {
             <a class="category-bubble" [href]="tile.href">
               <span>
-                <img [src]="tile.image" [alt]="tile.label" />
+                <img [src]="tile.image" [alt]="tile.label" (error)="useImageFallback($event, tile.label)" />
               </span>
               <strong>{{ tile.label }}</strong>
             </a>
@@ -616,7 +616,7 @@
       <div class="category-grid">
         @for (category of roomCategories; track category.name) {
           <a class="category-card" [href]="category.href">
-            <img [src]="category.image" [alt]="category.name" />
+            <img [src]="category.image" [alt]="category.name" (error)="useImageFallback($event, category.name)" />
             <span>{{ category.name }}</span>
           </a>
         }

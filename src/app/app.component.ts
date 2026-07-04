@@ -157,27 +157,24 @@ export class AppComponent implements OnInit {
   ];
 
   roomCategories = [
-    { name: 'Living Room', href: this.categoryUrls.livingRoom, image: '/assets/uploads/images/Menu%20Images/living-room-drop-down.jpg' },
-    { name: 'Bedroom', href: this.categoryUrls.bedrooms, image: '/assets/uploads/images/Menu%20Images/bedroom-drop-down.jpg' },
-    { name: 'Dining Room', href: this.categoryUrls.diningRoom, image: '/assets/uploads/images/Menu%20Images/dining-room-drop-down.jpg' },
-    { name: 'Mattresses', href: this.categoryUrls.mattresses, image: '/assets/uploads/images/Menu%20Images/mattresses-drop-down.jpg' },
-    { name: 'Office', href: this.categoryUrls.office, image: '/assets/uploads/images/Menu%20Images/office-drop-down.jpg' },
-    { name: 'Home Decor', href: this.categoryUrls.homeDecor, image: '/assets/uploads/images/Menu%20Images/home-decor-drop-down.jpg' }
-  ].map((item) => ({
-    ...item,
-    image: `https://cdn.rencdn.com/Cohensfurniture${item.image.replace('/assets', '')}`
-  }));
+    { name: 'Living Room', href: this.categoryUrls.livingRoom, image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/sofas.jpg' },
+    { name: 'Bedroom', href: this.categoryUrls.bedrooms, image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/bedroom-sets.jpg' },
+    { name: 'Dining Room', href: this.categoryUrls.diningRoom, image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/dining-room-sets.jpg' },
+    { name: 'Mattresses', href: this.categoryUrls.mattresses, image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/mattresses.jpg' },
+    { name: 'Office', href: this.categoryUrls.office, image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/home-office.jpg' },
+    { name: 'Home Decor', href: this.categoryUrls.homeDecor, image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/home-decor.jpg' }
+  ];
 
   categoryLandingTiles: Record<string, CategoryTile[]> = {
     'living-room': [
-      { label: 'Living Room Sets', href: '/c/living-room?sub=living-room-sets', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/Category%20Page/Living%20Room/living-room-sets.png' },
-      { label: 'Sofa Sets', href: '/c/living-room?sub=sofa-sets', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/Category%20Page/Living%20Room/sofa-sets.png' },
-      { label: 'Sofas', href: '/c/living-room?sub=sofas', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/Category%20Page/Living%20Room/sofas.png' },
-      { label: 'Loveseats', href: '/c/living-room?sub=loveseats', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/Category%20Page/Living%20Room/loveseats.png' },
-      { label: 'Sectionals', href: '/c/living-room?sub=sectionals', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/Category%20Page/Living%20Room/sectionals.png' },
-      { label: 'Recliners', href: '/c/living-room?sub=recliners', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/Category%20Page/Living%20Room/recliners.png' },
-      { label: 'Chairs', href: '/c/living-room?sub=chairs', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/Category%20Page/Living%20Room/chairs.png' },
-      { label: 'Ottomans', href: '/c/living-room?sub=ottomans', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/Category%20Page/Living%20Room/ottomans.png' },
+      { label: 'Living Room Sets', href: '/c/living-room?sub=living-room-sets', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/living-room-main_1.jpg' },
+      { label: 'Sofa Sets', href: '/c/living-room?sub=sofa-sets', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/sofas.jpg' },
+      { label: 'Sofas', href: '/c/living-room?sub=sofas', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/sofas.jpg' },
+      { label: 'Loveseats', href: '/c/living-room?sub=loveseats', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/loveseats.jpg' },
+      { label: 'Sectionals', href: '/c/living-room?sub=sectionals', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/sectionals.jpg' },
+      { label: 'Recliners', href: '/c/living-room?sub=recliners', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/recliners.jpg' },
+      { label: 'Chairs', href: '/c/living-room?sub=chairs', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/chairs.jpg' },
+      { label: 'Ottomans', href: '/c/living-room?sub=ottomans', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/ottomans.jpg' },
       { label: 'Coffee Tables', href: '/c/living-room?sub=coffee-tables', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/coffee-tables.jpg' },
       { label: 'TV Stands', href: '/c/living-room?sub=tv-stands', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/tv-stands.jpg' },
       { label: 'Living Room Storage', href: '/c/living-room?sub=living-room-storage', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/accent-cabinets.jpg' },
@@ -374,7 +371,7 @@ export class AppComponent implements OnInit {
 
     return tiles.map((tile) => ({
       ...tile,
-      image: this.categoryImage(tile.label)
+      image: tile.image || this.categoryImage(tile.label)
     }));
   }
 
@@ -447,6 +444,16 @@ export class AppComponent implements OnInit {
     const nextUrl = new URL(globalThis.location?.href || '/', globalThis.location?.origin || 'https://cohensfurnituremaryland.com');
     nextUrl.searchParams.set('sort', value);
     globalThis.location.href = `${nextUrl.pathname}${nextUrl.search}`;
+  }
+
+  useImageFallback(event: Event, label: string) {
+    const image = event.target as HTMLImageElement;
+
+    if (image.src.startsWith('data:image/svg+xml')) {
+      return;
+    }
+
+    image.src = this.categoryImage(label);
   }
 
   addToCart(product: Product) {

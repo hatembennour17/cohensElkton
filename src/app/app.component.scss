@@ -352,6 +352,39 @@ h3 {
   font-weight: 700;
 }
 
+.catalog-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin: -6px 0 18px;
+  padding: 12px 14px;
+  border: 1px solid #e1e1e1;
+  background: #f7f7f7;
+}
+
+.catalog-tools span {
+  color: #555;
+  font-weight: 900;
+}
+
+.catalog-tools label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #555;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.catalog-tools select {
+  height: 38px;
+  border: 1px solid #cfcfcf;
+  padding: 0 10px;
+  background: #fff;
+  font: inherit;
+}
+
 .category-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -669,6 +702,94 @@ h3 {
   padding: 26px;
   color: #555;
   text-align: center;
+}
+
+.category-browser {
+  padding: 26px 0 58px;
+  background: #fff;
+}
+
+.category-browser__header {
+  display: grid;
+  gap: 20px;
+  padding: 10px 0 26px;
+}
+
+.breadcrumbs {
+  display: flex;
+  gap: 8px;
+  color: #555;
+  font-size: 14px;
+}
+
+.breadcrumbs a {
+  color: #b42024;
+  text-decoration: underline;
+}
+
+.category-browser h1 {
+  color: #b42024;
+  font-size: 28px;
+}
+
+.browse-title {
+  margin: 20px 0 0;
+  padding-top: 26px;
+  border-top: 1px solid #e5e5e5;
+  color: #202020;
+  font-size: 22px;
+  font-weight: 400;
+  letter-spacing: 9px;
+  text-transform: uppercase;
+}
+
+.category-bubble-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 34px 24px;
+}
+
+.category-bubble {
+  display: grid;
+  gap: 16px;
+  justify-items: center;
+  text-align: center;
+}
+
+.category-bubble span {
+  width: 100%;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 50%;
+  background: #f1f1f1;
+}
+
+.category-bubble img {
+  width: 78%;
+  height: 78%;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+
+.category-bubble strong {
+  color: #3c3c3c;
+  font-size: 17px;
+  text-transform: uppercase;
+}
+
+.category-copy {
+  display: grid;
+  gap: 12px;
+  margin-top: 46px;
+  color: #333;
+  line-height: 1.6;
+}
+
+.category-copy h2 {
+  color: #b42024;
+  font-size: 24px;
 }
 
 .category-hero {
@@ -1347,6 +1468,7 @@ h3 {
 
   .promo-strip,
   .category-grid,
+  .category-bubble-grid,
   .admin-layout,
   .feature-layout,
   .checkout-grid,
@@ -1410,6 +1532,7 @@ h3 {
 
   .promo-strip,
   .category-grid,
+  .category-bubble-grid,
   .feature-layout,
   .tile-grid,
   .admin-toolbar,
@@ -1426,6 +1549,7 @@ h3 {
   }
 
   .section-heading,
+  .catalog-tools,
   .location-band__inner,
   .financing__inner {
     align-items: flex-start;

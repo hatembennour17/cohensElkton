@@ -20,6 +20,12 @@ type CategoryPage = {
   description: string;
 };
 
+type CategoryTile = {
+  label: string;
+  href: string;
+  image: string;
+};
+
 type AdminCatalogProduct = {
   sku: string;
   enabled: boolean;
@@ -49,7 +55,6 @@ type AdminCatalog = {
 export class AppComponent implements OnInit {
   title = "Cohen's Furniture in Elkton";
 
-  private readonly siteUrl = 'https://www.cohensfurnituredirect.com';
   private readonly categoryUrls = {
     livingRoom: '/c/living-room',
     bedrooms: '/c/bedrooms',
@@ -62,6 +67,7 @@ export class AppComponent implements OnInit {
     clearance: '/c/clearance'
   };
   private readonly currentPath = globalThis.location?.pathname ?? '/';
+  private readonly currentSearchParams = new URLSearchParams(globalThis.location?.search || '');
   private readonly cartStorageKey = 'cohens-elkton-cart';
 
   location = {
@@ -76,13 +82,13 @@ export class AppComponent implements OnInit {
   };
 
   links = {
-    home: this.siteUrl,
-    search: `${this.siteUrl}/search`,
-    login: `${this.siteUrl}/login`,
-    wishlist: `${this.siteUrl}/login`,
+    home: '/',
+    search: '/search',
+    login: '/account',
+    wishlist: '/wishlist',
     cart: '/cart',
     checkout: '/checkout',
-    contact: `${this.siteUrl}/contact`,
+    contact: '/contact',
     directions: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(this.location.mapsQuery)}`,
     financing: '/financing',
     delivery: '/delivery',
@@ -120,27 +126,27 @@ export class AppComponent implements OnInit {
     {
       label: 'Facebook',
       href: 'https://www.facebook.com/CohensFurnitureDE/',
-      icon: 'https://www.cohensfurnituredirect.com/assets/uploads/images/Real%20FB2.png'
+      icon: this.socialIcon('f', '#39569c')
     },
     {
       label: 'Instagram',
       href: 'https://www.instagram.com/cohensfurniture/',
-      icon: 'https://www.cohensfurnituredirect.com/assets/uploads/images/Real%20Insta2.png'
+      icon: this.socialIcon('ig', '#c13584')
     },
     {
       label: 'YouTube',
       href: 'https://www.youtube.com/channel/UCDBrVOuWoaOhMX_iZch36Xg',
-      icon: 'https://www.cohensfurnituredirect.com/assets/uploads/images/youtube-icon.png'
+      icon: this.socialIcon('yt', '#d71920')
     },
     {
       label: 'Pinterest',
       href: 'https://www.pinterest.com/CohensFurniture/',
-      icon: 'https://www.cohensfurnituredirect.com/assets/uploads/images/pinterest-icon.png'
+      icon: this.socialIcon('p', '#bd081c')
     },
     {
       label: 'Twitter',
       href: 'https://twitter.com/CohensFurniture',
-      icon: 'https://www.cohensfurnituredirect.com/assets/uploads/images/twitter-icon.png'
+      icon: this.socialIcon('x', '#1da1f2')
     }
   ];
 
@@ -159,14 +165,49 @@ export class AppComponent implements OnInit {
     { name: 'Home Decor', href: this.categoryUrls.homeDecor, image: '/assets/uploads/images/Menu%20Images/home-decor-drop-down.jpg' }
   ].map((item) => ({
     ...item,
-    image: `https://www.cohensfurnituredirect.com${item.image}`
+    image: `https://cdn.rencdn.com/Cohensfurniture${item.image.replace('/assets', '')}`
   }));
 
+  categoryLandingTiles: Record<string, CategoryTile[]> = {
+    'living-room': [
+      { label: 'Living Room Sets', href: '/c/living-room?sub=living-room-sets', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/Category%20Page/Living%20Room/living-room-sets.png' },
+      { label: 'Sofa Sets', href: '/c/living-room?sub=sofa-sets', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/Category%20Page/Living%20Room/sofa-sets.png' },
+      { label: 'Sofas', href: '/c/living-room?sub=sofas', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/Category%20Page/Living%20Room/sofas.png' },
+      { label: 'Loveseats', href: '/c/living-room?sub=loveseats', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/Category%20Page/Living%20Room/loveseats.png' },
+      { label: 'Sectionals', href: '/c/living-room?sub=sectionals', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/Category%20Page/Living%20Room/sectionals.png' },
+      { label: 'Recliners', href: '/c/living-room?sub=recliners', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/Category%20Page/Living%20Room/recliners.png' },
+      { label: 'Chairs', href: '/c/living-room?sub=chairs', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/Category%20Page/Living%20Room/chairs.png' },
+      { label: 'Ottomans', href: '/c/living-room?sub=ottomans', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/Category%20Page/Living%20Room/ottomans.png' },
+      { label: 'Coffee Tables', href: '/c/living-room?sub=coffee-tables', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/coffee-tables.jpg' },
+      { label: 'TV Stands', href: '/c/living-room?sub=tv-stands', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/tv-stands.jpg' },
+      { label: 'Living Room Storage', href: '/c/living-room?sub=living-room-storage', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/accent-cabinets.jpg' },
+      { label: 'Home Theater', href: '/c/living-room?sub=home-theater', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/home-theater.jpg' }
+    ],
+    bedrooms: [
+      { label: 'Bedroom Sets', href: '/c/bedrooms?sub=bedroom-sets', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/bedroom-sets.jpg' },
+      { label: 'Beds', href: '/c/bedrooms?sub=beds', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/beds.jpg' },
+      { label: 'Dressers', href: '/c/bedrooms?sub=dressers', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/dressers.jpg' },
+      { label: 'Nightstands', href: '/c/bedrooms?sub=nightstands', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/nightstands.jpg' }
+    ],
+    'dining-room': [
+      { label: 'Dining Room Sets', href: '/c/dining-room?sub=dining-room-sets', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/dining-room-sets.jpg' },
+      { label: 'Dining Tables', href: '/c/dining-room?sub=dining-tables', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/dining-table.jpg' },
+      { label: 'Dining Chairs', href: '/c/dining-room?sub=dining-chairs', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/dining-chairs.jpg' },
+      { label: 'Bar Stools', href: '/c/dining-room?sub=bar-stools', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/bar-stools-front.jpg' }
+    ],
+    mattresses: [
+      { label: 'Mattress Sets', href: '/c/mattresses?sub=mattress-sets', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/mattress-sets.jpg' },
+      { label: 'Foundations', href: '/c/mattresses?sub=foundations', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/foundations.jpg' },
+      { label: 'Queen', href: '/c/mattresses?sub=queen', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/queen-mattress.jpg' },
+      { label: 'King', href: '/c/mattresses?sub=king', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/king-mattress.jpg' }
+    ]
+  };
+
   diningTiles: Product[] = [
-    { sku: 'DIN-SET-01', name: 'Dining Room Sets', href: `${this.siteUrl}/c/dining-room-sets`, image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/dining-room-sets.jpg', unitPrice: 899.99 },
-    { sku: 'DIN-TBL-01', name: 'Dining Tables', href: `${this.siteUrl}/c/dining-tables`, image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/dining-table.jpg', unitPrice: 499.99 },
-    { sku: 'DIN-CHR-01', name: 'Dining Chairs', href: `${this.siteUrl}/c/dining-chairs`, image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/dining-chairs.jpg', unitPrice: 149.99 },
-    { sku: 'BAR-STL-01', name: 'Bar Stools', href: `${this.siteUrl}/c/bar-stools`, image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/bar-stools-front.jpg', unitPrice: 129.99 }
+    { sku: 'DIN-SET-01', name: 'Dining Room Sets', href: '/c/dining-room?sub=dining-room-sets', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/dining-room-sets.jpg', unitPrice: 899.99 },
+    { sku: 'DIN-TBL-01', name: 'Dining Tables', href: '/c/dining-room?sub=dining-tables', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/dining-table.jpg', unitPrice: 499.99 },
+    { sku: 'DIN-CHR-01', name: 'Dining Chairs', href: '/c/dining-room?sub=dining-chairs', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/dining-chairs.jpg', unitPrice: 149.99 },
+    { sku: 'BAR-STL-01', name: 'Bar Stools', href: '/c/dining-room?sub=bar-stools', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/bar-stools-front.jpg', unitPrice: 129.99 }
   ];
 
   livingDeals: Product[] = [
@@ -174,7 +215,7 @@ export class AppComponent implements OnInit {
       kicker: 'Room-ready comfort',
       name: 'Sofas',
       sku: 'SOFA-ELK-01',
-      href: `${this.siteUrl}/c/sofas`,
+      href: '/c/living-room?sub=sofas',
       image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/sofas.jpg',
       unitPrice: 799.99
     },
@@ -182,7 +223,7 @@ export class AppComponent implements OnInit {
       kicker: 'Family-sized seating',
       name: 'Sectionals',
       sku: 'SECT-ELK-01',
-      href: `${this.siteUrl}/c/sectionals`,
+      href: '/c/living-room?sub=sectionals',
       image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/sectionals.jpg',
       unitPrice: 1299.99
     },
@@ -190,7 +231,7 @@ export class AppComponent implements OnInit {
       kicker: 'Small-space pairings',
       name: 'Loveseats',
       sku: 'LOVE-ELK-01',
-      href: `${this.siteUrl}/c/loveseats`,
+      href: '/c/living-room?sub=loveseats',
       image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/loveseats.jpg',
       unitPrice: 599.99
     },
@@ -198,7 +239,7 @@ export class AppComponent implements OnInit {
       kicker: 'Finishing pieces',
       name: 'Coffee Tables',
       sku: 'CTBL-ELK-01',
-      href: `${this.siteUrl}/c/coffee-tables`,
+      href: '/c/living-room?sub=coffee-tables',
       image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/coffee-tables.jpg',
       unitPrice: 249.99
     }
@@ -240,6 +281,8 @@ export class AppComponent implements OnInit {
   financingMessage = '';
   catalogLoading = true;
   catalogMessage = 'Loading Ashley catalog products for the Elkton site.';
+  catalogSort = this.currentSearchParams.get('sort') || 'relevance';
+  searchQuery = (this.currentSearchParams.get('q') || '').trim();
 
   financeReference = {
     locationId: 'ELKTON-LOCATION-ID',
@@ -248,6 +291,11 @@ export class AppComponent implements OnInit {
   };
 
   ngOnInit() {
+    if (this.isCategoryLandingPage || this.isAccountPage || this.isWishlistPage || this.isContactPage) {
+      this.catalogLoading = false;
+      return;
+    }
+
     void this.loadAshleyProducts();
   }
 
@@ -267,6 +315,22 @@ export class AppComponent implements OnInit {
     return this.currentPath === '/delivery';
   }
 
+  get isSearchPage() {
+    return this.currentPath === '/search';
+  }
+
+  get isAccountPage() {
+    return this.currentPath === '/account';
+  }
+
+  get isWishlistPage() {
+    return this.currentPath === '/wishlist';
+  }
+
+  get isContactPage() {
+    return this.currentPath === '/contact';
+  }
+
   get isAdminPage() {
     return this.currentPath === '/admin';
   }
@@ -283,11 +347,45 @@ export class AppComponent implements OnInit {
     return this.activeCategory?.path.replace('/c/', '') || '';
   }
 
+  get activeSubcategorySlug() {
+    return (this.currentSearchParams.get('sub') || '').trim().toLowerCase();
+  }
+
+  get activeSubcategoryLabel() {
+    if (!this.activeSubcategorySlug) {
+      return '';
+    }
+
+    return this.activeSubcategorySlug.split('-').map((word) => word[0]?.toUpperCase() + word.slice(1)).join(' ');
+  }
+
+  get isCategoryLandingPage() {
+    return this.isCategoryPage && Boolean(this.activeCategory) && !this.activeSubcategorySlug && this.currentSearchParams.get('view') !== 'products';
+  }
+
+  get categoryLandingTilesForActiveCategory() {
+    return this.categoryLandingTiles[this.activeCategorySlug] || this.categoryPages
+      .filter((category) => category.path !== this.activeCategory?.path)
+      .map((category) => ({
+        label: category.label,
+        href: `${category.path}?view=products`,
+        image: this.roomCategories.find((room) => room.href === category.path)?.image || this.heroImages[0]
+      }));
+  }
+
   get categoryTitle() {
-    return this.activeCategory?.label || 'Furniture';
+    if (this.isSearchPage) {
+      return this.searchQuery ? `Search results for "${this.searchQuery}"` : 'Search Results';
+    }
+
+    return this.activeSubcategoryLabel || this.activeCategory?.label || 'Furniture';
   }
 
   get categoryDescription() {
+    if (this.isSearchPage) {
+      return this.searchQuery ? 'Showing Elkton catalog matches from the Ashley product feed.' : 'Enter a product, SKU, room, or style in the search box.';
+    }
+
     return this.activeCategory?.description || 'Shop furniture products through Cohen\'s Furniture in Elkton.';
   }
 
@@ -299,7 +397,7 @@ export class AppComponent implements OnInit {
     const products = this.catalogProducts.length ? this.catalogProducts : [...this.livingDeals, ...this.diningTiles];
     const seenSkus = new Set<string>();
 
-    return products.filter((product) => {
+    const uniqueProducts = products.filter((product) => {
       if (seenSkus.has(product.sku)) {
         return false;
       }
@@ -307,6 +405,12 @@ export class AppComponent implements OnInit {
       seenSkus.add(product.sku);
       return true;
     });
+
+    const filteredProducts = this.activeSubcategorySlug
+      ? uniqueProducts.filter((product) => this.productMatchesSubcategory(product, this.activeSubcategorySlug))
+      : uniqueProducts;
+
+    return this.sortProducts(filteredProducts);
   }
 
   get selectedAdminProducts() {
@@ -327,6 +431,12 @@ export class AppComponent implements OnInit {
 
   formatPrice(value: number) {
     return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+  }
+
+  changeCatalogSort(value: string) {
+    const nextUrl = new URL(globalThis.location?.href || '/', globalThis.location?.origin || 'https://cohensfurnituremaryland.com');
+    nextUrl.searchParams.set('sort', value);
+    globalThis.location.href = `${nextUrl.pathname}${nextUrl.search}`;
   }
 
   addToCart(product: Product) {
@@ -651,10 +761,14 @@ export class AppComponent implements OnInit {
     this.catalogMessage = 'Loading Ashley catalog products for the Elkton site.';
 
     try {
-      const params = new URLSearchParams({ limit: this.isCategoryPage ? '24' : '12' });
+      const params = new URLSearchParams({ limit: this.isCategoryPage || this.isSearchPage ? '48' : '12' });
 
-      if (this.activeCategorySlug) {
+      if (this.activeCategorySlug && !this.isCategoryLandingPage) {
         params.set('category', this.activeCategorySlug);
+      }
+
+      if (this.searchQuery) {
+        params.set('q', this.searchQuery);
       }
 
       const response = await fetch(`/.netlify/functions/ashley-products?${params}`);
@@ -684,5 +798,61 @@ export class AppComponent implements OnInit {
     } finally {
       this.catalogLoading = false;
     }
+  }
+
+  private productMatchesSubcategory(product: Product, subcategory: string) {
+    const keywordsBySubcategory: Record<string, string[]> = {
+      'living-room-sets': ['living room set', 'sofa set', 'sectional set'],
+      'sofa-sets': ['sofa set'],
+      sofas: ['sofa'],
+      loveseats: ['loveseat'],
+      sectionals: ['sectional'],
+      recliners: ['recliner'],
+      chairs: ['chair'],
+      ottomans: ['ottoman'],
+      'coffee-tables': ['coffee table', 'cocktail table'],
+      'tv-stands': ['tv stand', 'media', 'entertainment'],
+      'living-room-storage': ['storage', 'cabinet', 'console'],
+      'home-theater': ['home theater', 'power seating'],
+      'bedroom-sets': ['bedroom set'],
+      beds: ['bed'],
+      dressers: ['dresser'],
+      nightstands: ['nightstand'],
+      'dining-room-sets': ['dining set', 'dining room set'],
+      'dining-tables': ['dining table', 'table'],
+      'dining-chairs': ['dining chair', 'chair'],
+      'bar-stools': ['bar stool', 'barstool'],
+      'mattress-sets': ['mattress'],
+      foundations: ['foundation', 'box spring'],
+      queen: ['queen'],
+      king: ['king']
+    };
+    const keywords = keywordsBySubcategory[subcategory] || subcategory.split('-');
+    const searchableText = `${product.name} ${product.sku} ${product.kicker || ''}`.toLowerCase();
+    return keywords.some((keyword) => searchableText.includes(keyword));
+  }
+
+  private sortProducts(products: Product[]) {
+    const sortedProducts = [...products];
+
+    if (this.catalogSort === 'price-low') {
+      return sortedProducts.sort((left, right) => left.unitPrice - right.unitPrice);
+    }
+
+    if (this.catalogSort === 'price-high') {
+      return sortedProducts.sort((left, right) => right.unitPrice - left.unitPrice);
+    }
+
+    if (this.catalogSort === 'name') {
+      return sortedProducts.sort((left, right) => left.name.localeCompare(right.name));
+    }
+
+    return sortedProducts;
+  }
+
+  private socialIcon(text: string, color: string) {
+    const label = encodeURIComponent(text.toUpperCase());
+    const background = encodeURIComponent(color);
+    return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='${background}'/%3E%3Ctext x='32' y='39' text-anchor='middle' font-size='22' font-family='Arial,sans-serif' font-weight='700' fill='white'%3E${label}%3C/text%3E%3C/svg%3E`;
   }
 }

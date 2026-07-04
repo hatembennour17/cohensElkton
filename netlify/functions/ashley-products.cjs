@@ -50,6 +50,7 @@ exports.handler = async (event) => {
   const upstreamUrl = new URL(ASHLEY_PRODUCTS_URL);
   const requestedLimit = normalizeLimit(query.limit);
   const category = normalizeCategory(query.category);
+  const searchTerm = normalizeSearchTerm(query.q);
   const adminCatalog = normalizeAdminCatalog(await readAdminCatalog());
   const configuredProducts = getConfiguredProducts(adminCatalog, category);
 
@@ -65,6 +66,8 @@ exports.handler = async (event) => {
     upstreamUrl.searchParams.set('skus', configuredProducts.map((product) => product.sku).join(','));
   } else if (query.skus) {
     upstreamUrl.searchParams.set('skus', query.skus);
+  } else if (looksLikeSku(searchTerm)) {
+    upstreamUrl.searchParams.set('skus', searchTerm.toUpperCase());
   }
 
   const clientIdHeaderName = process.env.ASHLEY_CLIENT_ID_HEADER || 'client_id';
@@ -98,9 +101,10 @@ exports.handler = async (event) => {
     }
 
     const extractedProducts = extractProducts(payload);
-    const rawProducts = configuredProducts.length
+    const categoryProducts = configuredProducts.length
       ? orderConfiguredProducts(extractedProducts, configuredProducts)
       : filterByCategory(extractedProducts, category);
+    const rawProducts = filterBySearch(categoryProducts, searchTerm);
     const products = rawProducts
       .map((product) => normalizeProduct(product.item || product, product.config, adminCatalog, category))
       .filter(Boolean)
@@ -111,6 +115,7 @@ exports.handler = async (event) => {
       meta: {
         ...extractMeta(payload),
         category,
+        searchTerm,
         filteredRecords: rawProducts.length
       }
     });
@@ -134,6 +139,14 @@ function normalizeLimit(value) {
 
 function normalizeCategory(value) {
   return typeof value === 'string' ? value.trim().toLowerCase() : '';
+}
+
+function normalizeSearchTerm(value) {
+  return typeof value === 'string' ? value.trim().toLowerCase() : '';
+}
+
+function looksLikeSku(searchTerm) {
+  return /^[a-z0-9-]{4,}$/i.test(searchTerm) && /\d/.test(searchTerm);
 }
 
 async function readAdminCatalog() {
@@ -311,6 +324,19 @@ function filterByCategory(products, category) {
     .map((result) => result.product);
 }
 
+function filterBySearch(products, searchTerm) {
+  if (!searchTerm) {
+    return products;
+  }
+
+  const searchWords = searchTerm.split(/\s+/).filter(Boolean);
+
+  return products.filter((product) => {
+    const searchableText = productSearchText(product);
+    return searchWords.every((word) => searchableText.includes(word));
+  });
+}
+
 function keywordWeight(category, keyword) {
   const weightsByCategory = {
     'living-room': {
@@ -413,7 +439,7 @@ function normalizeProduct(product, priceConfig, adminCatalog, category) {
     image,
     ashleyPrice: basePrice || 0,
     unitPrice: price || 0,
-    href: `https://www.cohensfurnituredirect.com/search?q=${encodeURIComponent(String(sku))}`,
+    href: `/search?q=${encodeURIComponent(String(sku))}`,
     kicker: brand ? String(brand) : 'Ashley product'
   };
 }

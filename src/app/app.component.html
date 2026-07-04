@@ -17,7 +17,7 @@
 
       <form class="search" [action]="links.search" method="get" aria-label="Search products">
         <span>Search</span>
-        <input type="search" name="q" placeholder="Search furniture, mattresses, decor" />
+        <input type="search" name="q" [value]="searchQuery" placeholder="Search furniture, mattresses, decor" />
         <button type="submit">Go</button>
       </form>
 
@@ -375,6 +375,40 @@
           </div>
         </aside>
       </section>
+    } @else if (isAccountPage || isWishlistPage || isContactPage) {
+      <section class="checkout-hero">
+        <div class="wrap checkout-hero__inner">
+          <p class="eyebrow">Elkton service</p>
+          @if (isAccountPage) {
+            <h1>Customer accounts for the Elkton site are coming next.</h1>
+            <p>For now, call the Elkton showroom for order questions, account help, or product availability.</p>
+          } @else if (isWishlistPage) {
+            <h1>Your Elkton wishlist will stay on this site.</h1>
+            <p>Wishlist storage is a next step after the local product catalog and checkout are finalized.</p>
+          } @else {
+            <h1>Contact Cohen's Furniture in Elkton.</h1>
+            <p>Questions from this site should go to the Elkton showroom, not the shared Cohen's Direct location flow.</p>
+          }
+        </div>
+      </section>
+
+      <section class="wrap delivery-page">
+        <div class="delivery-panel">
+          <p class="eyebrow">{{ location.shortName }} showroom</p>
+          <h2>{{ location.street }}</h2>
+          <p>{{ location.cityLine }}</p>
+          <div class="delivery-actions">
+            <a class="btn btn--primary" [href]="location.phoneHref">Call {{ location.shortName }}</a>
+            <a class="btn btn--dark" [href]="links.directions">Get Directions</a>
+          </div>
+        </div>
+
+        <aside class="order-card">
+          <p class="eyebrow">Local routing</p>
+          <h2>Kept on the Elkton domain</h2>
+          <p>This page is intentionally local so shoppers do not get redirected to Cohen's Direct.</p>
+        </aside>
+      </section>
     } @else if (isDeliveryPage) {
       <section class="checkout-hero delivery-hero">
         <div class="wrap checkout-hero__inner">
@@ -421,7 +455,39 @@
           </dl>
         </aside>
       </section>
-    } @else if (isCategoryPage) {
+    } @else if (isCategoryLandingPage) {
+      <section class="category-browser">
+        <div class="wrap category-browser__header">
+          <nav class="breadcrumbs" aria-label="Breadcrumb">
+            <a [href]="links.home">Home</a>
+            <span>/</span>
+            <strong>{{ categoryTitle }}</strong>
+          </nav>
+          <h1>{{ categoryTitle }}</h1>
+          <p class="browse-title">Browse by Category</p>
+        </div>
+
+        <div class="wrap category-bubble-grid">
+          @for (tile of categoryLandingTilesForActiveCategory; track tile.label) {
+            <a class="category-bubble" [href]="tile.href">
+              <span>
+                <img [src]="tile.image" [alt]="tile.label" />
+              </span>
+              <strong>{{ tile.label }}</strong>
+            </a>
+          }
+        </div>
+
+        <div class="wrap category-copy">
+          <h2>Outstanding {{ categoryTitle }} Furniture for Less at the Elkton Store</h2>
+          <p>{{ categoryDescription }}</p>
+          <p>
+            Browse the departments above, then shop live Ashley catalog products with Elkton-only cart, delivery, and checkout handling.
+          </p>
+          <a class="btn btn--primary" [href]="activeCategory?.path + '?view=products'">View All {{ categoryTitle }} Products</a>
+        </div>
+      </section>
+    } @else if (isCategoryPage || isSearchPage) {
       <section class="category-hero">
         <div class="wrap category-hero__inner">
           <p class="eyebrow">Elkton catalog</p>
@@ -442,6 +508,18 @@
             <h2>{{ categoryTitle }} Products</h2>
           </div>
           <a [href]="links.cart">View Cart ({{ cartCount }})</a>
+        </div>
+        <div class="catalog-tools">
+          <span>{{ categoryProducts.length }} items</span>
+          <label>
+            Sort
+            <select [value]="catalogSort" (change)="changeCatalogSort($any($event.target).value)">
+              <option value="relevance">Relevant</option>
+              <option value="price-low">Price: Low to High</option>
+              <option value="price-high">Price: High to Low</option>
+              <option value="name">Name</option>
+            </select>
+          </label>
         </div>
         <p class="catalog-status">{{ catalogMessage }}</p>
 
@@ -481,6 +559,11 @@
                 <button type="button" (click)="addToCart(product)">Add to Cart</button>
               </div>
             </article>
+            } @empty {
+              <div class="catalog-empty">
+                <h2>No products found.</h2>
+                <p>Try a different search or choose another Elkton category.</p>
+              </div>
             }
           </div>
         }
@@ -697,7 +780,7 @@
 
     <div class="wrap footer-bottom">
       <p>Use of this site is subject to our Terms of Use and Privacy Policy. All marks, images, logos, and text are the property of their respective owners.</p>
-      <p>All purchases are subject to the Elkton store policy. All rights reserved. ©2010 - COPYRIGHT © COHEN'S FURNITURE</p>
+      <p>All purchases are subject to the Elkton store policy. All rights reserved. (C) 2010 - COPYRIGHT (C) COHEN'S FURNITURE</p>
       <div class="footer-social" aria-label="Cohen's Furniture social media">
         @for (social of socialLinks; track social.label) {
           <a [href]="social.href" target="_blank" rel="noopener" [attr.aria-label]="social.label">

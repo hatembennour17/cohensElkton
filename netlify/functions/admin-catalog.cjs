@@ -1,6 +1,4 @@
-const { getStore } = require('@netlify/blobs');
-
-const CATALOG_KEY = 'elkton-catalog-config';
+const CATALOG_FILE_PATH = 'data/elkton-catalog.json';
 
 const defaultCatalog = {
   priceRules: {
@@ -87,14 +85,104 @@ function validateAdmin(event) {
 }
 
 async function readCatalog() {
-  const store = getStore('cohens-elkton-admin');
-  const savedCatalog = await store.get(CATALOG_KEY, { type: 'json' });
+  const savedCatalog = await readGitHubCatalog();
   return normalizeCatalog(savedCatalog || defaultCatalog);
 }
 
 async function writeCatalog(catalog) {
-  const store = getStore('cohens-elkton-admin');
-  await store.setJSON(CATALOG_KEY, catalog);
+  await writeGitHubCatalog(catalog);
+}
+
+async function readGitHubCatalog() {
+  const response = await fetch(gitHubContentsUrl(), {
+    method: 'GET',
+    headers: gitHubHeaders()
+  });
+
+  if (response.status === 404) {
+    return null;
+  }
+
+  if (!response.ok) {
+    throw new Error(`GitHub catalog read failed with ${response.status}`);
+  }
+
+  const payload = await response.json();
+  const content = Buffer.from(String(payload.content || ''), 'base64').toString('utf8');
+  return content ? JSON.parse(content) : null;
+}
+
+async function writeGitHubCatalog(catalog) {
+  const token = process.env.GITHUB_TOKEN;
+
+  if (!token) {
+    throw new Error('GITHUB_TOKEN is required to save the catalog.');
+  }
+
+  const existingFile = await getExistingGitHubFile();
+  const body = {
+    message: 'Update Elkton catalog config',
+    content: Buffer.from(`${JSON.stringify(catalog, null, 2)}\n`, 'utf8').toString('base64'),
+    branch: gitHubBranch()
+  };
+
+  if (existingFile?.sha) {
+    body.sha = existingFile.sha;
+  }
+
+  const response = await fetch(gitHubContentsUrl(), {
+    method: 'PUT',
+    headers: gitHubHeaders(token),
+    body: JSON.stringify(body)
+  });
+
+  if (!response.ok) {
+    const details = await response.text();
+    throw new Error(`GitHub catalog save failed with ${response.status}: ${details}`);
+  }
+}
+
+async function getExistingGitHubFile() {
+  const response = await fetch(gitHubContentsUrl(), {
+    method: 'GET',
+    headers: gitHubHeaders(process.env.GITHUB_TOKEN)
+  });
+
+  if (response.status === 404) {
+    return null;
+  }
+
+  if (!response.ok) {
+    throw new Error(`GitHub catalog lookup failed with ${response.status}`);
+  }
+
+  return response.json();
+}
+
+function gitHubContentsUrl() {
+  const owner = process.env.GITHUB_OWNER || 'hatembennour17';
+  const repo = process.env.GITHUB_REPO || 'cohensElkton';
+  const path = encodeURIComponent(CATALOG_FILE_PATH).replace(/%2F/g, '/');
+  return `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${encodeURIComponent(gitHubBranch())}`;
+}
+
+function gitHubBranch() {
+  return process.env.GITHUB_BRANCH || 'master';
+}
+
+function gitHubHeaders(token = process.env.GITHUB_TOKEN) {
+  const headers = {
+    accept: 'application/vnd.github+json',
+    'content-type': 'application/json',
+    'user-agent': 'cohens-elkton-admin'
+  };
+
+  if (token) {
+    headers.authorization = `Bearer ${token}`;
+    headers['x-github-api-version'] = '2022-11-28';
+  }
+
+  return headers;
 }
 
 function normalizeCatalog(catalog) {

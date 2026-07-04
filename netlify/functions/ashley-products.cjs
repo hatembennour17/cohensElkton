@@ -1,7 +1,5 @@
-const { getStore } = require('@netlify/blobs');
-
 const ASHLEY_PRODUCTS_URL = 'https://apigw3.ashleyfurniture.com/productinformation/products';
-const CATALOG_KEY = 'elkton-catalog-config';
+const CATALOG_FILE_PATH = 'data/elkton-catalog.json';
 
 const jsonResponse = (statusCode, body) => ({
   statusCode,
@@ -122,11 +120,47 @@ function normalizeCategory(value) {
 
 async function readAdminCatalog() {
   try {
-    const store = getStore('cohens-elkton-admin');
-    return await store.get(CATALOG_KEY, { type: 'json' });
+    const response = await fetch(gitHubContentsUrl(), {
+      method: 'GET',
+      headers: gitHubHeaders()
+    });
+
+    if (response.status === 404) {
+      return null;
+    }
+
+    if (!response.ok) {
+      throw new Error(`GitHub catalog read failed with ${response.status}`);
+    }
+
+    const payload = await response.json();
+    const content = Buffer.from(String(payload.content || ''), 'base64').toString('utf8');
+    return content ? JSON.parse(content) : null;
   } catch {
     return null;
   }
+}
+
+function gitHubContentsUrl() {
+  const owner = process.env.GITHUB_OWNER || 'hatembennour17';
+  const repo = process.env.GITHUB_REPO || 'cohensElkton';
+  const branch = process.env.GITHUB_BRANCH || 'master';
+  const path = encodeURIComponent(CATALOG_FILE_PATH).replace(/%2F/g, '/');
+  return `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${encodeURIComponent(branch)}`;
+}
+
+function gitHubHeaders() {
+  const headers = {
+    accept: 'application/vnd.github+json',
+    'user-agent': 'cohens-elkton-catalog'
+  };
+
+  if (process.env.GITHUB_TOKEN) {
+    headers.authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
+    headers['x-github-api-version'] = '2022-11-28';
+  }
+
+  return headers;
 }
 
 function getConfiguredProducts(adminCatalog, category) {

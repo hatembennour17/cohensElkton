@@ -810,6 +810,25 @@ h3 {
   font-size: 18px;
 }
 
+.price-compare {
+  display: grid;
+  gap: 3px;
+}
+
+.price-compare strong {
+  color: #111;
+}
+
+.price-compare small {
+  color: #666;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.price-compare--tile {
+  line-height: 1.2;
+}
+
 .catalog-card button {
   min-height: 38px;
   border: 0;
@@ -1161,27 +1180,120 @@ h3 {
   }
 }
 
-footer {
-  background: #f3f3f3;
-  border-top: 1px solid #ddd;
+.site-footer {
+  color: #dcdcdc;
+  background: #202020;
 }
 
-.footer-grid {
-  min-height: 86px;
+.footer-main {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 34px;
+  padding: 42px 0 36px;
+}
+
+.footer-main section {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+}
+
+.footer-main h2 {
+  margin: 0;
+  color: #fff;
+  font-size: 18px;
+  text-transform: uppercase;
+}
+
+.footer-main nav,
+.footer-main address {
+  display: grid;
+  gap: 9px;
+  font-style: normal;
+}
+
+.footer-main a {
+  width: fit-content;
+  color: #dcdcdc;
+}
+
+.footer-main a:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.footer-main address strong {
+  color: #fff;
+  text-transform: uppercase;
+}
+
+.footer-subscribe {
+  margin-top: 8px;
+}
+
+.footer-subscribe label {
+  display: grid;
+  gap: 8px;
+  color: #fff;
+  font-weight: 900;
+}
+
+.footer-subscribe span {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.footer-subscribe input {
+  min-width: 0;
+  height: 42px;
+  border: 0;
+  padding: 0 12px;
+  font: inherit;
+}
+
+.footer-subscribe button {
+  border: 0;
+  padding: 0 14px;
+  color: #fff;
+  background: #b42024;
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.footer-bottom {
+  display: grid;
+  gap: 10px;
+  padding: 22px 0 28px;
+  border-top: 1px solid #3b3b3b;
+  color: #bdbdbd;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.footer-bottom p {
+  margin-bottom: 0;
+}
+
+.footer-social {
   display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.footer-social a {
+  display: inline-flex;
+  width: 30px;
+  height: 30px;
   align-items: center;
-  gap: 24px;
-  flex-wrap: wrap;
-  color: #555;
+  justify-content: center;
+  border-radius: 50%;
+  background: #fff;
 }
 
-.footer-grid strong {
-  color: #111;
-  margin-right: auto;
-}
-
-.footer-grid a:first-child {
-  margin-right: auto;
+.footer-social img {
+  max-width: 19px;
+  max-height: 19px;
 }
 
 @media (max-width: 900px) {
@@ -1240,6 +1352,7 @@ footer {
   .checkout-grid,
   .finance-grid,
   .delivery-page,
+  .footer-main,
   .catalog-grid,
   .deal-grid {
     grid-template-columns: 1fr 1fr;
@@ -1304,6 +1417,7 @@ footer {
   .checkout-grid,
   .finance-grid,
   .delivery-page,
+  .footer-main,
   .catalog-grid,
   .form-grid,
   .choice-grid,

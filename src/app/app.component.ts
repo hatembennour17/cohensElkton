@@ -5,6 +5,7 @@ type Product = {
   name: string;
   image: string;
   unitPrice: number;
+  ashleyPrice?: number;
   href: string;
   kicker?: string;
 };
@@ -203,12 +204,28 @@ export class AppComponent implements OnInit {
     }
   ];
 
-  footerLinks = [
+  footerCategoryLinks = [
     { label: 'Living Room', href: this.categoryUrls.livingRoom },
-    { label: 'Bedroom', href: this.categoryUrls.bedrooms },
+    { label: 'Bedrooms', href: this.categoryUrls.bedrooms },
     { label: 'Dining Room', href: this.categoryUrls.diningRoom },
+    { label: 'Home Decor', href: this.categoryUrls.homeDecor },
+    { label: 'Office', href: this.categoryUrls.office },
+    { label: 'Kids', href: this.categoryUrls.kids },
     { label: 'Mattresses', href: this.categoryUrls.mattresses },
-    { label: 'Home Decor', href: this.categoryUrls.homeDecor }
+    { label: 'Outdoor', href: this.categoryUrls.outdoor }
+  ];
+
+  footerCompanyLinks = [
+    { label: 'Financing & Leasing Options', href: this.links.financing },
+    { label: 'Delivery', href: this.links.delivery },
+    { label: 'Contact Us', href: this.links.contact },
+    { label: 'Store Policy', href: this.links.delivery }
+  ];
+
+  footerShoppingLinks = [
+    { label: 'Sign In', href: this.links.login },
+    { label: 'Wishlist', href: this.links.wishlist },
+    { label: 'Cart', href: this.links.cart }
   ];
 
   cartItems: CartItem[] = this.loadCart();

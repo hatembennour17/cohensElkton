@@ -411,6 +411,7 @@ function normalizeProduct(product, priceConfig, adminCatalog, category) {
     name: String(name),
     brand: brand ? String(brand) : 'Ashley',
     image,
+    ashleyPrice: basePrice || 0,
     unitPrice: price || 0,
     href: `https://www.cohensfurnituredirect.com/search?q=${encodeURIComponent(String(sku))}`,
     kicker: brand ? String(brand) : 'Ashley product'

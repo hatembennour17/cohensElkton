@@ -472,7 +472,12 @@
                 <span>{{ product.kicker || product.sku }}</span>
                 <h3>{{ product.name }}</h3>
                 <p>{{ product.sku }}</p>
-                <strong>{{ formatPrice(product.unitPrice) }}</strong>
+                <div class="price-compare">
+                  <strong>Our price {{ formatPrice(product.unitPrice) }}</strong>
+                  @if (product.ashleyPrice) {
+                    <small>Ashley {{ formatPrice(product.ashleyPrice) }}</small>
+                  }
+                </div>
                 <button type="button" (click)="addToCart(product)">Add to Cart</button>
               </div>
             </article>
@@ -572,7 +577,12 @@
             <img [src]="item.image" [alt]="item.name" />
             <span>{{ item.name }}</span>
             <div class="product-actions">
-              <strong>{{ formatPrice(item.unitPrice) }}</strong>
+              <div class="price-compare price-compare--tile">
+                <strong>{{ formatPrice(item.unitPrice) }}</strong>
+                @if (item.ashleyPrice) {
+                  <small>Ashley {{ formatPrice(item.ashleyPrice) }}</small>
+                }
+              </div>
               <button type="button" (click)="addToCart(item)">Add to Cart</button>
             </div>
           </article>
@@ -610,7 +620,12 @@
             <div>
               <span>{{ deal.kicker }}</span>
               <h3>{{ deal.name }}</h3>
-              <strong>{{ formatPrice(deal.unitPrice) }}</strong>
+              <div class="price-compare">
+                <strong>Our price {{ formatPrice(deal.unitPrice) }}</strong>
+                @if (deal.ashleyPrice) {
+                  <small>Ashley {{ formatPrice(deal.ashleyPrice) }}</small>
+                }
+              </div>
               <button type="button" (click)="addToCart(deal)">Add to Cart</button>
             </div>
           </article>
@@ -632,12 +647,64 @@
     }
   </main>
 
-  <footer>
-    <div class="wrap footer-grid">
-      <a [href]="links.home"><strong>Cohen's Furniture</strong></a>
-      @for (item of footerLinks; track item.label) {
-        <a [href]="item.href">{{ item.label }}</a>
-      }
+  <footer class="site-footer">
+    <div class="wrap footer-main">
+      <section>
+        <h2>Explore by Category</h2>
+        <nav aria-label="Footer categories">
+          @for (item of footerCategoryLinks; track item.label) {
+            <a [href]="item.href">{{ item.label }}</a>
+          }
+        </nav>
+      </section>
+
+      <section>
+        <h2>Our Company</h2>
+        <nav aria-label="Footer company links">
+          @for (item of footerCompanyLinks; track item.label) {
+            <a [href]="item.href">{{ item.label }}</a>
+          }
+        </nav>
+      </section>
+
+      <section>
+        <h2>Shopping Links</h2>
+        <nav aria-label="Footer shopping links">
+          @for (item of footerShoppingLinks; track item.label) {
+            <a [href]="item.href">{{ item.label }}</a>
+          }
+        </nav>
+      </section>
+
+      <section>
+        <h2>Our Location</h2>
+        <address>
+          <strong>{{ location.street }}</strong>
+          <span>{{ location.cityLine }}</span>
+          <a [href]="location.phoneHref">{{ location.phone }}</a>
+        </address>
+        <form class="footer-subscribe" aria-label="Subscribe to email list">
+          <label>
+            Sign up for our email list
+            <span>
+              <input type="email" placeholder="Enter Email" />
+              <button type="submit">Subscribe</button>
+            </span>
+          </label>
+        </form>
+      </section>
+    </div>
+
+    <div class="wrap footer-bottom">
+      <p>Use of this site is subject to our Terms of Use and Privacy Policy. All marks, images, logos, and text are the property of their respective owners.</p>
+      <p>All purchases are subject to the Elkton store policy. All rights reserved. ©2010 - COPYRIGHT © COHEN'S FURNITURE</p>
+      <div class="footer-social" aria-label="Cohen's Furniture social media">
+        @for (social of socialLinks; track social.label) {
+          <a [href]="social.href" target="_blank" rel="noopener" [attr.aria-label]="social.label">
+            <img [src]="social.icon" [alt]="social.label" />
+          </a>
+        }
+      </div>
     </div>
   </footer>
 </div>

@@ -19,6 +19,26 @@ type CategoryPage = {
   description: string;
 };
 
+type AdminCatalogProduct = {
+  sku: string;
+  enabled: boolean;
+  fixedPrice: number | null;
+  markupPercent: number | null;
+};
+
+type AdminCatalogCategory = {
+  markupPercent: number;
+  products: AdminCatalogProduct[];
+};
+
+type AdminCatalog = {
+  priceRules: {
+    defaultMarkupPercent: number;
+    rounding: 'ending-99' | 'none';
+  };
+  categories: Record<string, AdminCatalogCategory>;
+};
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -193,6 +213,12 @@ export class AppComponent implements OnInit {
 
   cartItems: CartItem[] = this.loadCart();
   catalogProducts: Product[] = [];
+  adminToken = globalThis.localStorage?.getItem('cohens-elkton-admin-token') || '';
+  adminCatalog: AdminCatalog = this.createDefaultAdminCatalog();
+  selectedAdminCategory = 'living-room';
+  newAdminSku = '';
+  adminMessage = '';
+  adminDragIndex = -1;
   orderMessage = '';
   financingMessage = '';
   catalogMessage = 'Showing starter Elkton products until the Ashley API is configured.';
@@ -217,6 +243,10 @@ export class AppComponent implements OnInit {
 
   get isFinancingPage() {
     return this.currentPath === '/financing';
+  }
+
+  get isAdminPage() {
+    return this.currentPath === '/admin';
   }
 
   get isCategoryPage() {
@@ -251,6 +281,14 @@ export class AppComponent implements OnInit {
       seenSkus.add(product.sku);
       return true;
     });
+  }
+
+  get selectedAdminProducts() {
+    return this.adminCatalog.categories[this.selectedAdminCategory]?.products || [];
+  }
+
+  get selectedAdminCategoryConfig() {
+    return this.adminCatalog.categories[this.selectedAdminCategory];
   }
 
   get cartSubtotal() {
@@ -312,6 +350,176 @@ export class AppComponent implements OnInit {
     this.financingMessage = `Financing request ready for ${this.location.name}. The next step is connecting this form to the Elkton financing inbox or provider endpoint.`;
   }
 
+  async loadAdminCatalog() {
+    if (!this.adminToken) {
+      this.adminMessage = 'Enter the admin token before loading the catalog.';
+      return;
+    }
+
+    try {
+      const response = await fetch('/.netlify/functions/admin-catalog', {
+        headers: this.adminHeaders()
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        this.adminMessage = payload.error || 'Unable to load admin catalog.';
+        return;
+      }
+
+      this.adminCatalog = this.normalizeAdminCatalog(payload.catalog);
+      globalThis.localStorage?.setItem('cohens-elkton-admin-token', this.adminToken);
+      this.adminMessage = 'Admin catalog loaded.';
+    } catch {
+      this.adminMessage = 'Unable to reach the admin catalog service.';
+    }
+  }
+
+  async saveAdminCatalog() {
+    if (!this.adminToken) {
+      this.adminMessage = 'Enter the admin token before saving.';
+      return;
+    }
+
+    try {
+      const response = await fetch('/.netlify/functions/admin-catalog', {
+        method: 'PUT',
+        headers: {
+          ...this.adminHeaders(),
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({ catalog: this.adminCatalog })
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        this.adminMessage = payload.error || 'Unable to save admin catalog.';
+        return;
+      }
+
+      this.adminCatalog = this.normalizeAdminCatalog(payload.catalog);
+      globalThis.localStorage?.setItem('cohens-elkton-admin-token', this.adminToken);
+      this.adminMessage = 'Admin catalog saved. The storefront will use these SKU lists on the next refresh.';
+    } catch {
+      this.adminMessage = 'Unable to save the admin catalog.';
+    }
+  }
+
+  addAdminSku() {
+    const sku = this.newAdminSku.trim().toUpperCase();
+
+    if (!sku) {
+      return;
+    }
+
+    const products = this.selectedAdminProducts;
+
+    if (!products.some((product) => product.sku === sku)) {
+      products.push({ sku, enabled: true, fixedPrice: null, markupPercent: null });
+    }
+
+    this.newAdminSku = '';
+  }
+
+  removeAdminProduct(index: number) {
+    this.selectedAdminProducts.splice(index, 1);
+  }
+
+  moveAdminProduct(fromIndex: number, toIndex: number) {
+    const products = this.selectedAdminProducts;
+
+    if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0 || fromIndex >= products.length || toIndex >= products.length) {
+      return;
+    }
+
+    const [item] = products.splice(fromIndex, 1);
+    products.splice(toIndex, 0, item);
+  }
+
+  startAdminDrag(index: number) {
+    this.adminDragIndex = index;
+  }
+
+  dropAdminProduct(index: number) {
+    this.moveAdminProduct(this.adminDragIndex, index);
+    this.adminDragIndex = -1;
+  }
+
+  updateDefaultMarkup(value: string) {
+    this.adminCatalog.priceRules.defaultMarkupPercent = this.numberOrDefault(value, 55);
+  }
+
+  updateDefaultRounding(value: string) {
+    this.adminCatalog.priceRules.rounding = value === 'none' ? 'none' : 'ending-99';
+  }
+
+  updateCategoryMarkup(value: string) {
+    this.selectedAdminCategoryConfig.markupPercent = this.numberOrDefault(value, this.adminCatalog.priceRules.defaultMarkupPercent);
+  }
+
+  updateAdminProduct(index: number, key: keyof AdminCatalogProduct, value: string | boolean) {
+    const product = this.selectedAdminProducts[index];
+
+    if (!product) {
+      return;
+    }
+
+    if (key === 'enabled') {
+      product.enabled = Boolean(value);
+      return;
+    }
+
+    if (key === 'sku') {
+      product.sku = String(value).trim().toUpperCase();
+      return;
+    }
+
+    product[key] = value === '' ? null : this.numberOrDefault(String(value), 0);
+  }
+
+  async importAdminSkuFile(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    try {
+      const rows = file.name.toLowerCase().endsWith('.xlsx') || file.name.toLowerCase().endsWith('.xls')
+        ? await this.readExcelRows(file)
+        : this.parseDelimitedRows(await file.text());
+
+      let importedCount = 0;
+
+      for (const row of rows) {
+        const sku = String(row['sku'] || row['SKU'] || row['Sku'] || row['0'] || '').trim().toUpperCase();
+
+        if (!sku) {
+          continue;
+        }
+
+        const category = String(row['category'] || row['Category'] || this.selectedAdminCategory).trim().toLowerCase() || this.selectedAdminCategory;
+        const categoryConfig = this.adminCatalog.categories[category] || this.selectedAdminCategoryConfig;
+        const fixedPrice = this.optionalNumber(row['fixedPrice'] || row['price'] || row['Price']);
+        const markupPercent = this.optionalNumber(row['markupPercent'] || row['markup'] || row['Markup']);
+
+        categoryConfig.products.push({
+          sku,
+          enabled: String(row['enabled'] || row['Enabled'] || 'true').toLowerCase() !== 'false',
+          fixedPrice,
+          markupPercent
+        });
+        importedCount += 1;
+      }
+
+      this.adminMessage = `Imported ${importedCount} SKU rows. Review and save when ready.`;
+      input.value = '';
+    } catch {
+      this.adminMessage = 'Unable to import that file. Use columns named sku, category, price, markupPercent, enabled.';
+    }
+  }
+
   private loadCart(): CartItem[] {
     try {
       const storedCart = globalThis.localStorage?.getItem(this.cartStorageKey);
@@ -319,6 +527,89 @@ export class AppComponent implements OnInit {
     } catch {
       return [];
     }
+  }
+
+  private adminHeaders() {
+    return {
+      'x-admin-token': this.adminToken
+    };
+  }
+
+  private createDefaultAdminCatalog(): AdminCatalog {
+    const categories = Object.fromEntries(
+      Object.values(this.categoryUrls).map((path) => [
+        path.replace('/c/', ''),
+        { markupPercent: 55, products: [] }
+      ])
+    );
+
+    return {
+      priceRules: {
+        defaultMarkupPercent: 55,
+        rounding: 'ending-99'
+      },
+      categories
+    };
+  }
+
+  private normalizeAdminCatalog(catalog: AdminCatalog): AdminCatalog {
+    return {
+      ...this.createDefaultAdminCatalog(),
+      ...catalog,
+      categories: {
+        ...this.createDefaultAdminCatalog().categories,
+        ...(catalog?.categories || {})
+      }
+    };
+  }
+
+  private numberOrDefault(value: string, fallback: number) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : fallback;
+  }
+
+  private optionalNumber(value: unknown) {
+    if (value === undefined || value === null || value === '') {
+      return null;
+    }
+
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  private parseDelimitedRows(text: string): Record<string, string>[] {
+    const lines = text.split(/\r?\n/).filter((line) => line.trim());
+
+    if (!lines.length) {
+      return [];
+    }
+
+    const delimiter = lines[0].includes('\t') ? '\t' : ',';
+    const headers = this.parseDelimitedLine(lines[0], delimiter);
+
+    return lines.slice(1).map((line) => {
+      const values = this.parseDelimitedLine(line, delimiter);
+      return Object.fromEntries(headers.map((header, index) => [header.trim(), values[index] || '']));
+    });
+  }
+
+  private parseDelimitedLine(line: string, delimiter: string) {
+    const pattern = new RegExp(`(?:^|${delimiter})(?:"([^"]*(?:""[^"]*)*)"|([^"${delimiter}]*))`, 'g');
+    const values: string[] = [];
+    let match: RegExpExecArray | null;
+
+    while ((match = pattern.exec(line))) {
+      values.push((match[1] || match[2] || '').replace(/""/g, '"').trim());
+    }
+
+    return values;
+  }
+
+  private async readExcelRows(file: File): Promise<Record<string, string>[]> {
+    const XLSX = await import('xlsx');
+    const workbook = XLSX.read(await file.arrayBuffer());
+    const firstSheetName = workbook.SheetNames[0];
+    return XLSX.utils.sheet_to_json(workbook.Sheets[firstSheetName], { defval: '' }) as Record<string, string>[];
   }
 
   private saveCart() {

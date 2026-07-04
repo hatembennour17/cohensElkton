@@ -37,7 +37,136 @@
   </header>
 
   <main>
-    @if (isCartPage) {
+    @if (isAdminPage) {
+      <section class="admin-shell">
+        <div class="wrap admin-layout">
+          <aside class="admin-sidebar">
+            <p class="eyebrow">Elkton admin</p>
+            <h1>Catalog Controls</h1>
+            <label>
+              Admin Token
+              <input
+                type="password"
+                [value]="adminToken"
+                (input)="adminToken = $any($event.target).value"
+                placeholder="Enter ADMIN_TOKEN"
+              />
+            </label>
+            <button class="btn btn--primary" type="button" (click)="loadAdminCatalog()">Load Catalog</button>
+            <button class="btn btn--dark" type="button" (click)="saveAdminCatalog()">Save Changes</button>
+            @if (adminMessage) {
+              <p class="form-message">{{ adminMessage }}</p>
+            }
+          </aside>
+
+          <section class="admin-panel">
+            <div class="admin-toolbar">
+              <label>
+                Category
+                <select [value]="selectedAdminCategory" (change)="selectedAdminCategory = $any($event.target).value">
+                  @for (category of categoryPages; track category.path) {
+                    <option [value]="category.path.replace('/c/', '')">{{ category.label }}</option>
+                  }
+                </select>
+              </label>
+              <label>
+                Default Markup %
+                <input
+                  type="number"
+                  [value]="adminCatalog.priceRules.defaultMarkupPercent"
+                  (input)="updateDefaultMarkup($any($event.target).value)"
+                />
+              </label>
+              <label>
+                Category Markup %
+                <input
+                  type="number"
+                  [value]="selectedAdminCategoryConfig.markupPercent"
+                  (input)="updateCategoryMarkup($any($event.target).value)"
+                />
+              </label>
+              <label>
+                Rounding
+                <select [value]="adminCatalog.priceRules.rounding" (change)="updateDefaultRounding($any($event.target).value)">
+                  <option value="ending-99">End in .99</option>
+                  <option value="none">No Rounding</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="admin-import">
+              <label>
+                Add SKU
+                <span>
+                  <input
+                    type="text"
+                    [value]="newAdminSku"
+                    (input)="newAdminSku = $any($event.target).value"
+                    placeholder="Example: 80703S1"
+                  />
+                  <button type="button" (click)="addAdminSku()">Add</button>
+                </span>
+              </label>
+              <label>
+                Import Excel or CSV
+                <input type="file" accept=".xlsx,.xls,.csv,.tsv" (change)="importAdminSkuFile($event)" />
+              </label>
+            </div>
+
+            <div class="admin-table">
+              <div class="admin-row admin-row--head">
+                <span>Order</span>
+                <span>Enabled</span>
+                <span>SKU</span>
+                <span>Fixed Price</span>
+                <span>Markup %</span>
+                <span></span>
+              </div>
+              @for (product of selectedAdminProducts; track product.sku; let index = $index) {
+                <div
+                  class="admin-row"
+                  draggable="true"
+                  (dragstart)="startAdminDrag(index)"
+                  (dragover)="$event.preventDefault()"
+                  (drop)="dropAdminProduct(index)"
+                >
+                  <span class="drag-handle">Drag</span>
+                  <label class="admin-check">
+                    <input
+                      type="checkbox"
+                      [checked]="product.enabled"
+                      (change)="updateAdminProduct(index, 'enabled', $any($event.target).checked)"
+                    />
+                  </label>
+                  <input
+                    type="text"
+                    [value]="product.sku"
+                    (input)="updateAdminProduct(index, 'sku', $any($event.target).value)"
+                  />
+                  <input
+                    type="number"
+                    [value]="product.fixedPrice ?? ''"
+                    placeholder="Auto"
+                    (input)="updateAdminProduct(index, 'fixedPrice', $any($event.target).value)"
+                  />
+                  <input
+                    type="number"
+                    [value]="product.markupPercent ?? ''"
+                    placeholder="Category"
+                    (input)="updateAdminProduct(index, 'markupPercent', $any($event.target).value)"
+                  />
+                  <button class="text-button" type="button" (click)="removeAdminProduct(index)">Remove</button>
+                </div>
+              } @empty {
+                <div class="admin-empty">
+                  Add SKUs manually or import a spreadsheet with columns: sku, category, price, markupPercent, enabled.
+                </div>
+              }
+            </div>
+          </section>
+        </div>
+      </section>
+    } @else if (isCartPage) {
       <section class="checkout-hero">
         <div class="wrap checkout-hero__inner">
           <p class="eyebrow">Elkton cart</p>

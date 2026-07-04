@@ -531,6 +531,146 @@ h3 {
   color: #d6d6d6;
 }
 
+.admin-shell {
+  min-height: 720px;
+  padding: 34px 0 56px;
+  background: #f4f5f7;
+}
+
+.admin-layout {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.admin-sidebar,
+.admin-panel {
+  border: 1px solid #d9dde3;
+  background: #fff;
+}
+
+.admin-sidebar {
+  display: grid;
+  gap: 14px;
+  padding: 22px;
+}
+
+.admin-sidebar h1 {
+  margin-bottom: 4px;
+  color: #111;
+  font-size: 30px;
+}
+
+.admin-sidebar label,
+.admin-toolbar label,
+.admin-import label {
+  display: grid;
+  gap: 7px;
+  color: #333;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.admin-sidebar input,
+.admin-toolbar input,
+.admin-toolbar select,
+.admin-import input,
+.admin-row input {
+  min-width: 0;
+  height: 40px;
+  border: 1px solid #c9ced6;
+  padding: 0 10px;
+  background: #fff;
+  font: inherit;
+}
+
+.admin-panel {
+  padding: 20px;
+}
+
+.admin-toolbar {
+  display: grid;
+  grid-template-columns: 1.4fr repeat(3, minmax(130px, 0.5fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.admin-import {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 0.7fr);
+  gap: 14px;
+  margin-bottom: 18px;
+  padding: 14px;
+  background: #f7f7f7;
+  border: 1px solid #e2e2e2;
+}
+
+.admin-import span {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.admin-import button {
+  min-height: 40px;
+  border: 0;
+  padding: 0 16px;
+  color: #fff;
+  background: #b42024;
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.admin-table {
+  border: 1px solid #dde1e7;
+}
+
+.admin-row {
+  display: grid;
+  grid-template-columns: 80px 80px minmax(150px, 1fr) 130px 130px 90px;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border-top: 1px solid #e4e6eb;
+  background: #fff;
+}
+
+.admin-row:first-child {
+  border-top: 0;
+}
+
+.admin-row--head {
+  color: #555;
+  background: #f0f2f5;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.drag-handle {
+  cursor: grab;
+  color: #b42024;
+  font-weight: 900;
+}
+
+.admin-check {
+  display: flex;
+  justify-content: center;
+}
+
+.admin-check input {
+  width: 18px;
+  height: 18px;
+}
+
+.admin-empty {
+  padding: 26px;
+  color: #555;
+  text-align: center;
+}
+
 .category-hero {
   color: #fff;
   background: #181818;
@@ -963,6 +1103,7 @@ footer {
 
   .promo-strip,
   .category-grid,
+  .admin-layout,
   .feature-layout,
   .checkout-grid,
   .finance-grid,
@@ -1025,6 +1166,8 @@ footer {
   .category-grid,
   .feature-layout,
   .tile-grid,
+  .admin-toolbar,
+  .admin-import,
   .checkout-grid,
   .finance-grid,
   .catalog-grid,
@@ -1043,5 +1186,10 @@ footer {
 
   .financing img {
     width: 104px;
+  }
+
+  .admin-row,
+  .admin-row--head {
+    grid-template-columns: 1fr;
   }
 }

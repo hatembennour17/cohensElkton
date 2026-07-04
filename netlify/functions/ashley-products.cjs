@@ -1,4 +1,7 @@
+const { getStore } = require('@netlify/blobs');
+
 const ASHLEY_PRODUCTS_URL = 'https://apigw3.ashleyfurniture.com/productinformation/products';
+const CATALOG_KEY = 'elkton-catalog-config';
 
 const jsonResponse = (statusCode, body) => ({
   statusCode,
@@ -31,16 +34,20 @@ exports.handler = async (event) => {
   const upstreamUrl = new URL(ASHLEY_PRODUCTS_URL);
   const requestedLimit = normalizeLimit(query.limit);
   const category = normalizeCategory(query.category);
+  const adminCatalog = await readAdminCatalog();
+  const configuredProducts = getConfiguredProducts(adminCatalog, category);
 
   upstreamUrl.searchParams.set('customer', process.env.ASHLEY_CUSTOMER);
   upstreamUrl.searchParams.set('shipto', process.env.ASHLEY_SHIPTO);
-  upstreamUrl.searchParams.set('limit', category ? '1000' : requestedLimit);
+  upstreamUrl.searchParams.set('limit', configuredProducts.length ? String(configuredProducts.length) : category ? '1000' : requestedLimit);
 
   if (query.page) {
     upstreamUrl.searchParams.set('page', query.page);
   }
 
-  if (query.skus) {
+  if (configuredProducts.length) {
+    upstreamUrl.searchParams.set('skus', configuredProducts.map((product) => product.sku).join(','));
+  } else if (query.skus) {
     upstreamUrl.searchParams.set('skus', query.skus);
   }
 
@@ -74,8 +81,14 @@ exports.handler = async (event) => {
       });
     }
 
-    const rawProducts = filterByCategory(extractProducts(payload), category);
-    const products = rawProducts.map(normalizeProduct).filter(Boolean).slice(0, Number(requestedLimit));
+    const extractedProducts = extractProducts(payload);
+    const rawProducts = configuredProducts.length
+      ? orderConfiguredProducts(extractedProducts, configuredProducts)
+      : filterByCategory(extractedProducts, category);
+    const products = rawProducts
+      .map((product) => normalizeProduct(product.item || product, product.config, adminCatalog, category))
+      .filter(Boolean)
+      .slice(0, Number(requestedLimit));
 
     return jsonResponse(200, {
       products,
@@ -105,6 +118,47 @@ function normalizeLimit(value) {
 
 function normalizeCategory(value) {
   return typeof value === 'string' ? value.trim().toLowerCase() : '';
+}
+
+async function readAdminCatalog() {
+  try {
+    const store = getStore('cohens-elkton-admin');
+    return await store.get(CATALOG_KEY, { type: 'json' });
+  } catch {
+    return null;
+  }
+}
+
+function getConfiguredProducts(adminCatalog, category) {
+  if (!category) {
+    return [];
+  }
+
+  const products = adminCatalog?.categories?.[category]?.products;
+
+  if (!Array.isArray(products)) {
+    return [];
+  }
+
+  return products
+    .map((product) => ({
+      sku: String(product?.sku || '').trim().toUpperCase(),
+      enabled: product?.enabled !== false,
+      fixedPrice: normalizeOptionalNumber(product?.fixedPrice),
+      markupPercent: normalizeOptionalNumber(product?.markupPercent)
+    }))
+    .filter((product) => product.sku && product.enabled);
+}
+
+function orderConfiguredProducts(products, configuredProducts) {
+  const productBySku = new Map(products.map((product) => [String(product?.sku || '').toUpperCase(), product]));
+
+  return configuredProducts
+    .map((config) => {
+      const item = productBySku.get(config.sku);
+      return item ? { item, config } : null;
+    })
+    .filter(Boolean);
 }
 
 function filterByCategory(products, category) {
@@ -247,7 +301,7 @@ function extractMeta(payload) {
   };
 }
 
-function normalizeProduct(product) {
+function normalizeProduct(product, priceConfig, adminCatalog, category) {
   const sku = firstValue(product, ['sku', 'SKU', 'itemNumber', 'item_number', 'itemNo', 'item', 'seriesId']);
   const name = firstValue(product, [
     'name',
@@ -265,7 +319,7 @@ function normalizeProduct(product) {
   }
 
   const brand = firstValue(product, ['brand', 'brandName']);
-  const price = firstNumber(product, [
+  const basePrice = firstNumber(product, [
     'map',
     'MAP',
     'minimumAdvertisedPrice',
@@ -275,6 +329,7 @@ function normalizeProduct(product) {
     'price',
     'fobBasePrice'
   ]);
+  const price = applyPriceRule(basePrice, priceConfig, adminCatalog, category);
   const image = firstImage(product);
 
   return {
@@ -286,6 +341,38 @@ function normalizeProduct(product) {
     href: `https://www.cohensfurnituredirect.com/search?q=${encodeURIComponent(String(sku))}`,
     kicker: brand ? String(brand) : 'Ashley product'
   };
+}
+
+function applyPriceRule(basePrice, priceConfig, adminCatalog, category) {
+  if (priceConfig?.fixedPrice !== null && priceConfig?.fixedPrice !== undefined) {
+    return priceConfig.fixedPrice;
+  }
+
+  const markupPercent =
+    priceConfig?.markupPercent ??
+    normalizeOptionalNumber(adminCatalog?.categories?.[category]?.markupPercent) ??
+    normalizeOptionalNumber(adminCatalog?.priceRules?.defaultMarkupPercent) ??
+    0;
+
+  const markedUpPrice = basePrice * (1 + markupPercent / 100);
+
+  if (adminCatalog?.priceRules?.rounding === 'none') {
+    return roundMoney(markedUpPrice);
+  }
+
+  return ending99(markedUpPrice);
+}
+
+function ending99(value) {
+  if (!Number.isFinite(value) || value <= 0) {
+    return 0;
+  }
+
+  return Math.max(0.99, Math.ceil(value) - 0.01);
+}
+
+function roundMoney(value) {
+  return Number.isFinite(value) ? Math.round(value * 100) / 100 : 0;
 }
 
 function firstValue(source, keys) {
@@ -302,6 +389,15 @@ function firstNumber(source, keys) {
   const value = firstValue(source, keys);
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function normalizeOptionalNumber(value) {
+  if (value === undefined || value === null || value === '') {
+    return null;
+  }
+
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
 }
 
 function firstImage(product) {

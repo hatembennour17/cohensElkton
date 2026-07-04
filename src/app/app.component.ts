@@ -411,10 +411,14 @@ export class AppComponent implements OnInit {
       return true;
     });
 
-    const subcategoryProducts = this.activeSubcategorySlug
-      ? uniqueProducts.filter((product) => this.productMatchesSubcategory(product, this.activeSubcategorySlug))
+    const searchProducts = this.searchQuery
+      ? uniqueProducts.filter((product) => this.productMatchesSearch(product, this.searchQuery))
       : uniqueProducts;
-    const filteredProducts = this.activeSubcategorySlug && subcategoryProducts.length ? subcategoryProducts : uniqueProducts;
+    const productsForSubcategory = this.searchQuery ? searchProducts : uniqueProducts;
+    const subcategoryProducts = this.activeSubcategorySlug
+      ? productsForSubcategory.filter((product) => this.productMatchesSubcategory(product, this.activeSubcategorySlug))
+      : productsForSubcategory;
+    const filteredProducts = this.activeSubcategorySlug && !this.searchQuery && !subcategoryProducts.length ? uniqueProducts : subcategoryProducts;
 
     return this.sortProducts(filteredProducts);
   }
@@ -781,7 +785,9 @@ export class AppComponent implements OnInit {
 
       if (!response.ok) {
         this.catalogLoading = false;
-        this.catalogMessage = 'Showing starter Elkton products until the Ashley API is configured.';
+        this.catalogMessage = this.searchQuery
+          ? 'Showing matching starter products while Ashley search is unavailable.'
+          : 'Showing starter Elkton products until the Ashley API is configured.';
         return;
       }
 
@@ -791,7 +797,9 @@ export class AppComponent implements OnInit {
 
       if (!usableProducts.length) {
         this.catalogLoading = false;
-        this.catalogMessage = 'Showing starter Elkton products until the Ashley API is configured.';
+        this.catalogMessage = this.searchQuery
+          ? 'No Ashley matches returned. Showing matching starter products when available.'
+          : 'Showing starter Elkton products until the Ashley API is configured.';
         return;
       }
 
@@ -800,7 +808,9 @@ export class AppComponent implements OnInit {
       this.diningTiles = usableProducts.slice(4, 8).length ? usableProducts.slice(4, 8) : usableProducts.slice(0, 4);
       this.catalogMessage = 'Showing live Ashley catalog products for the Elkton site.';
     } catch {
-      this.catalogMessage = 'Showing starter Elkton products until the Ashley API is configured.';
+      this.catalogMessage = this.searchQuery
+        ? 'Showing matching starter products while Ashley search is unavailable.'
+        : 'Showing starter Elkton products until the Ashley API is configured.';
     } finally {
       this.catalogLoading = false;
     }
@@ -836,6 +846,12 @@ export class AppComponent implements OnInit {
     const keywords = keywordsBySubcategory[subcategory] || subcategory.split('-');
     const searchableText = `${product.name} ${product.sku} ${product.kicker || ''}`.toLowerCase();
     return keywords.some((keyword) => searchableText.includes(keyword));
+  }
+
+  private productMatchesSearch(product: Product, searchQuery: string) {
+    const words = searchQuery.toLowerCase().split(/\s+/).filter(Boolean);
+    const searchableText = `${product.name} ${product.sku} ${product.kicker || ''}`.toLowerCase();
+    return words.every((word) => searchableText.includes(word));
   }
 
   private sortProducts(products: Product[]) {

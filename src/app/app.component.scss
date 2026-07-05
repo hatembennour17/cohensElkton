@@ -1228,6 +1228,138 @@ h3 {
   line-height: 1.5;
 }
 
+.finance-page {
+  padding: 42px 0 64px;
+  background: #fff;
+}
+
+.finance-page > h1 {
+  margin-bottom: 28px;
+  color: #111;
+  font-size: 30px;
+}
+
+.finance-content {
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr);
+  gap: 34px;
+  align-items: start;
+}
+
+.finance-sidebar {
+  display: grid;
+  gap: 32px;
+}
+
+.finance-sidebar section {
+  display: grid;
+  gap: 10px;
+}
+
+.finance-sidebar h2 {
+  margin-bottom: 8px;
+  color: #111;
+  font-size: 20px;
+}
+
+.finance-sidebar a {
+  color: #333;
+  line-height: 1.45;
+}
+
+.finance-sidebar a:hover,
+.finance-contact,
+.apply-link {
+  color: #b42024;
+  text-decoration: underline;
+}
+
+.finance-main {
+  display: grid;
+  gap: 28px;
+}
+
+.finance-section,
+.finance-article {
+  display: grid;
+  gap: 18px;
+}
+
+.finance-section h2,
+.finance-article h2 {
+  margin-bottom: 0;
+  color: #111;
+  font-size: 24px;
+}
+
+.finance-section hr {
+  width: 100%;
+  border: 0;
+  border-top: 1px solid #d8d8d8;
+}
+
+.finance-contact {
+  width: fit-content;
+  font-weight: 700;
+}
+
+.finance-logo-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.finance-logo {
+  min-height: 86px;
+  display: grid;
+  place-items: center;
+  gap: 5px;
+  border: 1px solid #d6d6d6;
+  padding: 18px;
+  color: #111;
+  background: #f8f8f8;
+  text-align: center;
+}
+
+.finance-logo strong {
+  font-size: 24px;
+  line-height: 1.15;
+}
+
+.finance-logo span {
+  color: #555;
+  font-size: 13px;
+}
+
+.finance-logo--wells strong {
+  color: #b42024;
+}
+
+.finance-logo--aff strong,
+.finance-logo--acima strong,
+.finance-logo--progressive strong,
+.finance-logo--snap strong,
+.finance-logo--mp strong {
+  color: #333;
+}
+
+.finance-provider {
+  display: grid;
+  gap: 10px;
+}
+
+.finance-provider p,
+.finance-article p {
+  color: #333;
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.apply-link {
+  width: fit-content;
+  font-weight: 700;
+}
+
 .delivery-hero {
   background: #1d1d1d;
 }
@@ -1473,6 +1605,7 @@ h3 {
   .feature-layout,
   .checkout-grid,
   .finance-grid,
+  .finance-content,
   .delivery-page,
   .footer-main,
   .catalog-grid,
@@ -1539,6 +1672,8 @@ h3 {
   .admin-import,
   .checkout-grid,
   .finance-grid,
+  .finance-content,
+  .finance-logo-row,
   .delivery-page,
   .footer-main,
   .catalog-grid,

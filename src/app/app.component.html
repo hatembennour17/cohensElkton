@@ -296,84 +296,119 @@
         </aside>
       </section>
     } @else if (isFinancingPage) {
-      <section class="checkout-hero finance-hero">
-        <div class="wrap checkout-hero__inner">
-          <p class="eyebrow">Elkton financing</p>
-          <h1>Finance your furniture through Cohen's Furniture in Elkton.</h1>
-          <p>
-            Financing requests from this page are prepared for the Elkton showroom, using the Elkton location and reference details.
-          </p>
+      <section class="wrap finance-page">
+        <h1>Financing & Leasing Options</h1>
+
+        <div class="finance-content">
+          <aside class="finance-sidebar">
+            <section>
+              <h2>Our Company</h2>
+              <a [href]="links.financing">Financing & Leasing Options</a>
+              <a href="/testimonials">Testimonials</a>
+              <a href="/buying-guide">Furniture Buying Guide</a>
+              <a [href]="links.contact">Contact Us</a>
+              <a [href]="links.delivery">Store Policy</a>
+            </section>
+
+            <section>
+              <h2>Shopping Links</h2>
+              <a href="/order-status">Order Status</a>
+              <a [href]="links.login">Sign In</a>
+              <a [href]="links.wishlist">Wishlist</a>
+            </section>
+          </aside>
+
+          <article class="finance-main">
+            <section class="finance-section">
+              <h2>Financing Options</h2>
+              <hr />
+              <a class="finance-contact" [href]="location.phoneHref">Contact store for details!</a>
+
+              <div class="finance-logo finance-logo--wells">
+                <strong>Wells Fargo</strong>
+                <span>Home furnishings credit card options</span>
+              </div>
+
+              <div class="finance-logo-row">
+                <div class="finance-logo"><strong>Synchrony</strong></div>
+                <div class="finance-logo"><strong>EasyPay</strong></div>
+                <div class="finance-logo"><strong>Store Credit</strong></div>
+              </div>
+            </section>
+
+            <section class="finance-section">
+              <h2>Leasing Options</h2>
+              <hr />
+
+              <div class="finance-provider">
+                <div class="finance-logo finance-logo--aff">
+                  <strong>American First Finance</strong>
+                </div>
+                <a class="apply-link" href="https://americanfirstfinance.com/" target="_blank" rel="noopener">Click Here to Apply for AFF!</a>
+              </div>
+
+              <div class="finance-provider">
+                <div class="finance-logo finance-logo--acima">
+                  <strong>Acima</strong>
+                </div>
+                <a class="apply-link" href="https://ams.acima.com/" target="_blank" rel="noopener">Click Here to Apply for Acima!</a>
+              </div>
+
+              <div class="finance-provider">
+                <div class="finance-logo finance-logo--progressive">
+                  <strong>Progressive Leasing</strong>
+                </div>
+                <p>No credit needed. Approval is not guaranteed, and lease ownership costs more than the cash price. Early purchase options may be available.</p>
+                <a class="apply-link" [href]="links.contact">Contact Us for Progressive Details</a>
+              </div>
+
+              <div class="finance-provider">
+                <div class="finance-logo finance-logo--snap">
+                  <strong>Snap Finance</strong>
+                </div>
+                <a class="apply-link" [href]="links.contact">Contact Us for Snap Details</a>
+              </div>
+
+              <div class="finance-provider">
+                <div class="finance-logo finance-logo--mp">
+                  <strong>Merchants Preferred</strong>
+                </div>
+                <a class="apply-link" [href]="links.contact">Contact Us for Merchants Preferred Details</a>
+              </div>
+            </section>
+
+            <section class="finance-article">
+              <h2>Fantastic Furniture Financing for a New Start AND Great Products!</h2>
+              <p>
+                Cohen's Furniture offers financing and leasing choices designed to make affordable furniture purchases easier for Elkton shoppers. The local team can help explain the available application options and next steps.
+              </p>
+              <p>
+                Many decisions can be made quickly, and approved shoppers may be able to arrange payments that fit their budget while bringing home living room, bedroom, dining, or mattress purchases sooner.
+              </p>
+
+              <h2>Credit Furniture Financing Made Simple</h2>
+              <p>
+                Store credit and financing plans can help customers manage larger furniture purchases with scheduled payments. Some programs may offer revolving credit or promotional payment options, depending on approval and provider terms.
+              </p>
+              <p>
+                The Elkton store can review current providers and help shoppers understand which option may fit their purchase amount and approval needs.
+              </p>
+
+              <h2>No Hassle, No-Credit Furniture Financing and Leasing</h2>
+              <p>
+                Leasing providers may help customers who are building credit or recovering from past credit challenges. Programs vary by provider, and approval, payments, fees, and ownership terms should be reviewed before signing.
+              </p>
+              <p>
+                Start with the Elkton showroom for current details, available providers, and application guidance.
+              </p>
+
+              <h2>Let's get started on financing YOUR new furniture to make your dreams for your home come true.</h2>
+              <p>
+                Call or visit Cohen's Furniture in Elkton to review financing and leasing options for your next room.
+              </p>
+            </section>
+          </article>
         </div>
-      </section>
-
-      <section class="wrap checkout-grid finance-grid">
-        <form class="checkout-form finance-form" aria-label="Elkton financing request form" (submit)="submitFinancingRequest($event)">
-          <fieldset>
-            <legend>Financing request</legend>
-            <div class="form-grid">
-              <label>First Name *<input type="text" name="firstName" autocomplete="given-name" /></label>
-              <label>Last Name *<input type="text" name="lastName" autocomplete="family-name" /></label>
-              <label>Email *<input type="email" name="email" autocomplete="email" /></label>
-              <label>Phone *<input type="tel" name="phone" autocomplete="tel" /></label>
-            </div>
-            <div class="form-grid">
-              <label>Estimated Purchase Amount<input type="text" name="purchaseAmount" placeholder="$" /></label>
-              <label>Preferred Room or Items<input type="text" name="items" placeholder="Living room, bedroom, mattress" /></label>
-            </div>
-            <label>
-              Notes
-              <textarea name="notes" rows="5" placeholder="Tell the Elkton team what you are shopping for"></textarea>
-            </label>
-          </fieldset>
-
-          <fieldset>
-            <legend>Store reference</legend>
-            <label class="store-lock">
-              <input type="radio" name="financeLocation" value="elkton" checked />
-              <span>
-                <strong>{{ location.name }}</strong>
-                <em>{{ location.street }}, {{ location.cityLine }}</em>
-                <small>Financing page locked to the Elkton business location</small>
-              </span>
-            </label>
-          </fieldset>
-
-          <button class="btn btn--primary" type="submit">Submit Financing Request</button>
-          @if (financingMessage) {
-            <p class="form-message">{{ financingMessage }}</p>
-          }
-        </form>
-
-        <aside class="order-card finance-card">
-          <p class="eyebrow">Elkton finance codes</p>
-          <h2>{{ location.shortName }} showroom</h2>
-          <p>{{ location.street }}<br />{{ location.cityLine }}</p>
-          <a [href]="location.phoneHref">{{ location.phone }}</a>
-
-          <dl class="finance-reference">
-            <div>
-              <dt>Location ID</dt>
-              <dd>{{ financeReference.locationId }}</dd>
-            </div>
-            <div>
-              <dt>Reference Code</dt>
-              <dd>{{ financeReference.referenceCode }}</dd>
-            </div>
-            <div>
-              <dt>Dealer Code</dt>
-              <dd>{{ financeReference.dealerCode }}</dd>
-            </div>
-          </dl>
-
-          <div class="finance-steps">
-            <strong>Next steps</strong>
-            <ol>
-              <li>Confirm the Elkton finance provider and location codes.</li>
-              <li>Connect this form to the Elkton inbox or provider application link.</li>
-              <li>Keep checkout and finance traffic assigned to the Elkton store.</li>
-            </ol>
-          </div>
-        </aside>
       </section>
     } @else if (isAccountPage || isWishlistPage || isContactPage) {
       <section class="checkout-hero">

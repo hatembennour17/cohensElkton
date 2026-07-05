@@ -594,13 +594,13 @@
                   }
                 </div>
                 <div class="catalog-actions" aria-label="Product actions">
-                  <button type="button" title="Add to wishlist" aria-label="Add {{ product.name }} to wishlist">
-                    <span aria-hidden="true">♡</span>
+                  <button type="button" title="Add to wishlist" [attr.aria-label]="'Add ' + product.name + ' to wishlist'">
+                    <span aria-hidden="true">&#9825;</span>
                   </button>
-                  <button type="button" title="Add to cart" aria-label="Add {{ product.name }} to cart" (click)="addToCart(product)">
-                    <span aria-hidden="true">🛒</span>
+                  <button type="button" title="Add to cart" [attr.aria-label]="'Add ' + product.name + ' to cart'" (click)="addToCart(product)">
+                    <span aria-hidden="true">&#128722;</span>
                   </button>
-                  <a [href]="product.href" title="More information" aria-label="More information about {{ product.name }}">
+                  <a [href]="product.href" title="More information" [attr.aria-label]="'More information about ' + product.name">
                     <span aria-hidden="true">?</span>
                   </a>
                 </div>

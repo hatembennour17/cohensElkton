@@ -847,15 +847,51 @@ h3 {
 .catalog-card {
   display: grid;
   grid-template-rows: auto 1fr;
-  border: 1px solid #e1e1e1;
+  border: 0;
   background: #fff;
 }
 
-.catalog-card img {
-  width: 100%;
+.catalog-card__media {
+  position: relative;
+  display: block;
+  overflow: hidden;
   aspect-ratio: 1.22;
-  object-fit: cover;
-  background: #eee;
+  background: #e9e9e9;
+}
+
+.catalog-card__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #e9e9e9;
+  transition: transform 180ms ease;
+}
+
+.quick-view {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: grid;
+  min-height: 44px;
+  place-items: center;
+  color: #fff;
+  background: #cf6d73;
+  font-weight: 800;
+  text-decoration: none;
+  text-transform: uppercase;
+  transform: translateY(100%);
+  transition: transform 180ms ease;
+}
+
+.catalog-card:hover .quick-view,
+.catalog-card:focus-within .quick-view {
+  transform: translateY(0);
+}
+
+.catalog-card:hover .catalog-card__media img,
+.catalog-card:focus-within .catalog-card__media img {
+  transform: scale(1.03);
 }
 
 .product-loader {
@@ -917,13 +953,13 @@ h3 {
   cursor: default;
 }
 
-.catalog-card div {
+.catalog-card__body {
   display: grid;
-  gap: 8px;
-  padding: 16px;
+  gap: 11px;
+  padding: 20px 14px 4px;
 }
 
-.catalog-card span {
+.catalog-card__body > span {
   color: #b42024;
   font-size: 12px;
   font-weight: 900;
@@ -931,22 +967,20 @@ h3 {
 }
 
 .catalog-card h3 {
-  margin-bottom: 0;
-}
-
-.catalog-card p {
-  margin-bottom: 0;
-  color: #666;
-  font-weight: 700;
+  margin: 0;
+  color: #202020;
+  font-size: 20px;
+  line-height: 1.15;
+  text-transform: uppercase;
 }
 
 .catalog-card strong {
-  font-size: 18px;
+  font-size: 20px;
 }
 
 .price-compare {
   display: grid;
-  gap: 3px;
+  gap: 4px;
 }
 
 .price-compare strong {
@@ -963,15 +997,37 @@ h3 {
   line-height: 1.2;
 }
 
-.catalog-card button {
-  min-height: 38px;
-  border: 0;
-  padding: 0 14px;
-  color: #fff;
-  background: #b42024;
+.catalog-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.catalog-actions button,
+.catalog-actions a {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+  border: 1px solid #c52229;
+  border-radius: 50%;
+  color: #111;
+  background: #fff;
   font: inherit;
+  font-size: 22px;
   font-weight: 900;
+  line-height: 1;
+  text-decoration: none;
   cursor: pointer;
+}
+
+.catalog-actions button:hover,
+.catalog-actions a:hover,
+.catalog-actions button:focus-visible,
+.catalog-actions a:focus-visible {
+  color: #fff;
+  background: #c52229;
+  outline: none;
 }
 
 .checkout-hero {

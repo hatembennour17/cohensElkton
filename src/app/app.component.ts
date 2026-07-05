@@ -287,6 +287,7 @@ export class AppComponent implements OnInit {
   adminMessage = '';
   adminDragIndex = -1;
   orderMessage = '';
+  orderSubmitting = false;
   financingMessage = '';
   catalogLoading = true;
   catalogMessage = 'Loading Ashley catalog products for the Elkton site.';
@@ -501,7 +502,7 @@ export class AppComponent implements OnInit {
     this.saveCart();
   }
 
-  submitOrder(event: Event) {
+  async submitOrder(event: Event) {
     event.preventDefault();
 
     if (!this.cartItems.length) {
@@ -509,7 +510,56 @@ export class AppComponent implements OnInit {
       return;
     }
 
-    this.orderMessage = `Order request ready for ${this.location.name}. The next step is connecting this form to email, SMS, or a backend order inbox.`;
+    const form = event.currentTarget as HTMLFormElement;
+    const formData = new FormData(form);
+    const submission = new URLSearchParams();
+
+    submission.set('form-name', 'elkton-order-request');
+    submission.set('firstName', this.formValue(formData, 'firstName'));
+    submission.set('lastName', this.formValue(formData, 'lastName'));
+    submission.set('email', this.formValue(formData, 'email'));
+    submission.set('phone', this.formValue(formData, 'phone'));
+    submission.set('address', this.formValue(formData, 'address'));
+    submission.set('city', this.formValue(formData, 'city'));
+    submission.set('state', this.formValue(formData, 'state'));
+    submission.set('zip', this.formValue(formData, 'zip'));
+    submission.set('fulfillment', this.formValue(formData, 'fulfillment'));
+    submission.set('storeLocation', `${this.location.name} - ${this.location.street}, ${this.location.cityLine}`);
+    submission.set('notificationEmail', 'hatembennour77@gmail.com');
+    submission.set('subtotal', this.formatPrice(this.cartSubtotal));
+    submission.set(
+      'cartItems',
+      this.cartItems
+        .map((item) => `${item.quantity} x ${item.name} (${item.sku}) at ${this.formatPrice(item.unitPrice)} = ${this.formatPrice(item.unitPrice * item.quantity)}`)
+        .join('\n')
+    );
+
+    this.orderSubmitting = true;
+    this.orderMessage = 'Submitting your Elkton order request...';
+
+    try {
+      const response = await fetch('/', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/x-www-form-urlencoded'
+        },
+        body: submission.toString()
+      });
+
+      if (!response.ok) {
+        throw new Error(`Netlify Forms returned ${response.status}`);
+      }
+
+      this.orderMessage = `Order request sent to the Elkton checkout inbox. Netlify form notifications should be set to hatembennour77@gmail.com.`;
+    } catch {
+      this.orderMessage = `We could not submit the order request online. Please call ${this.location.phone} and keep the cart open.`;
+    } finally {
+      this.orderSubmitting = false;
+    }
+  }
+
+  private formValue(formData: FormData, field: string) {
+    return String(formData.get(field) || '').trim();
   }
 
   submitFinancingRequest(event: Event) {

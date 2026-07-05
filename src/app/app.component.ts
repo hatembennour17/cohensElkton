@@ -550,9 +550,10 @@ export class AppComponent implements OnInit {
         throw new Error(`Netlify Forms returned ${response.status}`);
       }
 
-      this.orderMessage = `Order request sent to the Elkton checkout inbox. Netlify form notifications should be set to hatembennour77@gmail.com.`;
+      this.clearCart();
+      this.orderMessage = 'Thank you. Your Elkton order request has been received. A team member will contact you shortly to confirm availability, fulfillment, and final payment details.';
     } catch {
-      this.orderMessage = `We could not submit the order request online. Please call ${this.location.phone} and keep the cart open.`;
+      this.orderMessage = `We could not submit your order request online. Please call ${this.location.phone} and our Elkton team will help complete it.`;
     } finally {
       this.orderSubmitting = false;
     }

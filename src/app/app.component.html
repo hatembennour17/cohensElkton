@@ -578,18 +578,32 @@
           <div class="catalog-grid">
             @for (product of categoryProducts; track product.sku) {
             <article class="catalog-card">
-              <img [src]="product.image" [alt]="product.name" (error)="useImageFallback($event, product.name)" />
-              <div>
-                <span>{{ product.kicker || product.sku }}</span>
+              <div class="catalog-card__media">
+                <img [src]="product.image" [alt]="product.name" (error)="useImageFallback($event, product.name)" />
+                <a class="quick-view" [href]="product.href">Quick View</a>
+              </div>
+              <div class="catalog-card__body">
+                @if (product.kicker) {
+                  <span>{{ product.kicker }}</span>
+                }
                 <h3>{{ product.name }}</h3>
-                <p>{{ product.sku }}</p>
                 <div class="price-compare">
-                  <strong>Our price {{ formatPrice(product.unitPrice) }}</strong>
+                  <strong>{{ formatPrice(product.unitPrice) }}</strong>
                   @if (product.ashleyPrice) {
                     <small>Ashley {{ formatPrice(product.ashleyPrice) }}</small>
                   }
                 </div>
-                <button type="button" (click)="addToCart(product)">Add to Cart</button>
+                <div class="catalog-actions" aria-label="Product actions">
+                  <button type="button" title="Add to wishlist" aria-label="Add {{ product.name }} to wishlist">
+                    <span aria-hidden="true">♡</span>
+                  </button>
+                  <button type="button" title="Add to cart" aria-label="Add {{ product.name }} to cart" (click)="addToCart(product)">
+                    <span aria-hidden="true">🛒</span>
+                  </button>
+                  <a [href]="product.href" title="More information" aria-label="More information about {{ product.name }}">
+                    <span aria-hidden="true">?</span>
+                  </a>
+                </div>
               </div>
             </article>
             } @empty {

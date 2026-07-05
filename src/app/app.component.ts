@@ -966,18 +966,19 @@ export class AppComponent implements OnInit {
     // "-sets" subcategories are genuine multi-piece combo products (e.g. "Kanwyn Queen Panel
     // Bed, Dresser and Mirror"), not standalone pieces. A product only counts as a "set" if its
     // name mentions a primary piece AND at least one distinct companion piece.
-    const multiPieceRules: Record<string, { primary: string[]; secondary: string[] }> = {
-      'bedroom-sets': { primary: ['bed'], secondary: ['dresser', 'mirror', 'chest', 'nightstand', 'storage bench'] },
-      'dining-room-sets': { primary: ['table'], secondary: ['chair', 'bench', 'server', 'buffet'] },
-      'living-room-sets': { primary: ['sofa', 'sectional'], secondary: ['loveseat', 'chair', 'ottoman'] },
-      'sofa-sets': { primary: ['sofa'], secondary: ['loveseat'] }
+    const multiPieceRules: Record<string, { primary: string[]; secondary: string[]; setTerms?: string[] }> = {
+      'bedroom-sets': { primary: ['bed'], secondary: ['dresser', 'mirror', 'chest', 'nightstand', 'storage bench'], setTerms: ['set', 'package', 'piece'] },
+      'dining-room-sets': { primary: ['table'], secondary: ['chair', 'bench', 'server', 'buffet'], setTerms: ['set', 'package', 'piece'] },
+      'living-room-sets': { primary: ['sofa', 'sectional', 'reclining sofa'], secondary: ['loveseat', 'chair', 'recliner', 'ottoman'], setTerms: ['set', 'package', 'piece'] },
+      'sofa-sets': { primary: ['sofa'], secondary: ['loveseat', 'chair', 'recliner'], setTerms: ['set', 'package', 'piece'] }
     };
 
     const multiPieceRule = multiPieceRules[subcategory];
     if (multiPieceRule) {
       const hasPrimaryPiece = multiPieceRule.primary.some((term) => this.textContainsTerm(searchableText, term));
       const hasCompanionPiece = multiPieceRule.secondary.some((term) => this.textContainsTerm(searchableText, term));
-      return hasPrimaryPiece && hasCompanionPiece;
+      const hasSetLanguage = (multiPieceRule.setTerms || []).some((term) => this.textContainsTerm(searchableText, term));
+      return hasPrimaryPiece && (hasCompanionPiece || hasSetLanguage);
     }
 
     const keywordsBySubcategory: Record<string, string[]> = {
@@ -1002,6 +1003,25 @@ export class AppComponent implements OnInit {
       queen: ['queen'],
       king: ['king']
     };
+
+    const exclusionsBySubcategory: Record<string, string[]> = {
+      beds: ['mirror', 'dresser', 'chest', 'nightstand', 'vanity', 'bench', 'foundation', 'mattress'],
+      dressers: ['mirror only', 'mirror'],
+      chests: ['mirror', 'dresser'],
+      nightstands: ['mirror', 'dresser', 'chest'],
+      sofas: ['loveseat', 'sectional', 'recliner', 'sleeper'],
+      loveseats: ['sofa', 'sectional'],
+      recliners: ['sofa', 'loveseat', 'sectional'],
+      'dining-tables': ['chair', 'bench', 'stool'],
+      'dining-chairs': ['table', 'bench', 'stool'],
+      'bar-stools': ['table', 'chair set']
+    };
+
+    const exclusions = exclusionsBySubcategory[subcategory] || [];
+    if (exclusions.some((keyword) => this.textContainsTerm(searchableText, keyword))) {
+      return false;
+    }
+
     const keywords = keywordsBySubcategory[subcategory] || subcategory.split('-');
     return keywords.some((keyword) => this.textContainsTerm(searchableText, keyword));
   }

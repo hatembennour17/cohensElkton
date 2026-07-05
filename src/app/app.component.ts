@@ -502,9 +502,7 @@ export class AppComponent implements OnInit {
     const subcategoryProducts = this.activeSubcategorySlug
       ? productsForSubcategory.filter((product) => this.productMatchesSubcategory(product, this.activeSubcategorySlug))
       : productsForSubcategory;
-    const filteredProducts = this.activeSubcategorySlug && !this.searchQuery && !subcategoryProducts.length ? uniqueProducts : subcategoryProducts;
-
-    return this.sortProducts(filteredProducts);
+    return this.sortProducts(subcategoryProducts);
   }
 
   get selectedAdminProducts() {
@@ -964,8 +962,8 @@ export class AppComponent implements OnInit {
 
   private productMatchesSubcategory(product: Product, subcategory: string) {
     const keywordsBySubcategory: Record<string, string[]> = {
-      'living-room-sets': ['living room set', 'sofa set', 'sectional set'],
-      'sofa-sets': ['sofa set'],
+      'living-room-sets': ['living room set', 'sofa set', 'sectional set', 'sofa', 'sectional', 'loveseat'],
+      'sofa-sets': ['sofa set', 'sofa', 'loveseat'],
       sofas: ['sofa'],
       loveseats: ['loveseat'],
       sectionals: ['sectional'],
@@ -976,11 +974,11 @@ export class AppComponent implements OnInit {
       'tv-stands': ['tv stand', 'media', 'entertainment'],
       'living-room-storage': ['storage', 'cabinet', 'console'],
       'home-theater': ['home theater', 'power seating'],
-      'bedroom-sets': ['bedroom set'],
+      'bedroom-sets': ['bedroom set', 'dresser', 'mirror', 'chest of drawers', 'bed'],
       beds: ['bed'],
       dressers: ['dresser'],
       nightstands: ['nightstand'],
-      'dining-room-sets': ['dining set', 'dining room set'],
+      'dining-room-sets': ['dining set', 'dining room set', 'dining table', 'dining chair', 'server', 'buffet'],
       'dining-tables': ['dining table', 'table'],
       'dining-chairs': ['dining chair', 'chair'],
       'bar-stools': ['bar stool', 'barstool'],

@@ -207,6 +207,18 @@ export class AppComponent implements OnInit {
     { sku: 'BAR-STL-01', name: 'Bar Stools', href: '/c/dining-room?sub=bar-stools', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/bar-stools-front.jpg', unitPrice: 129.99 }
   ];
 
+  searchFallbackProducts: Product[] = [
+    {
+      kicker: 'Ashley',
+      name: 'Lawrence 3-Piece Upholstered Reclining Sofa Set Charcoal',
+      sku: '603504-S3',
+      href: '/search?q=603504-S3',
+      image: 'https://cdn.rencdn.com/Cohensfurniture/product/603504-S3/large/603504-S3.jpg',
+      unitPrice: 2579.99,
+      ashleyPrice: 2579.99
+    }
+  ];
+
   livingDeals: Product[] = [
     {
       kicker: 'Room-ready comfort',
@@ -396,7 +408,9 @@ export class AppComponent implements OnInit {
       return [];
     }
 
-    const products = this.catalogProducts.length ? this.catalogProducts : [...this.livingDeals, ...this.diningTiles];
+    const products = this.catalogProducts.length
+      ? this.catalogProducts
+      : [...this.searchFallbackProducts, ...this.livingDeals, ...this.diningTiles];
     const seenSkus = new Set<string>();
 
     const uniqueProducts = products.filter((product) => {

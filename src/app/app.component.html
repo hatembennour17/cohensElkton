@@ -545,7 +545,7 @@
           <div class="catalog-grid">
             @for (product of categoryProducts; track product.sku) {
             <article class="catalog-card">
-              <img [src]="product.image" [alt]="product.name" />
+              <img [src]="product.image" [alt]="product.name" (error)="useImageFallback($event, product.name)" />
               <div>
                 <span>{{ product.kicker || product.sku }}</span>
                 <h3>{{ product.name }}</h3>

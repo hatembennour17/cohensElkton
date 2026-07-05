@@ -241,7 +241,7 @@
       </section>
 
       <section class="wrap checkout-grid">
-        <form class="checkout-form" name="elkton-order-request" data-netlify="true" aria-label="Elkton checkout form" (submit)="submitOrder($event)">
+        <form class="checkout-form" name="elkton-order-request" method="POST" data-netlify="true" aria-label="Elkton checkout form" (submit)="submitOrder($event)">
           <input type="hidden" name="form-name" value="elkton-order-request" />
           <input class="sr-only" type="text" name="bot-field" tabindex="-1" autocomplete="off" />
           <fieldset>

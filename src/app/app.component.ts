@@ -528,9 +528,11 @@ export class AppComponent implements OnInit {
   }
 
   changeCatalogSort(value: string) {
+    this.catalogSort = value;
+
     const nextUrl = new URL(globalThis.location?.href || '/', globalThis.location?.origin || 'https://cohensfurnituremaryland.com');
     nextUrl.searchParams.set('sort', value);
-    globalThis.location.href = `${nextUrl.pathname}${nextUrl.search}`;
+    globalThis.history?.replaceState(null, '', `${nextUrl.pathname}${nextUrl.search}`);
   }
 
   useImageFallback(event: Event, label: string) {

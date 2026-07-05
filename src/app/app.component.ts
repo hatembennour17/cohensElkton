@@ -961,9 +961,26 @@ export class AppComponent implements OnInit {
   }
 
   private productMatchesSubcategory(product: Product, subcategory: string) {
+    const searchableText = `${product.name} ${product.sku} ${product.kicker || ''}`.toLowerCase();
+
+    // "-sets" subcategories are genuine multi-piece combo products (e.g. "Kanwyn Queen Panel
+    // Bed, Dresser and Mirror"), not standalone pieces. A product only counts as a "set" if its
+    // name mentions a primary piece AND at least one distinct companion piece.
+    const multiPieceRules: Record<string, { primary: string[]; secondary: string[] }> = {
+      'bedroom-sets': { primary: ['bed'], secondary: ['dresser', 'mirror', 'chest', 'nightstand', 'storage bench'] },
+      'dining-room-sets': { primary: ['table'], secondary: ['chair', 'bench', 'server', 'buffet'] },
+      'living-room-sets': { primary: ['sofa', 'sectional'], secondary: ['loveseat', 'chair', 'ottoman'] },
+      'sofa-sets': { primary: ['sofa'], secondary: ['loveseat'] }
+    };
+
+    const multiPieceRule = multiPieceRules[subcategory];
+    if (multiPieceRule) {
+      const hasPrimaryPiece = multiPieceRule.primary.some((term) => searchableText.includes(term));
+      const hasCompanionPiece = multiPieceRule.secondary.some((term) => searchableText.includes(term));
+      return hasPrimaryPiece && hasCompanionPiece;
+    }
+
     const keywordsBySubcategory: Record<string, string[]> = {
-      'living-room-sets': ['living room set', 'sofa set', 'sectional set', 'sofa', 'sectional', 'loveseat'],
-      'sofa-sets': ['sofa set', 'sofa', 'loveseat'],
       sofas: ['sofa'],
       loveseats: ['loveseat'],
       sectionals: ['sectional'],
@@ -974,11 +991,9 @@ export class AppComponent implements OnInit {
       'tv-stands': ['tv stand', 'media', 'entertainment'],
       'living-room-storage': ['storage', 'cabinet', 'console'],
       'home-theater': ['home theater', 'power seating'],
-      'bedroom-sets': ['bedroom set', 'dresser', 'mirror', 'chest of drawers', 'bed'],
       beds: ['bed'],
       dressers: ['dresser'],
       nightstands: ['nightstand'],
-      'dining-room-sets': ['dining set', 'dining room set', 'dining table', 'dining chair', 'server', 'buffet'],
       'dining-tables': ['dining table', 'table'],
       'dining-chairs': ['dining chair', 'chair'],
       'bar-stools': ['bar stool', 'barstool'],
@@ -988,7 +1003,6 @@ export class AppComponent implements OnInit {
       king: ['king']
     };
     const keywords = keywordsBySubcategory[subcategory] || subcategory.split('-');
-    const searchableText = `${product.name} ${product.sku} ${product.kicker || ''}`.toLowerCase();
     return keywords.some((keyword) => searchableText.includes(keyword));
   }
 

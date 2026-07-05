@@ -975,8 +975,8 @@ export class AppComponent implements OnInit {
 
     const multiPieceRule = multiPieceRules[subcategory];
     if (multiPieceRule) {
-      const hasPrimaryPiece = multiPieceRule.primary.some((term) => searchableText.includes(term));
-      const hasCompanionPiece = multiPieceRule.secondary.some((term) => searchableText.includes(term));
+      const hasPrimaryPiece = multiPieceRule.primary.some((term) => this.textContainsTerm(searchableText, term));
+      const hasCompanionPiece = multiPieceRule.secondary.some((term) => this.textContainsTerm(searchableText, term));
       return hasPrimaryPiece && hasCompanionPiece;
     }
 
@@ -1003,7 +1003,12 @@ export class AppComponent implements OnInit {
       king: ['king']
     };
     const keywords = keywordsBySubcategory[subcategory] || subcategory.split('-');
-    return keywords.some((keyword) => searchableText.includes(keyword));
+    return keywords.some((keyword) => this.textContainsTerm(searchableText, keyword));
+  }
+
+  private textContainsTerm(text: string, term: string) {
+    const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return new RegExp(`\\b${escapedTerm}\\b`).test(text);
   }
 
   private productMatchesSearch(product: Product, searchQuery: string) {

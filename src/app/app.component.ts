@@ -190,22 +190,85 @@ export class AppComponent implements OnInit {
       { label: 'Home Theater', href: '/c/living-room?sub=home-theater', image: 'https://cdn.rencdn.com/category/Home-Theater1104.jpg' }
     ],
     bedrooms: [
-      { label: 'Bedroom Sets', href: '/c/bedrooms?sub=bedroom-sets', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/bedroom-sets.jpg' },
-      { label: 'Beds', href: '/c/bedrooms?sub=beds', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/beds.jpg' },
-      { label: 'Dressers', href: '/c/bedrooms?sub=dressers', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/dressers.jpg' },
-      { label: 'Nightstands', href: '/c/bedrooms?sub=nightstands', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/nightstands.jpg' }
+      { label: 'Bedroom Sets', href: '/c/bedrooms?sub=bedroom-sets', image: 'https://cdn.rencdn.com/category/Bedroom-Category_Bed-Set92.png' },
+      { label: 'Beds', href: '/c/bedrooms?sub=beds', image: 'https://rebuildassets.s3.amazonaws.com/renpim/uploads/images/Bedroom_B1a.jpg' },
+      { label: 'Headboards', href: '/c/bedrooms?sub=headboards', image: 'https://rebuildassets.s3.amazonaws.com/renpim/uploads/images/Bedroom_B1b.jpg' },
+      { label: 'Dressers', href: '/c/bedrooms?sub=dressers', image: 'https://rebuildassets.s3.amazonaws.com/renpim/uploads/images/Bedroom_B1f.jpg' },
+      { label: 'Mirrored Dressers', href: '/c/bedrooms?sub=mirrored-dressers', image: 'https://rebuildassets.s3.amazonaws.com/renpim/uploads/images/Bedroom_B1g.jpg' },
+      { label: 'Mirrors', href: '/c/bedrooms?sub=mirrors', image: 'https://www.cohensfurnituredirect.com/assets/uploads/images/Subcategory%20Images/Mirror%20-%20Landing%20Page%20-%20Category.jpg' },
+      { label: 'Chests', href: '/c/bedrooms?sub=chests', image: 'https://www.cohensfurnituredirect.com/assets/uploads/images/Subcategory%20Images/chests---Category.jpg' },
+      { label: 'Nightstands', href: '/c/bedrooms?sub=nightstands', image: 'https://rebuildassets.s3.amazonaws.com/renpim/uploads/images/Bedroom_B1e.jpg' },
+      { label: 'Media Chests', href: '/c/bedrooms?sub=media-chests', image: 'https://cdn.rencdn.com/category/Bedroom-Media-Chest406.jpg' },
+      { label: 'Armoires', href: '/c/bedrooms?sub=armoires', image: 'https://cdn.rencdn.com/category/Bedroom-Armoires409.jpg' },
+      { label: 'Vanities', href: '/c/bedrooms?sub=vanities', image: 'https://rebuildassets.s3.amazonaws.com/renpim/uploads/images/Bedroom_B1k.jpg' },
+      { label: 'Bedroom Benches', href: '/c/bedrooms?sub=bedroom-benches', image: 'https://rebuildassets.s3.amazonaws.com/renpim/uploads/images/Bedroom_B1l.jpg' },
+      { label: 'Bedroom Chairs', href: '/c/bedrooms?sub=bedroom-chairs', image: 'https://www.cohensfurnituredirect.com/assets/uploads/images/Subcategory%20Images/Group%2082536.jpg' },
+      { label: 'Bedroom Storage', href: '/c/bedrooms?sub=bedroom-storage', image: 'https://www.cohensfurnituredirect.com/assets/uploads/images/Subcategory%20Images/Bedroom_B1j.jpg' },
+      { label: 'Lingerie Chests', href: '/c/bedrooms?sub=lingerie-chests', image: 'https://www.cohensfurnituredirect.com/assets/uploads/images/Subcategory%20Images/lingerie-chests.jpg' }
     ],
     'dining-room': [
-      { label: 'Dining Room Sets', href: '/c/dining-room?sub=dining-room-sets', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/dining-room-sets.jpg' },
-      { label: 'Dining Tables', href: '/c/dining-room?sub=dining-tables', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/dining-table.jpg' },
-      { label: 'Dining Chairs', href: '/c/dining-room?sub=dining-chairs', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/dining-chairs.jpg' },
-      { label: 'Bar Stools', href: '/c/dining-room?sub=bar-stools', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/bar-stools-front.jpg' }
+      { label: 'Dining Room Sets', href: '/c/dining-room?sub=dining-room-sets', image: 'https://rebuildassets.s3.amazonaws.com/renpim/uploads/images/Group%2082533(1).jpg' },
+      { label: 'Dining Tables', href: '/c/dining-room?sub=dining-tables', image: 'https://rebuildassets.s3.amazonaws.com/renpim/uploads/images/Furniture-Category-Dining-Table.png' },
+      { label: 'Dining Chairs', href: '/c/dining-room?sub=dining-chairs', image: 'https://rebuildassets.s3.amazonaws.com/renpim/uploads/images/Group%2082532(1).jpg' },
+      { label: 'Dining Benches', href: '/c/dining-room?sub=dining-benches', image: 'https://www.cohensfurnituredirect.com/assets/uploads/images/Subcategory%20Images/Group%2082535.jpg' },
+      { label: 'Bar Stools', href: '/c/dining-room?sub=bar-stools', image: 'https://rebuildassets.s3.amazonaws.com/renpim/uploads/images/Group%2082534(1).jpg' },
+      { label: 'Bar Furniture', href: '/c/dining-room?sub=bar-furniture', image: 'https://rebuildassets.s3.amazonaws.com/renpim/uploads/images/Furniture-Category-Dining-BarFurniture.png' },
+      { label: 'Dining Room Storage', href: '/c/dining-room?sub=dining-room-storage', image: 'https://rebuildassets.s3.amazonaws.com/renpim/uploads/images/Group%2082541(3).jpg' }
     ],
     mattresses: [
-      { label: 'Mattress Sets', href: '/c/mattresses?sub=mattress-sets', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/mattress-sets.jpg' },
-      { label: 'Foundations', href: '/c/mattresses?sub=foundations', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/foundations.jpg' },
-      { label: 'Queen', href: '/c/mattresses?sub=queen', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/queen-mattress.jpg' },
-      { label: 'King', href: '/c/mattresses?sub=king', image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/king-mattress.jpg' }
+      { label: 'Bedding', href: '/c/mattresses?sub=bedding', image: 'https://cdn.rencdn.com/category/Bedding_B1d10.jpg' },
+      { label: 'Mattress Sets', href: '/c/mattresses?sub=mattress-sets', image: 'https://cdn.rencdn.com/category/Category-Image-Base_Mattress-Sets956.png' },
+      { label: 'Mattress by Size', href: '/c/mattresses?sub=mattress-by-size', image: 'https://www.cohensfurnituredirect.com/assets/uploads/images/Subcategory%20Images/Mattress-Size-Updated.jpeg' },
+      { label: 'Mattress by Type', href: '/c/mattresses?sub=mattress-by-type', image: 'https://www.cohensfurnituredirect.com/assets/uploads/images/Subcategory%20Images/Mattress-Type-Updated.jpeg' }
+    ],
+    kids: [
+      { label: 'Kids Bedroom Sets', href: '/c/kids?sub=kids-bedroom-sets', image: 'https://cdn.rencdn.com/category/Kids-Bedroom-Set123.jpg' },
+      { label: 'Kids Beds', href: '/c/kids?sub=kids-beds', image: 'https://rebuildassets.s3.amazonaws.com/renpim/uploads/images/Group%2082606.jpg' },
+      { label: 'Bunk & Loft Beds', href: '/c/kids?sub=bunk-loft-beds', image: 'https://www.cohensfurnituredirect.com/assets/uploads/images/Subcategory%20Images/Group%2082605.jpg' },
+      { label: 'Daybeds', href: '/c/kids?sub=daybeds', image: 'https://www.cohensfurnituredirect.com/assets/uploads/images/Subcategory%20Images/Day%20Bed%20-%20Landing%20Page%20-%20Category.jpg' },
+      { label: 'Kids Headboards', href: '/c/kids?sub=kids-headboards', image: 'https://rebuildassets.s3.amazonaws.com/renpim/uploads/images/Category-Images/Group-82604.jpg' },
+      { label: 'Kids Mirrored Dressers', href: '/c/kids?sub=kids-mirrored-dressers', image: 'https://www.cohensfurnituredirect.com/assets/uploads/images/Subcategory%20Images/kids-mirrored-dressers.jpg' },
+      { label: 'Kids Chests', href: '/c/kids?sub=kids-chests', image: 'https://rebuildassets.s3.amazonaws.com/renpim/uploads/images/Group%2082603.jpg' },
+      { label: 'Kids Nightstands', href: '/c/kids?sub=kids-nightstands', image: 'https://rebuildassets.s3.amazonaws.com/renpim/uploads/images/Group%2082604.jpg' },
+      { label: 'Kids Desks', href: '/c/kids?sub=kids-desks', image: 'https://rebuildassets.s3.amazonaws.com/renpim/uploads/images/Category-Images/KidDesk.jpg' },
+      { label: 'Kids Storage', href: '/c/kids?sub=kids-storage', image: 'https://www.cohensfurnituredirect.com/assets/uploads/images/Subcategory%20Images/Kids%20Storage%20-%20Landing%20Page%20-%20Category.jpg' }
+    ],
+    office: [
+      { label: 'Gaming', href: '/c/office?sub=gaming', image: 'https://www.cohensfurnituredirect.com/assets/uploads/images/Subcategory%20Images/Gaming%20-%20Landing%20Page%20-%20Category.jpg' },
+      { label: 'Desks', href: '/c/office?sub=desks', image: 'https://rebuildassets.s3.amazonaws.com/renpim/uploads/images/Group%2082531(2).jpg' },
+      { label: 'Office Chairs', href: '/c/office?sub=office-chairs', image: 'https://rebuildassets.s3.amazonaws.com/renpim/uploads/images/Group%2082533(2).jpg' },
+      { label: 'Bookcases', href: '/c/office?sub=bookcases', image: 'https://rebuildassets.s3.amazonaws.com/renpim/uploads/images/Furniture-Category-Office-Bookcase.png' },
+      { label: 'Office Storage', href: '/c/office?sub=office-storage', image: 'https://rebuildassets.s3.amazonaws.com/renpim/uploads/images/Group%2082534(2).jpg' },
+      { label: 'Office Packages', href: '/c/office?sub=office-packages', image: 'https://cdn.rencdn.com/category/Office-Packages1108.jpg' }
+    ],
+    'home-decor': [
+      { label: 'Storage and Organization', href: '/c/home-decor?sub=storage-and-organization', image: 'https://www.cohensfurnituredirect.com/assets/uploads/images/Subcategory%20Images/Group%2082539.jpg' },
+      { label: 'Accent Furniture', href: '/c/home-decor?sub=accent-furniture', image: 'https://cdn.rencdn.com/category/Category-Base_Accent-Furniture538.jpg' },
+      { label: 'Rugs', href: '/c/home-decor?sub=rugs', image: 'https://www.cohensfurnituredirect.com/assets/uploads/images/Subcategory%20Images/Rugs_B1a.jpg' },
+      { label: 'Lamps', href: '/c/home-decor?sub=lamps', image: 'https://cdn.rencdn.com/category/Lamp89.jpg' },
+      { label: 'Bowls & Trays', href: '/c/home-decor?sub=bowls-trays', image: 'https://cdn.rencdn.com/category/Home-Decor-Trays436.jpg' },
+      { label: 'Candles & Candle Holders', href: '/c/home-decor?sub=candles-candle-holders', image: 'https://cdn.rencdn.com/category/Home_Decor_Category_Candle_Holders432.jpg' },
+      { label: 'Canisters & Jars', href: '/c/home-decor?sub=canisters-jars', image: 'https://cdn.rencdn.com/category/Home-Decor-Canisters437.jpg' },
+      { label: 'Vases & Bottles', href: '/c/home-decor?sub=vases-bottles', image: 'https://cdn.rencdn.com/category/Home_Decor_Category_Vases_Bottles433.jpg' },
+      { label: 'Sculptures', href: '/c/home-decor?sub=sculptures', image: 'https://cdn.rencdn.com/category/Home-Decor-Sculptures434.jpg' },
+      { label: 'Wall Clocks', href: '/c/home-decor?sub=wall-clocks', image: 'https://cdn.rencdn.com/category/Clocks_Category_Img_Updates_202226.jpg' },
+      { label: 'Poufs', href: '/c/home-decor?sub=poufs', image: 'https://rebuildassets.s3.amazonaws.com/renpim/uploads/images/Category-Images/Pouf.jpg' },
+      { label: 'Throw Pillows', href: '/c/home-decor?sub=throw-pillows', image: 'https://rebuildassets.s3.amazonaws.com/renpim/uploads/images/Category-Images/Throw-Pillow.jpg' },
+      { label: 'Blankets and Throws', href: '/c/home-decor?sub=blankets-and-throws', image: 'https://www.cohensfurnituredirect.com/assets/uploads/images/Subcategory%20Images/Group%2082594.jpg' },
+      { label: 'Wall Art', href: '/c/home-decor?sub=wall-art', image: 'https://www.cohensfurnituredirect.com/assets/uploads/images/Subcategory%20Images/Group%2082587.jpg' },
+      { label: 'Lighting', href: '/c/home-decor?sub=lighting', image: 'https://rebuildassets.s3.amazonaws.com/renpim/uploads/images/Category-Images/Lamp.jpg' },
+      { label: 'Rug and Pillow Set', href: '/c/home-decor?sub=rug-and-pillow-set', image: 'https://cdn.rencdn.com/category/Category-Images_Rub-Pillow-Set1240.jpg' }
+    ],
+    outdoor: [
+      { label: 'Patio Furniture', href: '/c/outdoor?sub=patio-furniture', image: 'https://cdn.rencdn.com/category/Patio_Furniture_Category_Img_Updates_202212.jpg' },
+      { label: 'Outdoor Seating', href: '/c/outdoor?sub=outdoor-seating', image: 'https://cdn.rencdn.com/category/Outdoor-Seating464.jpg' },
+      { label: 'Outdoor Tables', href: '/c/outdoor?sub=outdoor-tables', image: 'https://cdn.rencdn.com/category/Outdoor-Tables465.jpg' },
+      { label: 'Outdoor Dining', href: '/c/outdoor?sub=outdoor-dining', image: 'https://www.cohensfurnituredirect.com/assets/uploads/images/Subcategory%20Images/Group%2082553.jpg' },
+      { label: 'Outdoor Dining Sets', href: '/c/outdoor?sub=outdoor-dining-sets', image: 'https://cdn.rencdn.com/category/Outdoor-Dining-Sets183.jpg' },
+      { label: 'Outdoor Dining Chairs', href: '/c/outdoor?sub=outdoor-dining-chairs', image: 'https://rebuildassets.s3.amazonaws.com/renpim/uploads/images/Category-Images/Outdoor-chair.jpg' },
+      { label: 'Outdoor Bar Furniture', href: '/c/outdoor?sub=outdoor-bar-furniture', image: 'https://www.cohensfurnituredirect.com/assets/uploads/images/Subcategory%20Images/outdoor-bar-furniture.jpg' },
+      { label: 'Patio Accessories', href: '/c/outdoor?sub=patio-accessories', image: 'https://www.cohensfurnituredirect.com/assets/uploads/images/Subcategory%20Images/Patio%20accessories%20-%20Landing%20Page%20-%20Category1.jpg' },
+      { label: 'Firepits', href: '/c/outdoor?sub=firepits', image: 'https://cdn.rencdn.com/category/Fire-Pits728.jpg' }
     ]
   };
 

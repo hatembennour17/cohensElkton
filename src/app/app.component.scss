@@ -434,6 +434,64 @@ h3 {
   bottom: 58px;
 }
 
+.explore-section {
+  padding-top: 104px;
+}
+
+.explore-section h2 {
+  margin: 0 0 34px;
+  text-align: center;
+  font-size: 31px;
+  font-weight: 400;
+  line-height: 1.2;
+  text-transform: lowercase;
+}
+
+.explore-section h2 span {
+  color: #b42024;
+  font-weight: 900;
+}
+
+.explore-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32px;
+}
+
+.explore-card {
+  display: grid;
+  align-content: center;
+  min-height: 138px;
+  padding: 22px;
+  color: #050505;
+  background: #efefef;
+  text-decoration: none;
+  transition:
+    background-color 160ms ease,
+    transform 160ms ease;
+}
+
+.explore-card:hover,
+.explore-card:focus-visible {
+  background: #e5e5e5;
+  outline: none;
+  transform: translateY(-2px);
+}
+
+.explore-card strong {
+  display: block;
+  margin-bottom: 14px;
+  font-size: 31px;
+  line-height: 1;
+  text-transform: lowercase;
+}
+
+.explore-card span {
+  font-size: 18px;
+  letter-spacing: 5px;
+  text-transform: lowercase;
+}
+
 .financing {
   padding: 28px 0;
   background: #efefef;
@@ -1678,6 +1736,7 @@ h3 {
   .delivery-page,
   .footer-main,
   .catalog-grid,
+  .explore-grid,
   .deal-grid {
     grid-template-columns: 1fr 1fr;
   }
@@ -1746,6 +1805,7 @@ h3 {
   .delivery-page,
   .footer-main,
   .catalog-grid,
+  .explore-grid,
   .form-grid,
   .choice-grid,
   .deal-grid {

@@ -655,16 +655,13 @@
       }
     </section>
 
-    <section class="wrap section">
-      <div class="section-heading">
-        <h2>Shop By Room</h2>
-        <a [href]="links.home">View all departments</a>
-      </div>
-      <div class="category-grid">
+    <section class="wrap section explore-section">
+      <h2><span>explore</span> by category</h2>
+      <div class="explore-grid">
         @for (category of roomCategories; track category.name) {
-          <a class="category-card" [href]="category.href">
-            <img [src]="category.image" [alt]="category.name" (error)="useImageFallback($event, category.name)" />
-            <span>{{ category.name }}</span>
+          <a class="explore-card" [href]="category.href">
+            <strong>{{ category.name }}</strong>
+            <span>browse now &gt;</span>
           </a>
         }
       </div>

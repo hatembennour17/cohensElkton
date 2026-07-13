@@ -1,4 +1,4 @@
-const { connectLambda, getStore } = require('@netlify/blobs');
+const { getBlob, setJSONBlob } = require('./blob-store.cjs');
 
 const CATALOG_BLOB_KEY = 'catalog';
 const CATALOG_FILE_PATH = 'data/elkton-catalog.json';
@@ -45,7 +45,6 @@ const jsonResponse = (statusCode, body) => ({
 });
 
 exports.handler = async (event) => {
-  connectBlobs(event);
   const authError = validateAdmin(event);
 
   if (authError) {
@@ -55,14 +54,14 @@ exports.handler = async (event) => {
   try {
     if (event.httpMethod === 'GET') {
       return jsonResponse(200, {
-        catalog: await readCatalog()
+        catalog: await readCatalog(event)
       });
     }
 
     if (event.httpMethod === 'PUT') {
       const payload = event.body ? JSON.parse(event.body) : {};
       const catalog = normalizeCatalog(payload.catalog);
-      await writeCatalog(catalog);
+      await writeCatalog(event, catalog);
 
       return jsonResponse(200, {
         catalog,
@@ -102,35 +101,25 @@ function validateAdmin(event) {
   return null;
 }
 
-async function readCatalog() {
-  const savedCatalog = await readBlobCatalog() || await readGitHubCatalog();
+async function readCatalog(event) {
+  const savedCatalog = await readBlobCatalog(event) || await readGitHubCatalog();
   return normalizeCatalog(savedCatalog || defaultCatalog);
 }
 
-async function writeCatalog(catalog) {
-  const store = getCatalogStore();
-  await store.setJSON(CATALOG_BLOB_KEY, catalog);
+async function writeCatalog(event, catalog) {
+  await setJSONBlob(event, getCatalogStoreName(), CATALOG_BLOB_KEY, catalog);
 }
 
-async function readBlobCatalog() {
+async function readBlobCatalog(event) {
   try {
-    const store = getCatalogStore();
-    return await store.get(CATALOG_BLOB_KEY, { type: 'json', consistency: 'strong' });
+    return await getBlob(event, getCatalogStoreName(), CATALOG_BLOB_KEY, { type: 'json' });
   } catch {
     return null;
   }
 }
 
-function getCatalogStore() {
-  return getStore('cohens-elkton-admin');
-}
-
-function connectBlobs(event) {
-  try {
-    connectLambda(event);
-  } catch {
-    // Netlify may already provide blob context in newer runtimes.
-  }
+function getCatalogStoreName() {
+  return 'cohens-elkton-admin';
 }
 
 async function readGitHubCatalog() {

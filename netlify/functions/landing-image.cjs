@@ -1,4 +1,4 @@
-const { connectLambda, getStore } = require('@netlify/blobs');
+const { getBlob, setBlob } = require('./blob-store.cjs');
 
 const IMAGE_PREFIX = 'landing/';
 
@@ -12,8 +12,6 @@ const jsonResponse = (statusCode, body) => ({
 });
 
 exports.handler = async (event) => {
-  connectBlobs(event);
-
   if (event.httpMethod === 'GET') {
     return serveImage(event);
   }
@@ -44,9 +42,8 @@ exports.handler = async (event) => {
     const contentType = dataUrlContentType(payload.dataUrl);
     const imageBuffer = Buffer.from(contentBase64, 'base64');
     const imageKey = `${IMAGE_PREFIX}${Date.now()}-${fileName}`;
-    const store = getImageStore();
-
-    await store.set(imageKey, imageBuffer, {
+    await setBlob(event, getImageStoreName(), imageKey, imageBuffer, {
+      contentType,
       metadata: {
         contentType,
         fileName
@@ -122,10 +119,7 @@ async function serveImage(event) {
   }
 
   try {
-    const entry = await getImageStore().getWithMetadata(key, {
-      type: 'arrayBuffer',
-      consistency: 'strong'
-    });
+    const entry = await getBlob(event, getImageStoreName(), key, { type: 'arrayBuffer' });
 
     if (!entry?.data) {
       return {
@@ -158,14 +152,6 @@ async function serveImage(event) {
   }
 }
 
-function getImageStore() {
-  return getStore('cohens-elkton-images');
-}
-
-function connectBlobs(event) {
-  try {
-    connectLambda(event);
-  } catch {
-    // Netlify may already provide blob context in newer runtimes.
-  }
+function getImageStoreName() {
+  return 'cohens-elkton-images';
 }

@@ -1,4 +1,4 @@
-const { connectLambda, getStore } = require('@netlify/blobs');
+const { getBlob } = require('./blob-store.cjs');
 
 const ASHLEY_PRODUCTS_URL = 'https://apigw3.ashleyfurniture.com/productinformation/products';
 const CATALOG_BLOB_KEY = 'catalog';
@@ -54,8 +54,6 @@ const requiredEnv = [
 ];
 
 exports.handler = async (event) => {
-  connectBlobs(event);
-
   const missing = requiredEnv.filter((name) => !process.env[name]);
 
   if (missing.length) {
@@ -70,7 +68,7 @@ exports.handler = async (event) => {
   const category = normalizeCategory(query.category);
   const subcategory = normalizeCategory(query.subcategory || query.sub);
   const searchTerm = normalizeSearchTerm(query.q);
-  const adminCatalog = normalizeAdminCatalog(await readAdminCatalog());
+  const adminCatalog = normalizeAdminCatalog(await readAdminCatalog(event));
   const configuredProducts = getConfiguredProducts(adminCatalog, category);
 
   const clientIdHeaderName = process.env.ASHLEY_CLIENT_ID_HEADER || 'client_id';
@@ -218,8 +216,8 @@ function looksLikeSku(searchTerm) {
   return /^[a-z0-9-]{4,}$/i.test(searchTerm) && /\d/.test(searchTerm);
 }
 
-async function readAdminCatalog() {
-  const blobCatalog = await readBlobCatalog();
+async function readAdminCatalog(event) {
+  const blobCatalog = await readBlobCatalog(event);
 
   if (blobCatalog) {
     return blobCatalog;
@@ -247,20 +245,11 @@ async function readAdminCatalog() {
   }
 }
 
-async function readBlobCatalog() {
+async function readBlobCatalog(event) {
   try {
-    const store = getStore('cohens-elkton-admin');
-    return await store.get(CATALOG_BLOB_KEY, { type: 'json', consistency: 'strong' });
+    return await getBlob(event, 'cohens-elkton-admin', CATALOG_BLOB_KEY, { type: 'json' });
   } catch {
     return null;
-  }
-}
-
-function connectBlobs(event) {
-  try {
-    connectLambda(event);
-  } catch {
-    // Netlify may already provide blob context in newer runtimes.
   }
 }
 

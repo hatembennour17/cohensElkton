@@ -404,7 +404,9 @@ export class AppComponent implements OnInit {
       return;
     }
 
-    void this.loadStorefrontConfig();
+    if (!this.applyStorefrontDraft()) {
+      void this.loadStorefrontConfig();
+    }
 
     if (this.isCategoryLandingPage || this.isAccountPage || this.isWishlistPage || this.isContactPage) {
       this.catalogLoading = false;
@@ -737,7 +739,7 @@ export class AppComponent implements OnInit {
       globalThis.localStorage?.removeItem(this.adminDraftStorageKey);
       this.adminMessage = 'Admin catalog saved. The storefront will use these SKU lists on the next refresh.';
     } catch {
-      this.adminMessage = 'Unable to save the admin catalog.';
+      this.adminMessage = 'Unable to publish changes. Your draft is saved in this browser, but the public homepage will not update until Save Changes succeeds.';
     }
   }
 
@@ -985,6 +987,23 @@ export class AppComponent implements OnInit {
       this.adminMessage = 'Restored unsaved admin changes from this browser. Click Save Changes to publish them.';
     } catch {
       globalThis.localStorage?.removeItem(this.adminDraftStorageKey);
+    }
+  }
+
+  private applyStorefrontDraft() {
+    try {
+      const storedDraft = globalThis.localStorage?.getItem(this.adminDraftStorageKey);
+
+      if (!storedDraft) {
+        return false;
+      }
+
+      const draftCatalog = this.normalizeAdminCatalog(JSON.parse(storedDraft));
+      this.applyHeroSlides(draftCatalog.hero.slides);
+      return true;
+    } catch {
+      globalThis.localStorage?.removeItem(this.adminDraftStorageKey);
+      return false;
     }
   }
 

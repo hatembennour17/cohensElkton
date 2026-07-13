@@ -78,6 +78,7 @@ export class AppComponent implements OnInit {
   private readonly currentPath = globalThis.location?.pathname ?? '/';
   private readonly currentSearchParams = new URLSearchParams(globalThis.location?.search || '');
   private readonly cartStorageKey = 'cohens-elkton-cart';
+  private readonly adminDraftStorageKey = 'cohens-elkton-admin-draft';
 
   location = {
     name: 'Cohen\'s Furniture in Elkton',
@@ -396,6 +397,13 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     this.startHeroCarousel();
+
+    if (this.isAdminPage) {
+      this.loadAdminDraft();
+      this.catalogLoading = false;
+      return;
+    }
+
     void this.loadStorefrontConfig();
 
     if (this.isCategoryLandingPage || this.isAccountPage || this.isWishlistPage || this.isContactPage) {
@@ -694,6 +702,7 @@ export class AppComponent implements OnInit {
       this.adminCatalog = this.normalizeAdminCatalog(payload.catalog);
       this.applyHeroSlides(this.adminCatalog.hero.slides);
       globalThis.localStorage?.setItem('cohens-elkton-admin-token', this.adminToken);
+      globalThis.localStorage?.removeItem(this.adminDraftStorageKey);
       this.adminMessage = 'Admin catalog loaded.';
     } catch {
       this.adminMessage = 'Unable to reach the admin catalog service.';
@@ -725,6 +734,7 @@ export class AppComponent implements OnInit {
       this.adminCatalog = this.normalizeAdminCatalog(payload.catalog);
       this.applyHeroSlides(this.adminCatalog.hero.slides);
       globalThis.localStorage?.setItem('cohens-elkton-admin-token', this.adminToken);
+      globalThis.localStorage?.removeItem(this.adminDraftStorageKey);
       this.adminMessage = 'Admin catalog saved. The storefront will use these SKU lists on the next refresh.';
     } catch {
       this.adminMessage = 'Unable to save the admin catalog.';
@@ -816,6 +826,7 @@ export class AppComponent implements OnInit {
       enabled: true
     });
     this.applyHeroSlides(this.adminCatalog.hero.slides);
+    this.saveAdminDraft();
     this.newHeroImageUrl = '';
     this.adminMessage = 'Added landing image URL. Save changes to publish it.';
   }
@@ -842,7 +853,7 @@ export class AppComponent implements OnInit {
         });
       } catch (error) {
         slides.push({
-          image: await this.readFileAsDataUrl(file),
+          image: await this.compressHeroImage(file),
           alt: file.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' '),
           enabled: true
         });
@@ -853,6 +864,7 @@ export class AppComponent implements OnInit {
     if (slides.length) {
       this.adminCatalog.hero.slides.push(...slides);
       this.applyHeroSlides(this.adminCatalog.hero.slides);
+      this.saveAdminDraft();
     }
 
     this.adminMessage = uploadWarnings.length
@@ -875,11 +887,13 @@ export class AppComponent implements OnInit {
     }
 
     this.applyHeroSlides(this.adminCatalog.hero.slides);
+    this.saveAdminDraft();
   }
 
   removeHeroSlide(index: number) {
     this.adminCatalog.hero.slides.splice(index, 1);
     this.applyHeroSlides(this.adminCatalog.hero.slides);
+    this.saveAdminDraft();
   }
 
   startHeroDrag(index: number) {
@@ -897,6 +911,7 @@ export class AppComponent implements OnInit {
     slides.splice(index, 0, slide);
     this.adminHeroDragIndex = -1;
     this.applyHeroSlides(slides);
+    this.saveAdminDraft();
   }
 
   async importAdminSkuFile(event: Event) {
@@ -955,6 +970,30 @@ export class AppComponent implements OnInit {
     return {
       'x-admin-token': this.adminToken
     };
+  }
+
+  private loadAdminDraft() {
+    try {
+      const storedDraft = globalThis.localStorage?.getItem(this.adminDraftStorageKey);
+
+      if (!storedDraft) {
+        return;
+      }
+
+      this.adminCatalog = this.normalizeAdminCatalog(JSON.parse(storedDraft));
+      this.applyHeroSlides(this.adminCatalog.hero.slides);
+      this.adminMessage = 'Restored unsaved admin changes from this browser. Click Save Changes to publish them.';
+    } catch {
+      globalThis.localStorage?.removeItem(this.adminDraftStorageKey);
+    }
+  }
+
+  private saveAdminDraft() {
+    try {
+      globalThis.localStorage?.setItem(this.adminDraftStorageKey, JSON.stringify(this.adminCatalog));
+    } catch {
+      this.adminMessage = 'Changes are visible now, but this browser could not store the draft locally.';
+    }
   }
 
   private createDefaultAdminCatalog(): AdminCatalog {
@@ -1028,12 +1067,40 @@ export class AppComponent implements OnInit {
     }, 5500);
   }
 
-  private readFileAsDataUrl(file: File) {
+  private compressHeroImage(file: File) {
     return new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(String(reader.result || ''));
-      reader.onerror = () => reject(reader.error);
-      reader.readAsDataURL(file);
+      const image = new Image();
+      const objectUrl = URL.createObjectURL(file);
+
+      image.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+
+        const maxWidth = 1800;
+        const maxHeight = 1000;
+        const scale = Math.min(1, maxWidth / image.width, maxHeight / image.height);
+        const width = Math.max(1, Math.round(image.width * scale));
+        const height = Math.max(1, Math.round(image.height * scale));
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+
+        const context = canvas.getContext('2d');
+
+        if (!context) {
+          reject(new Error('Unable to prepare image for upload.'));
+          return;
+        }
+
+        context.drawImage(image, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.78));
+      };
+
+      image.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error('Unable to read selected image.'));
+      };
+
+      image.src = objectUrl;
     });
   }
 
@@ -1166,6 +1233,7 @@ export class AppComponent implements OnInit {
   }
 
   private async uploadHeroImage(file: File) {
+    const uploadFileName = /\.[^.]+$/.test(file.name) ? file.name.replace(/\.[^.]+$/, '.jpg') : `${file.name}.jpg`;
     const response = await fetch('/.netlify/functions/landing-image', {
       method: 'POST',
       headers: {
@@ -1173,8 +1241,8 @@ export class AppComponent implements OnInit {
         'content-type': 'application/json'
       },
       body: JSON.stringify({
-        fileName: file.name,
-        dataUrl: await this.readFileAsDataUrl(file)
+        fileName: uploadFileName,
+        dataUrl: await this.compressHeroImage(file)
       })
     });
     const rawPayload = await response.text();

@@ -400,13 +400,14 @@ export class AppComponent implements OnInit {
 
     if (this.isAdminPage) {
       this.loadAdminDraft();
+      if (this.adminToken) {
+        void this.loadAdminCatalog({ silent: true });
+      }
       this.catalogLoading = false;
       return;
     }
 
-    if (!this.applyStorefrontDraft()) {
-      void this.loadStorefrontConfig();
-    }
+    void this.loadStorefrontConfig();
 
     if (this.isCategoryLandingPage || this.isAccountPage || this.isWishlistPage || this.isContactPage) {
       this.catalogLoading = false;
@@ -684,9 +685,11 @@ export class AppComponent implements OnInit {
     this.financingMessage = `Financing request ready for ${this.location.name}. The next step is connecting this form to the Elkton financing inbox or provider endpoint.`;
   }
 
-  async loadAdminCatalog() {
+  async loadAdminCatalog(options: { silent?: boolean } = {}) {
     if (!this.adminToken) {
-      this.adminMessage = 'Enter the admin token before loading the catalog.';
+      if (!options.silent) {
+        this.adminMessage = 'Enter the admin token before loading the catalog.';
+      }
       return;
     }
 
@@ -697,7 +700,9 @@ export class AppComponent implements OnInit {
       const payload = await response.json();
 
       if (!response.ok) {
-        this.adminMessage = payload.error || 'Unable to load admin catalog.';
+        if (!options.silent) {
+          this.adminMessage = payload.error || 'Unable to load admin catalog.';
+        }
         return;
       }
 
@@ -705,9 +710,11 @@ export class AppComponent implements OnInit {
       this.applyHeroSlides(this.adminCatalog.hero.slides);
       globalThis.localStorage?.setItem('cohens-elkton-admin-token', this.adminToken);
       globalThis.localStorage?.removeItem(this.adminDraftStorageKey);
-      this.adminMessage = 'Admin catalog loaded.';
+      this.adminMessage = options.silent ? 'Loaded the published admin catalog.' : 'Admin catalog loaded.';
     } catch {
-      this.adminMessage = 'Unable to reach the admin catalog service.';
+      if (!options.silent) {
+        this.adminMessage = 'Unable to reach the admin catalog service.';
+      }
     }
   }
 
@@ -987,23 +994,6 @@ export class AppComponent implements OnInit {
       this.adminMessage = 'Restored unsaved admin changes from this browser. Click Save Changes to publish them.';
     } catch {
       globalThis.localStorage?.removeItem(this.adminDraftStorageKey);
-    }
-  }
-
-  private applyStorefrontDraft() {
-    try {
-      const storedDraft = globalThis.localStorage?.getItem(this.adminDraftStorageKey);
-
-      if (!storedDraft) {
-        return false;
-      }
-
-      const draftCatalog = this.normalizeAdminCatalog(JSON.parse(storedDraft));
-      this.applyHeroSlides(draftCatalog.hero.slides);
-      return true;
-    } catch {
-      globalThis.localStorage?.removeItem(this.adminDraftStorageKey);
-      return false;
     }
   }
 

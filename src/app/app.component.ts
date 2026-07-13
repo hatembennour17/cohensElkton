@@ -915,7 +915,8 @@ export class AppComponent implements OnInit {
     this.catalogMessage = 'Loading Ashley catalog products for the Elkton site.';
 
     try {
-      const params = new URLSearchParams({ limit: this.isCategoryPage || this.isSearchPage ? '48' : '12' });
+      const catalogLimit = this.activeSubcategorySlug ? '300' : this.isCategoryPage || this.isSearchPage ? '96' : '12';
+      const params = new URLSearchParams({ limit: catalogLimit });
 
       if (this.activeCategorySlug && !this.isCategoryLandingPage) {
         params.set('category', this.activeCategorySlug);

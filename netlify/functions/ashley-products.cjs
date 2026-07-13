@@ -47,60 +47,47 @@ exports.handler = async (event) => {
   }
 
   const query = event.queryStringParameters || {};
-  const upstreamUrl = new URL(ASHLEY_PRODUCTS_URL);
   const requestedLimit = normalizeLimit(query.limit);
   const category = normalizeCategory(query.category);
   const searchTerm = normalizeSearchTerm(query.q);
   const adminCatalog = normalizeAdminCatalog(await readAdminCatalog());
   const configuredProducts = getConfiguredProducts(adminCatalog, category);
 
-  upstreamUrl.searchParams.set('customer', process.env.ASHLEY_CUSTOMER);
-  upstreamUrl.searchParams.set('shipto', process.env.ASHLEY_SHIPTO);
-  upstreamUrl.searchParams.set('limit', configuredProducts.length ? String(configuredProducts.length) : category || searchTerm ? '1000' : requestedLimit);
-
-  if (query.page) {
-    upstreamUrl.searchParams.set('page', query.page);
-  }
-
-  if (configuredProducts.length) {
-    upstreamUrl.searchParams.set('skus', configuredProducts.map((product) => product.sku).join(','));
-  } else if (query.skus) {
-    upstreamUrl.searchParams.set('skus', query.skus);
-  } else if (looksLikeSku(searchTerm)) {
-    upstreamUrl.searchParams.set('skus', searchTerm.toUpperCase());
-  }
-
   const clientIdHeaderName = process.env.ASHLEY_CLIENT_ID_HEADER || 'client_id';
   const authToken = Buffer.from(`${process.env.ASHLEY_USERNAME}:${process.env.ASHLEY_PASSWORD}`).toString('base64');
+  const headers = {
+    accept: 'application/json',
+    'accept-language': 'en-US',
+    authorization: `Basic ${authToken}`,
+    [clientIdHeaderName]: process.env.ASHLEY_CLIENT_ID
+  };
 
   try {
-    const upstreamResponse = await fetch(upstreamUrl, {
-      method: 'GET',
-      headers: {
-        accept: 'application/json',
-        'accept-language': 'en-US',
-        authorization: `Basic ${authToken}`,
-        [clientIdHeaderName]: process.env.ASHLEY_CLIENT_ID
-      }
+    const requestLimit = configuredProducts.length ? String(configuredProducts.length) : category || searchTerm ? '1000' : requestedLimit;
+    const baseSearchParams = {
+      customer: process.env.ASHLEY_CUSTOMER,
+      shipto: process.env.ASHLEY_SHIPTO,
+      limit: requestLimit
+    };
+
+    if (query.page) {
+      baseSearchParams.page = query.page;
+    }
+
+    if (configuredProducts.length) {
+      baseSearchParams.skus = configuredProducts.map((product) => product.sku).join(',');
+    } else if (query.skus) {
+      baseSearchParams.skus = query.skus;
+    } else if (looksLikeSku(searchTerm)) {
+      baseSearchParams.skus = searchTerm.toUpperCase();
+    }
+
+    const payloads = await fetchAshleyPayloads(baseSearchParams, headers, {
+      paginate: Boolean(category && !configuredProducts.length && !baseSearchParams.skus && !query.page),
+      pageSize: Number(requestLimit)
     });
 
-    const rawBody = await upstreamResponse.text();
-    let payload;
-
-    try {
-      payload = rawBody ? JSON.parse(rawBody) : {};
-    } catch {
-      payload = { rawBody };
-    }
-
-    if (!upstreamResponse.ok) {
-      return jsonResponse(upstreamResponse.status, {
-        error: 'Ashley API request failed.',
-        details: payload
-      });
-    }
-
-    const extractedProducts = extractProducts(payload);
+    const extractedProducts = payloads.flatMap((payload) => extractProducts(payload));
     const categoryProducts = configuredProducts.length
       ? orderConfiguredProducts(extractedProducts, configuredProducts)
       : filterByCategory(extractedProducts, category);
@@ -113,19 +100,76 @@ exports.handler = async (event) => {
     return jsonResponse(200, {
       products,
       meta: {
-        ...extractMeta(payload),
+        ...extractMeta(payloads[0] || {}),
         category,
         searchTerm,
+        fetchedRecords: extractedProducts.length,
         filteredRecords: rawProducts.length
       }
     });
   } catch (error) {
+    if (error?.statusCode) {
+      return jsonResponse(error.statusCode, {
+        error: error.message || 'Ashley API request failed.',
+        details: error.details
+      });
+    }
+
     return jsonResponse(502, {
       error: 'Unable to reach Ashley API.',
       message: error instanceof Error ? error.message : String(error)
     });
   }
 };
+
+async function fetchAshleyPayloads(baseSearchParams, headers, options = {}) {
+  const pageSize = Number(options.pageSize) || 1000;
+  const maxPages = options.paginate ? 5 : 1;
+  const payloads = [];
+
+  for (let page = 1; page <= maxPages; page += 1) {
+    const upstreamUrl = new URL(ASHLEY_PRODUCTS_URL);
+
+    for (const [key, value] of Object.entries(baseSearchParams)) {
+      if (value !== undefined && value !== null && value !== '') {
+        upstreamUrl.searchParams.set(key, String(value));
+      }
+    }
+
+    if (options.paginate) {
+      upstreamUrl.searchParams.set('page', String(page));
+    }
+
+    const upstreamResponse = await fetch(upstreamUrl, {
+      method: 'GET',
+      headers
+    });
+
+    const rawBody = await upstreamResponse.text();
+    let payload;
+
+    try {
+      payload = rawBody ? JSON.parse(rawBody) : {};
+    } catch {
+      payload = { rawBody };
+    }
+
+    if (!upstreamResponse.ok) {
+      const error = new Error('Ashley API request failed.');
+      error.statusCode = upstreamResponse.status;
+      error.details = payload;
+      throw error;
+    }
+
+    payloads.push(payload);
+
+    if (!options.paginate || extractProducts(payload).length < pageSize) {
+      break;
+    }
+  }
+
+  return payloads;
+}
 
 function normalizeLimit(value) {
   const parsed = Number(value);

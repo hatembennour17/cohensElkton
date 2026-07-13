@@ -1,4 +1,7 @@
+const { connectLambda, getStore } = require('@netlify/blobs');
+
 const ASHLEY_PRODUCTS_URL = 'https://apigw3.ashleyfurniture.com/productinformation/products';
+const CATALOG_BLOB_KEY = 'catalog';
 const CATALOG_FILE_PATH = 'data/elkton-catalog.json';
 
 const jsonResponse = (statusCode, body) => ({
@@ -51,6 +54,8 @@ const requiredEnv = [
 ];
 
 exports.handler = async (event) => {
+  connectBlobs(event);
+
   const missing = requiredEnv.filter((name) => !process.env[name]);
 
   if (missing.length) {
@@ -214,6 +219,12 @@ function looksLikeSku(searchTerm) {
 }
 
 async function readAdminCatalog() {
+  const blobCatalog = await readBlobCatalog();
+
+  if (blobCatalog) {
+    return blobCatalog;
+  }
+
   try {
     const response = await fetch(gitHubContentsUrl(), {
       method: 'GET',
@@ -233,6 +244,23 @@ async function readAdminCatalog() {
     return content ? JSON.parse(content) : null;
   } catch {
     return null;
+  }
+}
+
+async function readBlobCatalog() {
+  try {
+    const store = getStore('cohens-elkton-admin');
+    return await store.get(CATALOG_BLOB_KEY, { type: 'json', consistency: 'strong' });
+  } catch {
+    return null;
+  }
+}
+
+function connectBlobs(event) {
+  try {
+    connectLambda(event);
+  } catch {
+    // Netlify may already provide blob context in newer runtimes.
   }
 }
 

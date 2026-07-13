@@ -1,3 +1,6 @@
+const { connectLambda, getStore } = require('@netlify/blobs');
+
+const CATALOG_BLOB_KEY = 'catalog';
 const CATALOG_FILE_PATH = 'data/elkton-catalog.json';
 
 const defaultHero = {
@@ -24,9 +27,11 @@ const jsonResponse = (statusCode, body) => ({
   body: JSON.stringify(body)
 });
 
-exports.handler = async () => {
+exports.handler = async (event) => {
+  connectBlobs(event);
+
   try {
-    const catalog = await readGitHubCatalog();
+    const catalog = await readBlobCatalog() || await readGitHubCatalog();
 
     return jsonResponse(200, {
       hero: {
@@ -40,6 +45,23 @@ exports.handler = async () => {
     });
   }
 };
+
+async function readBlobCatalog() {
+  try {
+    const store = getStore('cohens-elkton-admin');
+    return await store.get(CATALOG_BLOB_KEY, { type: 'json', consistency: 'strong' });
+  } catch {
+    return null;
+  }
+}
+
+function connectBlobs(event) {
+  try {
+    connectLambda(event);
+  } catch {
+    // Netlify may already provide blob context in newer runtimes.
+  }
+}
 
 async function readGitHubCatalog() {
   const response = await fetch(gitHubContentsUrl(), {

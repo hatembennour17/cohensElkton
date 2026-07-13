@@ -1,4 +1,6 @@
-const ASSET_DIRECTORY = 'src/assets/landing';
+const { connectLambda, getStore } = require('@netlify/blobs');
+
+const IMAGE_PREFIX = 'landing/';
 
 const jsonResponse = (statusCode, body) => ({
   statusCode,
@@ -10,6 +12,12 @@ const jsonResponse = (statusCode, body) => ({
 });
 
 exports.handler = async (event) => {
+  connectBlobs(event);
+
+  if (event.httpMethod === 'GET') {
+    return serveImage(event);
+  }
+
   const authError = validateAdmin(event);
 
   if (authError) {
@@ -33,12 +41,21 @@ exports.handler = async (event) => {
       });
     }
 
-    const assetPath = `${ASSET_DIRECTORY}/${Date.now()}-${fileName}`;
-    await writeGitHubFile(assetPath, contentBase64);
+    const contentType = dataUrlContentType(payload.dataUrl);
+    const imageBuffer = Buffer.from(contentBase64, 'base64');
+    const imageKey = `${IMAGE_PREFIX}${Date.now()}-${fileName}`;
+    const store = getImageStore();
+
+    await store.set(imageKey, imageBuffer, {
+      metadata: {
+        contentType,
+        fileName
+      }
+    });
 
     return jsonResponse(200, {
-      imageUrl: `/assets/landing/${assetPath.split('/').pop()}`,
-      path: assetPath
+      imageUrl: `/.netlify/functions/landing-image?key=${encodeURIComponent(imageKey)}`,
+      path: imageKey
     });
   } catch (error) {
     return jsonResponse(500, {
@@ -66,12 +83,6 @@ function validateAdmin(event) {
     });
   }
 
-  if (!process.env.GITHUB_TOKEN) {
-    return jsonResponse(500, {
-      error: 'GITHUB_TOKEN is required to upload landing images.'
-    });
-  }
-
   return null;
 }
 
@@ -95,42 +106,66 @@ function dataUrlToBase64(dataUrl) {
   return match?.[1] || '';
 }
 
-async function writeGitHubFile(path, contentBase64) {
-  const body = {
-    message: `Upload Elkton landing image ${path.split('/').pop()}`,
-    content: contentBase64,
-    branch: gitHubBranch()
-  };
+function dataUrlContentType(dataUrl) {
+  const match = String(dataUrl || '').match(/^data:(image\/(?:jpeg|jpg|png|webp|gif));base64,/i);
+  return match?.[1]?.toLowerCase().replace('image/jpg', 'image/jpeg') || 'image/jpeg';
+}
 
-  const response = await fetch(gitHubContentsUrl(path), {
-    method: 'PUT',
-    headers: gitHubHeaders(),
-    body: JSON.stringify(body)
-  });
+async function serveImage(event) {
+  const key = String(event.queryStringParameters?.key || '');
 
-  if (!response.ok) {
-    const details = await response.text();
-    throw new Error(`GitHub image upload failed with ${response.status}: ${details}`);
+  if (!key.startsWith(IMAGE_PREFIX)) {
+    return {
+      statusCode: 404,
+      body: 'Image not found.'
+    };
+  }
+
+  try {
+    const entry = await getImageStore().getWithMetadata(key, {
+      type: 'arrayBuffer',
+      consistency: 'strong'
+    });
+
+    if (!entry?.data) {
+      return {
+        statusCode: 404,
+        body: 'Image not found.'
+      };
+    }
+
+    return {
+      statusCode: 200,
+      headers: {
+        'content-type': String(entry.metadata?.contentType || 'image/jpeg'),
+        'cache-control': 'public, max-age=31536000, immutable'
+      },
+      isBase64Encoded: true,
+      body: Buffer.from(entry.data).toString('base64')
+    };
+  } catch (error) {
+    return {
+      statusCode: 500,
+      headers: {
+        'content-type': 'application/json',
+        'cache-control': 'no-store'
+      },
+      body: JSON.stringify({
+        error: 'Unable to load landing image.',
+        message: error instanceof Error ? error.message : String(error)
+      })
+    };
   }
 }
 
-function gitHubContentsUrl(path) {
-  const owner = process.env.GITHUB_OWNER || 'hatembennour17';
-  const repo = process.env.GITHUB_REPO || 'cohensElkton';
-  const encodedPath = encodeURIComponent(path).replace(/%2F/g, '/');
-  return `https://api.github.com/repos/${owner}/${repo}/contents/${encodedPath}`;
+function getImageStore() {
+  return getStore('cohens-elkton-images');
 }
 
-function gitHubBranch() {
-  return process.env.GITHUB_BRANCH || 'master';
-}
-
-function gitHubHeaders() {
-  return {
-    accept: 'application/vnd.github+json',
-    authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-    'content-type': 'application/json',
-    'user-agent': 'cohens-elkton-admin',
-    'x-github-api-version': '2022-11-28'
-  };
+function connectBlobs(event) {
+  try {
+    connectLambda(event);
+  } catch {
+    // Netlify may already provide blob context in newer runtimes.
+  }
 }

@@ -396,6 +396,7 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     this.startHeroCarousel();
+    void this.loadStorefrontConfig();
 
     if (this.isCategoryLandingPage || this.isAccountPage || this.isWishlistPage || this.isContactPage) {
       this.catalogLoading = false;
@@ -827,11 +828,15 @@ export class AppComponent implements OnInit {
     }
 
     try {
-      const slides = await Promise.all(files.map(async (file) => ({
-        image: await this.readFileAsDataUrl(file),
-        alt: file.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' '),
-        enabled: true
-      })));
+      const slides = await Promise.all(files.map(async (file) => {
+        const upload = await this.uploadHeroImage(file);
+
+        return {
+          image: upload.imageUrl,
+          alt: file.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' '),
+          enabled: true
+        };
+      }));
 
       this.adminCatalog.hero.slides.push(...slides);
       this.applyHeroSlides(this.adminCatalog.hero.slides);
@@ -1129,6 +1134,42 @@ export class AppComponent implements OnInit {
     } finally {
       this.catalogLoading = false;
     }
+  }
+
+  private async loadStorefrontConfig() {
+    try {
+      const response = await fetch('/.netlify/functions/storefront-config');
+
+      if (!response.ok) {
+        return;
+      }
+
+      const payload = await response.json();
+      this.applyHeroSlides(payload.hero?.slides);
+    } catch {
+      // Keep fallback slides when the settings function is unavailable.
+    }
+  }
+
+  private async uploadHeroImage(file: File) {
+    const response = await fetch('/.netlify/functions/landing-image', {
+      method: 'POST',
+      headers: {
+        ...this.adminHeaders(),
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        fileName: file.name,
+        dataUrl: await this.readFileAsDataUrl(file)
+      })
+    });
+    const payload = await response.json();
+
+    if (!response.ok) {
+      throw new Error(payload.error || 'Unable to upload landing image.');
+    }
+
+    return payload as { imageUrl: string };
   }
 
   private productMatchesSubcategory(product: Product, subcategory: string) {

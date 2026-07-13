@@ -108,7 +108,7 @@ async function writeCatalog(catalog) {
 }
 
 async function readGitHubCatalog() {
-  const response = await fetch(gitHubContentsUrl(), {
+  const response = await fetch(gitHubContentsUrl({ includeRef: true }), {
     method: 'GET',
     headers: gitHubHeaders()
   });
@@ -144,7 +144,7 @@ async function writeGitHubCatalog(catalog) {
     body.sha = existingFile.sha;
   }
 
-  const response = await fetch(gitHubContentsUrl(), {
+  const response = await fetch(gitHubContentsUrl({ includeRef: false }), {
     method: 'PUT',
     headers: gitHubHeaders(token),
     body: JSON.stringify(body)
@@ -157,7 +157,7 @@ async function writeGitHubCatalog(catalog) {
 }
 
 async function getExistingGitHubFile() {
-  const response = await fetch(gitHubContentsUrl(), {
+  const response = await fetch(gitHubContentsUrl({ includeRef: true }), {
     method: 'GET',
     headers: gitHubHeaders(process.env.GITHUB_TOKEN)
   });
@@ -173,11 +173,12 @@ async function getExistingGitHubFile() {
   return response.json();
 }
 
-function gitHubContentsUrl() {
+function gitHubContentsUrl(options = { includeRef: true }) {
   const owner = process.env.GITHUB_OWNER || 'hatembennour17';
   const repo = process.env.GITHUB_REPO || 'cohensElkton';
   const path = encodeURIComponent(CATALOG_FILE_PATH).replace(/%2F/g, '/');
-  return `https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${encodeURIComponent(gitHubBranch())}`;
+  const baseUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+  return options.includeRef ? `${baseUrl}?ref=${encodeURIComponent(gitHubBranch())}` : baseUrl;
 }
 
 function gitHubBranch() {

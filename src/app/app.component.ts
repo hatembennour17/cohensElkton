@@ -817,6 +817,7 @@ export class AppComponent implements OnInit {
     });
     this.applyHeroSlides(this.adminCatalog.hero.slides);
     this.newHeroImageUrl = '';
+    this.adminMessage = 'Added landing image URL. Save changes to publish it.';
   }
 
   async importHeroImages(event: Event) {
@@ -827,24 +828,37 @@ export class AppComponent implements OnInit {
       return;
     }
 
-    try {
-      const slides = await Promise.all(files.map(async (file) => {
+    const slides: HeroSlide[] = [];
+    const uploadWarnings: string[] = [];
+
+    for (const file of files) {
+      try {
         const upload = await this.uploadHeroImage(file);
 
-        return {
+        slides.push({
           image: upload.imageUrl,
           alt: file.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' '),
           enabled: true
-        };
-      }));
+        });
+      } catch (error) {
+        slides.push({
+          image: await this.readFileAsDataUrl(file),
+          alt: file.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' '),
+          enabled: true
+        });
+        uploadWarnings.push(error instanceof Error ? error.message : String(error));
+      }
+    }
 
+    if (slides.length) {
       this.adminCatalog.hero.slides.push(...slides);
       this.applyHeroSlides(this.adminCatalog.hero.slides);
-      this.adminMessage = `Added ${slides.length} landing slide image${slides.length === 1 ? '' : 's'}. Save changes to publish.`;
-      input.value = '';
-    } catch {
-      this.adminMessage = 'Unable to read those image files.';
     }
+
+    this.adminMessage = uploadWarnings.length
+      ? `Added ${slides.length} image preview${slides.length === 1 ? '' : 's'}, but server upload failed: ${uploadWarnings[0]}`
+      : `Added ${slides.length} landing slide image${slides.length === 1 ? '' : 's'}. Save changes to publish.`;
+    input.value = '';
   }
 
   updateHeroSlide(index: number, key: keyof HeroSlide, value: string | boolean) {
@@ -1163,10 +1177,21 @@ export class AppComponent implements OnInit {
         dataUrl: await this.readFileAsDataUrl(file)
       })
     });
-    const payload = await response.json();
+    const rawPayload = await response.text();
+    let payload: { imageUrl?: string; error?: string; message?: string } = {};
+
+    try {
+      payload = rawPayload ? JSON.parse(rawPayload) : {};
+    } catch {
+      payload = { message: rawPayload };
+    }
 
     if (!response.ok) {
-      throw new Error(payload.error || 'Unable to upload landing image.');
+      throw new Error(payload.message || payload.error || `Upload failed with ${response.status}.`);
+    }
+
+    if (!payload.imageUrl) {
+      throw new Error('Upload completed without an image URL.');
     }
 
     return payload as { imageUrl: string };

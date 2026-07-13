@@ -49,6 +49,7 @@ exports.handler = async (event) => {
   const query = event.queryStringParameters || {};
   const requestedLimit = normalizeLimit(query.limit);
   const category = normalizeCategory(query.category);
+  const subcategory = normalizeCategory(query.subcategory || query.sub);
   const searchTerm = normalizeSearchTerm(query.q);
   const adminCatalog = normalizeAdminCatalog(await readAdminCatalog());
   const configuredProducts = getConfiguredProducts(adminCatalog, category);
@@ -91,7 +92,10 @@ exports.handler = async (event) => {
     const categoryProducts = configuredProducts.length
       ? orderConfiguredProducts(extractedProducts, configuredProducts)
       : filterByCategory(extractedProducts, category);
-    const rawProducts = filterBySearch(categoryProducts, looksLikeSku(searchTerm) ? '' : searchTerm);
+    const subcategoryProducts = subcategory
+      ? categoryProducts.filter((product) => productMatchesSubcategory(product.item || product, subcategory))
+      : categoryProducts;
+    const rawProducts = filterBySearch(subcategoryProducts, looksLikeSku(searchTerm) ? '' : searchTerm);
     const products = rawProducts
       .map((product) => normalizeProduct(product.item || product, product.config, adminCatalog, category))
       .filter(Boolean)
@@ -102,6 +106,7 @@ exports.handler = async (event) => {
       meta: {
         ...extractMeta(payloads[0] || {}),
         category,
+        subcategory,
         searchTerm,
         fetchedRecords: extractedProducts.length,
         filteredRecords: rawProducts.length
@@ -379,6 +384,142 @@ function filterBySearch(products, searchTerm) {
     const searchableText = productSearchText(product);
     return searchWords.every((word) => searchableText.includes(word));
   });
+}
+
+function productMatchesSubcategory(product, subcategory) {
+  const searchableText = productSearchText(product);
+  const multiPieceRules = {
+    'bedroom-sets': { primary: ['bed'], secondary: ['dresser', 'mirror', 'chest', 'nightstand', 'storage bench'], setTerms: ['set', 'package', 'piece'] },
+    'kids-bedroom-sets': { primary: ['bed'], secondary: ['dresser', 'mirror', 'chest', 'nightstand'], setTerms: ['set', 'package', 'piece'] },
+    'dining-room-sets': { primary: ['table'], secondary: ['chair', 'bench', 'server', 'buffet'], setTerms: ['set', 'package', 'piece'] },
+    'living-room-sets': { primary: ['sofa', 'sectional', 'loveseat', 'recliner'], secondary: ['loveseat', 'chair', 'recliner', 'ottoman'], setTerms: ['set', 'package', 'piece'] },
+    'sofa-sets': { primary: ['sofa'], secondary: ['loveseat', 'chair', 'recliner'], setTerms: ['set', 'package', 'piece'] },
+    'office-packages': { primary: ['desk', 'office'], secondary: ['chair', 'bookcase', 'file'], setTerms: ['set', 'package', 'piece'] }
+  };
+
+  const multiPieceRule = multiPieceRules[subcategory];
+  if (multiPieceRule) {
+    const hasPrimaryPiece = multiPieceRule.primary.some((term) => textIncludesTerm(searchableText, term));
+    const hasCompanionPiece = multiPieceRule.secondary.some((term) => textIncludesTerm(searchableText, term));
+    const hasSetLanguage = multiPieceRule.setTerms.some((term) => textIncludesTerm(searchableText, term));
+    return hasPrimaryPiece && (hasCompanionPiece || hasSetLanguage);
+  }
+
+  const keywordsBySubcategory = {
+    sofas: ['sofa'],
+    loveseats: ['loveseat'],
+    sectionals: ['sectional'],
+    recliners: ['recliner'],
+    'power-seating': ['power recliner', 'power reclining', 'power seating'],
+    chairs: ['chair'],
+    ottomans: ['ottoman'],
+    chaises: ['chaise'],
+    'sleeper-sofas': ['sleeper sofa', 'sofa sleeper'],
+    futons: ['futon'],
+    'tv-stands-media-centers': ['tv stand', 'media center', 'entertainment center'],
+    'occasional-tables': ['coffee table', 'cocktail table', 'end table', 'side table', 'console table'],
+    'coffee-end-table-sets': ['table set', 'coffee table set', 'cocktail table set', 'end table set'],
+    'coffee-tables': ['coffee table', 'cocktail table'],
+    'end-side-tables': ['end table', 'side table'],
+    'console-tables': ['console table'],
+    'living-room-storage': ['storage', 'cabinet', 'console'],
+    'sleeper-sectionals': ['sleeper sectional'],
+    'home-theater': ['home theater'],
+    beds: ['bed'],
+    headboards: ['headboard'],
+    dressers: ['dresser'],
+    'mirrored-dressers': ['dresser and mirror', 'dresser/mirror', 'mirrored dresser'],
+    mirrors: ['mirror'],
+    chests: ['chest'],
+    nightstands: ['nightstand'],
+    'media-chests': ['media chest'],
+    armoires: ['armoire'],
+    vanities: ['vanity'],
+    'bedroom-benches': ['bedroom bench', 'bench'],
+    'bedroom-chairs': ['bedroom chair', 'chair'],
+    'bedroom-storage': ['bedroom storage', 'storage'],
+    'lingerie-chests': ['lingerie chest'],
+    'dining-tables': ['dining table', 'table'],
+    'dining-chairs': ['dining chair', 'chair'],
+    'dining-benches': ['dining bench', 'bench'],
+    'bar-stools': ['bar stool', 'barstool'],
+    'bar-furniture': ['bar furniture', 'bar table', 'bar cabinet'],
+    'dining-room-storage': ['server', 'buffet', 'china cabinet', 'dining storage'],
+    gaming: ['gaming'],
+    desks: ['desk'],
+    'office-chairs': ['office chair', 'desk chair'],
+    bookcases: ['bookcase'],
+    'office-storage': ['file cabinet', 'office storage', 'bookcase'],
+    bedding: ['bedding', 'comforter', 'quilt', 'pillow'],
+    'mattress-sets': ['mattress'],
+    'mattress-by-size': ['mattress'],
+    'mattress-by-type': ['mattress'],
+    foundations: ['foundation', 'box spring'],
+    'power-bases': ['power base', 'adjustable base'],
+    'storage-and-organization': ['storage', 'basket', 'box', 'organizer'],
+    'accent-furniture': ['accent'],
+    rugs: ['rug'],
+    lamps: ['lamp'],
+    'bowls-trays': ['bowl', 'tray'],
+    'candles-candle-holders': ['candle'],
+    'canisters-jars': ['canister', 'jar'],
+    'vases-bottles': ['vase', 'bottle'],
+    sculptures: ['sculpture'],
+    'wall-clocks': ['clock'],
+    poufs: ['pouf'],
+    'throw-pillows': ['throw pillow', 'pillow'],
+    'blankets-and-throws': ['blanket', 'throw'],
+    'wall-art': ['wall art'],
+    lighting: ['lighting', 'lamp', 'pendant', 'chandelier'],
+    'rug-and-pillow-set': ['rug and pillow', 'rug pillow'],
+    'outdoor-seating': ['outdoor seating', 'patio seating', 'chair', 'sofa', 'sectional'],
+    'outdoor-tables': ['outdoor table', 'patio table'],
+    'outdoor-dining-sets': ['outdoor dining set', 'patio dining set'],
+    'outdoor-dining-chairs': ['outdoor dining chair', 'patio chair'],
+    'outdoor-dining-tables': ['outdoor dining table', 'patio table'],
+    'outdoor-bar-furniture': ['outdoor bar', 'patio bar'],
+    firepits: ['fire pit', 'firepit'],
+    'kids-beds': ['bed'],
+    'bunk-loft-beds': ['bunk bed', 'loft bed'],
+    daybeds: ['daybed'],
+    'kids-headboards': ['headboard'],
+    'kids-mirrored-dressers': ['dresser and mirror', 'mirrored dresser'],
+    'kids-chests': ['chest'],
+    'kids-nightstands': ['nightstand'],
+    'kids-desks': ['desk'],
+    'kids-storage': ['storage']
+  };
+
+  const exclusionsBySubcategory = {
+    beds: ['mirror', 'dresser', 'chest', 'nightstand', 'vanity', 'bench', 'foundation', 'mattress'],
+    'kids-beds': ['mirror', 'dresser', 'chest', 'nightstand', 'vanity', 'bench', 'foundation', 'mattress'],
+    headboards: ['bed with storage', 'dresser', 'mirror'],
+    dressers: ['mirror only'],
+    mirrors: ['dresser and mirror', 'mirrored dresser'],
+    chests: ['mirror', 'dresser'],
+    nightstands: ['mirror', 'dresser', 'chest'],
+    sofas: ['loveseat', 'sectional', 'recliner', 'sleeper'],
+    loveseats: ['sofa', 'sectional'],
+    recliners: ['sofa', 'loveseat', 'sectional'],
+    chairs: ['dining chair', 'office chair'],
+    'dining-tables': ['chair', 'bench', 'stool'],
+    'dining-chairs': ['table', 'bench', 'stool'],
+    'bar-stools': ['table', 'chair set'],
+    lamps: ['lamp table'],
+    rugs: ['rug and pillow']
+  };
+
+  const exclusions = exclusionsBySubcategory[subcategory] || [];
+  if (exclusions.some((keyword) => textIncludesTerm(searchableText, keyword))) {
+    return false;
+  }
+
+  const keywords = keywordsBySubcategory[subcategory] || subcategory.split('-');
+  return keywords.some((keyword) => textIncludesTerm(searchableText, keyword));
+}
+
+function textIncludesTerm(text, term) {
+  return text.includes(String(term).toLowerCase());
 }
 
 function keywordWeight(category, keyword) {

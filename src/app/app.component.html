@@ -589,9 +589,6 @@
                 <h3>{{ product.name }}</h3>
                 <div class="price-compare">
                   <strong>{{ formatPrice(product.unitPrice) }}</strong>
-                  @if (product.ashleyPrice) {
-                    <small>Ashley {{ formatPrice(product.ashleyPrice) }}</small>
-                  }
                 </div>
                 <div class="catalog-actions" aria-label="Product actions">
                   <button type="button" title="Add to wishlist" [attr.aria-label]="'Add ' + product.name + ' to wishlist'">
@@ -706,9 +703,6 @@
             <div class="product-actions">
               <div class="price-compare price-compare--tile">
                 <strong>{{ formatPrice(item.unitPrice) }}</strong>
-                @if (item.ashleyPrice) {
-                  <small>Ashley {{ formatPrice(item.ashleyPrice) }}</small>
-                }
               </div>
               <button type="button" (click)="addToCart(item)">Add to Cart</button>
             </div>
@@ -749,9 +743,6 @@
               <h3>{{ deal.name }}</h3>
               <div class="price-compare">
                 <strong>Our price {{ formatPrice(deal.unitPrice) }}</strong>
-                @if (deal.ashleyPrice) {
-                  <small>Ashley {{ formatPrice(deal.ashleyPrice) }}</small>
-                }
               </div>
               <button type="button" (click)="addToCart(deal)">Add to Cart</button>
             </div>

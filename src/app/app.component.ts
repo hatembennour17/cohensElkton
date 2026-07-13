@@ -499,7 +499,7 @@ export class AppComponent implements OnInit {
       ? uniqueProducts.filter((product) => this.productMatchesSearch(product, this.searchQuery))
       : uniqueProducts;
     const productsForSubcategory = this.searchQuery ? searchProducts : uniqueProducts;
-    const subcategoryProducts = this.activeSubcategorySlug
+    const subcategoryProducts = this.activeSubcategorySlug && !this.catalogProducts.length
       ? productsForSubcategory.filter((product) => this.productMatchesSubcategory(product, this.activeSubcategorySlug))
       : productsForSubcategory;
     return this.sortProducts(subcategoryProducts);
@@ -915,11 +915,15 @@ export class AppComponent implements OnInit {
     this.catalogMessage = 'Loading Ashley catalog products for the Elkton site.';
 
     try {
-      const catalogLimit = this.activeSubcategorySlug ? '300' : this.isCategoryPage || this.isSearchPage ? '96' : '12';
+      const catalogLimit = this.activeSubcategorySlug ? '1000' : this.isCategoryPage || this.isSearchPage ? '96' : '12';
       const params = new URLSearchParams({ limit: catalogLimit });
 
       if (this.activeCategorySlug && !this.isCategoryLandingPage) {
         params.set('category', this.activeCategorySlug);
+      }
+
+      if (this.activeSubcategorySlug) {
+        params.set('sub', this.activeSubcategorySlug);
       }
 
       if (this.searchQuery) {

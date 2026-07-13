@@ -64,16 +64,23 @@
               <button
                 type="button"
                 [class.admin-tab--active]="selectedAdminTab === 'catalog'"
-                (click)="selectedAdminTab = 'catalog'"
+                (click)="selectAdminTab('catalog')"
               >
                 Catalog
               </button>
               <button
                 type="button"
                 [class.admin-tab--active]="selectedAdminTab === 'landing'"
-                (click)="selectedAdminTab = 'landing'"
+                (click)="selectAdminTab('landing')"
               >
                 Landing Images
+              </button>
+              <button
+                type="button"
+                [class.admin-tab--active]="selectedAdminTab === 'visitors'"
+                (click)="selectAdminTab('visitors')"
+              >
+                Visitors
               </button>
             </div>
 
@@ -181,7 +188,7 @@
                 </div>
               }
             </div>
-            } @else {
+            } @else if (selectedAdminTab === 'landing') {
               <div class="admin-landing">
                 <div class="admin-import">
                   <label>
@@ -255,6 +262,120 @@
                     </div>
                   }
                 </div>
+              </div>
+            } @else {
+              <div class="admin-analytics">
+                <div class="admin-analytics__header">
+                  <div>
+                    <p class="eyebrow">Traffic dashboard</p>
+                    <h2>Visitor Activity</h2>
+                    <p>Track visits, traffic sources, approximate location, device type, and time spent.</p>
+                  </div>
+                  <button class="btn btn--primary" type="button" (click)="loadAnalytics()">
+                    {{ analyticsLoading ? 'Loading...' : 'Refresh Data' }}
+                  </button>
+                </div>
+
+                @if (analyticsMessage) {
+                  <p class="form-message">{{ analyticsMessage }}</p>
+                }
+
+                @if (analyticsSummary) {
+                  <div class="analytics-cards">
+                    <article>
+                      <span>Total Visits</span>
+                      <strong>{{ analyticsSummary.totals.visits }}</strong>
+                    </article>
+                    <article>
+                      <span>Unique Sessions</span>
+                      <strong>{{ analyticsSummary.totals.uniqueSessions }}</strong>
+                    </article>
+                    <article>
+                      <span>Today</span>
+                      <strong>{{ analyticsSummary.totals.visitsToday }}</strong>
+                    </article>
+                    <article>
+                      <span>This Week</span>
+                      <strong>{{ analyticsSummary.totals.visitsThisWeek }}</strong>
+                    </article>
+                    <article>
+                      <span>Avg. Time</span>
+                      <strong>{{ analyticsSummary.totals.averageDurationSeconds }}s</strong>
+                    </article>
+                  </div>
+
+                  <div class="analytics-grid">
+                    <section>
+                      <h3>Top Pages</h3>
+                      @for (item of analyticsSummary.topPages; track item.label) {
+                        <div class="analytics-bar">
+                          <span>{{ item.label }}</span>
+                          <strong>{{ item.count }}</strong>
+                        </div>
+                      } @empty {
+                        <p>No page traffic yet.</p>
+                      }
+                    </section>
+                    <section>
+                      <h3>Traffic Sources</h3>
+                      @for (item of analyticsSummary.topReferrers; track item.label) {
+                        <div class="analytics-bar">
+                          <span>{{ item.label }}</span>
+                          <strong>{{ item.count }}</strong>
+                        </div>
+                      } @empty {
+                        <p>No referral data yet.</p>
+                      }
+                    </section>
+                    <section>
+                      <h3>Visitor Locations</h3>
+                      @for (item of analyticsSummary.topLocations; track item.label) {
+                        <div class="analytics-bar">
+                          <span>{{ item.label }}</span>
+                          <strong>{{ item.count }}</strong>
+                        </div>
+                      } @empty {
+                        <p>No location data yet.</p>
+                      }
+                    </section>
+                    <section>
+                      <h3>Devices</h3>
+                      @for (item of analyticsSummary.devices; track item.label) {
+                        <div class="analytics-bar">
+                          <span>{{ item.label }}</span>
+                          <strong>{{ item.count }}</strong>
+                        </div>
+                      } @empty {
+                        <p>No device data yet.</p>
+                      }
+                    </section>
+                  </div>
+
+                  <div class="admin-table analytics-table">
+                    <div class="admin-row admin-row--head analytics-row">
+                      <span>Time</span>
+                      <span>Page</span>
+                      <span>Source</span>
+                      <span>Location</span>
+                      <span>Device</span>
+                      <span>Time Spent</span>
+                    </div>
+                    @for (visit of analyticsSummary.recentVisits; track visit.id) {
+                      <div class="admin-row analytics-row">
+                        <span>{{ formatVisitDate(visit.startedAt) }}</span>
+                        <span>{{ visit.path }}</span>
+                        <span>{{ visit.referrer }}</span>
+                        <span>{{ visit.location }}</span>
+                        <span>{{ visit.device }} / {{ visit.browser }}</span>
+                        <span>{{ visit.durationSeconds }}s</span>
+                      </div>
+                    } @empty {
+                      <div class="admin-empty">No visits recorded yet.</div>
+                    }
+                  </div>
+                } @else {
+                  <div class="admin-empty">Enter the admin token and refresh visitor data.</div>
+                }
               </div>
             }
           </section>
@@ -689,7 +810,11 @@
                     <span aria-hidden="true">&#9825;</span>
                   </button>
                   <button type="button" title="Add to cart" [attr.aria-label]="'Add ' + product.name + ' to cart'" (click)="addToCart(product)">
-                    <span aria-hidden="true">&#128722;</span>
+                    <svg aria-hidden="true" viewBox="0 0 24 24">
+                      <circle cx="9" cy="20" r="1.8"></circle>
+                      <circle cx="18" cy="20" r="1.8"></circle>
+                      <path d="M3 4h2.2l2.2 11.2a2 2 0 0 0 2 1.6h8.9a2 2 0 0 0 1.9-1.4L22 8H7"></path>
+                    </svg>
                   </button>
                   <a [href]="product.href" title="More information" [attr.aria-label]="'More information about ' + product.name">
                     <span aria-hidden="true">?</span>

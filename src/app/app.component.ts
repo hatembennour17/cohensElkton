@@ -55,6 +55,40 @@ type AdminCatalog = {
   categories: Record<string, AdminCatalogCategory>;
 };
 
+type AnalyticsCount = {
+  label: string;
+  count: number;
+};
+
+type AnalyticsVisit = {
+  id: string;
+  path: string;
+  referrer: string;
+  startedAt: string;
+  lastSeenAt: string;
+  durationSeconds: number;
+  location: string;
+  device: string;
+  browser: string;
+  screen: string;
+};
+
+type AnalyticsSummary = {
+  totals: {
+    visits: number;
+    uniqueSessions: number;
+    visitsToday: number;
+    visitsThisWeek: number;
+    averageDurationSeconds: number;
+  };
+  topPages: AnalyticsCount[];
+  topReferrers: AnalyticsCount[];
+  topLocations: AnalyticsCount[];
+  devices: AnalyticsCount[];
+  browsers: AnalyticsCount[];
+  recentVisits: AnalyticsVisit[];
+};
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -79,6 +113,11 @@ export class AppComponent implements OnInit {
   private readonly currentSearchParams = new URLSearchParams(globalThis.location?.search || '');
   private readonly cartStorageKey = 'cohens-elkton-cart';
   private readonly adminDraftStorageKey = 'cohens-elkton-admin-draft';
+  private readonly analyticsSessionStorageKey = 'cohens-elkton-analytics-session';
+  private analyticsVisitId = '';
+  private analyticsSessionId = '';
+  private analyticsStartedAt = 0;
+  private analyticsLastPingAt = 0;
 
   location = {
     name: 'Cohen\'s Furniture in Elkton',
@@ -374,13 +413,16 @@ export class AppComponent implements OnInit {
   catalogProducts: Product[] = [];
   adminToken = globalThis.localStorage?.getItem('cohens-elkton-admin-token') || '';
   adminCatalog: AdminCatalog = this.createDefaultAdminCatalog();
-  selectedAdminTab: 'catalog' | 'landing' = 'catalog';
+  selectedAdminTab: 'catalog' | 'landing' | 'visitors' = 'catalog';
   selectedAdminCategory = 'living-room';
   newAdminSku = '';
   newHeroImageUrl = '';
   adminMessage = '';
   adminDragIndex = -1;
   adminHeroDragIndex = -1;
+  analyticsLoading = false;
+  analyticsMessage = '';
+  analyticsSummary: AnalyticsSummary | null = null;
   orderMessage = '';
   orderSubmitting = false;
   financingMessage = '';
@@ -402,11 +444,13 @@ export class AppComponent implements OnInit {
       this.loadAdminDraft();
       if (this.adminToken) {
         void this.loadAdminCatalog({ silent: true });
+        void this.loadAnalytics({ silent: true });
       }
       this.catalogLoading = false;
       return;
     }
 
+    this.startAnalyticsTracking();
     void this.loadStorefrontConfig();
 
     if (this.isCategoryLandingPage || this.isAccountPage || this.isWishlistPage || this.isContactPage) {
@@ -568,6 +612,21 @@ export class AppComponent implements OnInit {
 
   formatPrice(value: number) {
     return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+  }
+
+  formatVisitDate(value: string) {
+    const parsed = Date.parse(value);
+
+    if (!Number.isFinite(parsed)) {
+      return 'Unknown';
+    }
+
+    return new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit'
+    }).format(new Date(parsed));
   }
 
   changeCatalogSort(value: string) {
@@ -747,6 +806,45 @@ export class AppComponent implements OnInit {
       this.adminMessage = 'Admin catalog saved. The storefront will use these SKU lists on the next refresh.';
     } catch {
       this.adminMessage = 'Unable to publish changes. Your draft is saved in this browser, but the public homepage will not update until Save Changes succeeds.';
+    }
+  }
+
+  async loadAnalytics(options: { silent?: boolean } = {}) {
+    if (!this.adminToken) {
+      if (!options.silent) {
+        this.analyticsMessage = 'Enter the admin token before loading visitor data.';
+      }
+      return;
+    }
+
+    this.analyticsLoading = true;
+
+    try {
+      const response = await fetch('/.netlify/functions/analytics', {
+        headers: this.adminHeaders()
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        this.analyticsMessage = payload.error || 'Unable to load visitor data.';
+        return;
+      }
+
+      this.analyticsSummary = this.normalizeAnalyticsSummary(payload);
+      this.analyticsMessage = options.silent ? '' : 'Visitor data refreshed.';
+      globalThis.localStorage?.setItem('cohens-elkton-admin-token', this.adminToken);
+    } catch {
+      this.analyticsMessage = 'Unable to reach the visitor analytics service.';
+    } finally {
+      this.analyticsLoading = false;
+    }
+  }
+
+  selectAdminTab(tab: 'catalog' | 'landing' | 'visitors') {
+    this.selectedAdminTab = tab;
+
+    if (tab === 'visitors') {
+      void this.loadAnalytics({ silent: true });
     }
   }
 
@@ -1003,6 +1101,118 @@ export class AppComponent implements OnInit {
     } catch {
       this.adminMessage = 'Changes are visible now, but this browser could not store the draft locally.';
     }
+  }
+
+  private startAnalyticsTracking() {
+    if (!globalThis.navigator || this.currentPath === '/admin') {
+      return;
+    }
+
+    this.analyticsVisitId = this.randomId();
+    this.analyticsSessionId = this.getAnalyticsSessionId();
+    this.analyticsStartedAt = Date.now();
+    this.analyticsLastPingAt = this.analyticsStartedAt;
+
+    void this.sendAnalyticsEvent('pageview');
+
+    globalThis.addEventListener?.('beforeunload', () => {
+      this.sendAnalyticsBeacon();
+    });
+
+    globalThis.document?.addEventListener?.('visibilitychange', () => {
+      if (globalThis.document?.visibilityState === 'hidden') {
+        this.sendAnalyticsBeacon();
+      }
+    });
+  }
+
+  private async sendAnalyticsEvent(event: 'pageview' | 'engagement') {
+    try {
+      await fetch('/.netlify/functions/analytics', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify(this.analyticsPayload(event))
+      });
+    } catch {
+      // Analytics should never interrupt shopping.
+    }
+  }
+
+  private sendAnalyticsBeacon() {
+    if (!this.analyticsVisitId || Date.now() - this.analyticsLastPingAt < 2000) {
+      return;
+    }
+
+    this.analyticsLastPingAt = Date.now();
+    const body = JSON.stringify(this.analyticsPayload('engagement'));
+
+    if (!globalThis.navigator?.sendBeacon?.('/.netlify/functions/analytics', new Blob([body], { type: 'application/json' }))) {
+      void this.sendAnalyticsEvent('engagement');
+    }
+  }
+
+  private analyticsPayload(event: 'pageview' | 'engagement') {
+    return {
+      id: this.analyticsVisitId,
+      sessionId: this.analyticsSessionId,
+      event,
+      path: this.currentPath,
+      fullUrl: globalThis.location?.href || '',
+      referrer: globalThis.document?.referrer || '',
+      title: globalThis.document?.title || this.title,
+      startedAt: new Date(this.analyticsStartedAt).toISOString(),
+      durationSeconds: Math.round((Date.now() - this.analyticsStartedAt) / 1000),
+      language: globalThis.navigator?.language || '',
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || '',
+      screen: globalThis.screen ? `${globalThis.screen.width}x${globalThis.screen.height}` : '',
+      userAgent: globalThis.navigator?.userAgent || ''
+    };
+  }
+
+  private getAnalyticsSessionId() {
+    try {
+      const existingSession = globalThis.sessionStorage?.getItem(this.analyticsSessionStorageKey);
+
+      if (existingSession) {
+        return existingSession;
+      }
+
+      const sessionId = this.randomId();
+      globalThis.sessionStorage?.setItem(this.analyticsSessionStorageKey, sessionId);
+      return sessionId;
+    } catch {
+      return this.randomId();
+    }
+  }
+
+  private randomId() {
+    return globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  }
+
+  private normalizeAnalyticsSummary(payload: AnalyticsSummary): AnalyticsSummary {
+    return {
+      totals: {
+        visits: Number(payload?.totals?.visits || 0),
+        uniqueSessions: Number(payload?.totals?.uniqueSessions || 0),
+        visitsToday: Number(payload?.totals?.visitsToday || 0),
+        visitsThisWeek: Number(payload?.totals?.visitsThisWeek || 0),
+        averageDurationSeconds: Number(payload?.totals?.averageDurationSeconds || 0)
+      },
+      topPages: this.normalizeAnalyticsCounts(payload?.topPages),
+      topReferrers: this.normalizeAnalyticsCounts(payload?.topReferrers),
+      topLocations: this.normalizeAnalyticsCounts(payload?.topLocations),
+      devices: this.normalizeAnalyticsCounts(payload?.devices),
+      browsers: this.normalizeAnalyticsCounts(payload?.browsers),
+      recentVisits: Array.isArray(payload?.recentVisits) ? payload.recentVisits : []
+    };
+  }
+
+  private normalizeAnalyticsCounts(counts: AnalyticsCount[] | undefined) {
+    return Array.isArray(counts)
+      ? counts.map((item) => ({ label: String(item.label || 'Unknown'), count: Number(item.count || 0) }))
+      : [];
   }
 
   private createDefaultAdminCatalog(): AdminCatalog {

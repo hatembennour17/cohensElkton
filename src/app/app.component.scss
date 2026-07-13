@@ -861,6 +861,95 @@ h3 {
   background: #ddd;
 }
 
+.admin-analytics {
+  display: grid;
+  gap: 18px;
+}
+
+.admin-analytics__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 16px;
+  border: 1px solid #dde1e7;
+  background: #f7f7f7;
+}
+
+.admin-analytics__header h2 {
+  font-size: 26px;
+}
+
+.analytics-cards {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.analytics-cards article {
+  padding: 16px;
+  border: 1px solid #dde1e7;
+  background: #fff;
+}
+
+.analytics-cards span {
+  display: block;
+  color: #555;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.analytics-cards strong {
+  color: #111;
+  font-size: 30px;
+  line-height: 1;
+}
+
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.analytics-grid section {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid #dde1e7;
+  background: #fff;
+}
+
+.analytics-grid h3 {
+  font-size: 18px;
+}
+
+.analytics-bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 9px;
+  background: #f4f5f7;
+}
+
+.analytics-bar span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.analytics-row {
+  grid-template-columns: 120px minmax(120px, 0.9fr) minmax(150px, 1fr) minmax(150px, 1fr) 130px 110px;
+}
+
+.analytics-row span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .category-browser {
   padding: 26px 0 58px;
   background: #fff;
@@ -1185,6 +1274,16 @@ h3 {
   color: #fff;
   background: #c52229;
   outline: none;
+}
+
+.catalog-actions svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .checkout-hero {

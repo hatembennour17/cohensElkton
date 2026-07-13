@@ -5,6 +5,20 @@ const defaultCatalog = {
     defaultMarkupPercent: 55,
     rounding: 'ending-99'
   },
+  hero: {
+    slides: [
+      {
+        image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/living-room-main_1.jpg',
+        alt: 'Stylish living room furniture at Cohen\'s Furniture',
+        enabled: true
+      },
+      {
+        image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/sofas.jpg',
+        alt: 'Comfortable sofa selection at Cohen\'s Furniture',
+        enabled: true
+      }
+    ]
+  },
   categories: {
     'living-room': { markupPercent: 55, products: [] },
     bedrooms: { markupPercent: 55, products: [] },
@@ -205,8 +219,27 @@ function normalizeCatalog(catalog) {
       defaultMarkupPercent: normalizeNumber(sourceRules.defaultMarkupPercent, 55),
       rounding: sourceRules.rounding === 'none' ? 'none' : 'ending-99'
     },
+    hero: {
+      slides: normalizeHeroSlides(source.hero?.slides)
+    },
     categories
   };
+}
+
+function normalizeHeroSlides(slides) {
+  if (!Array.isArray(slides)) {
+    return defaultCatalog.hero.slides;
+  }
+
+  const normalizedSlides = slides
+    .map((slide) => ({
+      image: String(slide?.image || '').trim(),
+      alt: String(slide?.alt || 'Cohen\'s Furniture landing slide').trim(),
+      enabled: slide?.enabled !== false
+    }))
+    .filter((slide) => slide.image);
+
+  return normalizedSlides.length ? normalizedSlides : defaultCatalog.hero.slides;
 }
 
 function normalizeCatalogProduct(product) {

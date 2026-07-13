@@ -26,6 +26,12 @@ type CategoryTile = {
   image: string;
 };
 
+type HeroSlide = {
+  image: string;
+  alt: string;
+  enabled: boolean;
+};
+
 type AdminCatalogProduct = {
   sku: string;
   enabled: boolean;
@@ -42,6 +48,9 @@ type AdminCatalog = {
   priceRules: {
     defaultMarkupPercent: number;
     rounding: 'ending-99' | 'none';
+  };
+  hero: {
+    slides: HeroSlide[];
   };
   categories: Record<string, AdminCatalogCategory>;
 };
@@ -117,10 +126,20 @@ export class AppComponent implements OnInit {
     href: category.path
   }));
 
-  heroImages = [
-    'https://cdn.rencdn.com/Cohensfurniture/uploads/images/living-room-main_1.jpg',
-    'https://cdn.rencdn.com/Cohensfurniture/uploads/images/sofas.jpg'
+  defaultHeroSlides: HeroSlide[] = [
+    {
+      image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/living-room-main_1.jpg',
+      alt: 'Stylish living room furniture at Cohen\'s Furniture',
+      enabled: true
+    },
+    {
+      image: 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/sofas.jpg',
+      alt: 'Comfortable sofa selection at Cohen\'s Furniture',
+      enabled: true
+    }
   ];
+  heroSlides: HeroSlide[] = [...this.defaultHeroSlides];
+  activeHeroSlideIndex = 0;
 
   socialLinks = [
     {
@@ -354,10 +373,13 @@ export class AppComponent implements OnInit {
   catalogProducts: Product[] = [];
   adminToken = globalThis.localStorage?.getItem('cohens-elkton-admin-token') || '';
   adminCatalog: AdminCatalog = this.createDefaultAdminCatalog();
+  selectedAdminTab: 'catalog' | 'landing' = 'catalog';
   selectedAdminCategory = 'living-room';
   newAdminSku = '';
+  newHeroImageUrl = '';
   adminMessage = '';
   adminDragIndex = -1;
+  adminHeroDragIndex = -1;
   orderMessage = '';
   orderSubmitting = false;
   financingMessage = '';
@@ -373,6 +395,8 @@ export class AppComponent implements OnInit {
   };
 
   ngOnInit() {
+    this.startHeroCarousel();
+
     if (this.isCategoryLandingPage || this.isAccountPage || this.isWishlistPage || this.isContactPage) {
       this.catalogLoading = false;
       return;
@@ -458,6 +482,15 @@ export class AppComponent implements OnInit {
       ...tile,
       image: tile.image || this.categoryImage(tile.label)
     }));
+  }
+
+  get enabledHeroSlides() {
+    const slides = this.heroSlides.filter((slide) => slide.enabled && slide.image);
+    return slides.length ? slides : this.defaultHeroSlides;
+  }
+
+  get activeHeroSlide() {
+    return this.enabledHeroSlides[this.activeHeroSlideIndex] || this.enabledHeroSlides[0];
   }
 
   get categoryTitle() {
@@ -658,6 +691,7 @@ export class AppComponent implements OnInit {
       }
 
       this.adminCatalog = this.normalizeAdminCatalog(payload.catalog);
+      this.applyHeroSlides(this.adminCatalog.hero.slides);
       globalThis.localStorage?.setItem('cohens-elkton-admin-token', this.adminToken);
       this.adminMessage = 'Admin catalog loaded.';
     } catch {
@@ -688,6 +722,7 @@ export class AppComponent implements OnInit {
       }
 
       this.adminCatalog = this.normalizeAdminCatalog(payload.catalog);
+      this.applyHeroSlides(this.adminCatalog.hero.slides);
       globalThis.localStorage?.setItem('cohens-elkton-admin-token', this.adminToken);
       this.adminMessage = 'Admin catalog saved. The storefront will use these SKU lists on the next refresh.';
     } catch {
@@ -767,6 +802,84 @@ export class AppComponent implements OnInit {
     product[key] = value === '' ? null : this.numberOrDefault(String(value), 0);
   }
 
+  addHeroImageUrl() {
+    const image = this.newHeroImageUrl.trim();
+
+    if (!image) {
+      return;
+    }
+
+    this.adminCatalog.hero.slides.push({
+      image,
+      alt: 'Cohen\'s Furniture landing slide',
+      enabled: true
+    });
+    this.applyHeroSlides(this.adminCatalog.hero.slides);
+    this.newHeroImageUrl = '';
+  }
+
+  async importHeroImages(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const files = Array.from(input.files || []);
+
+    if (!files.length) {
+      return;
+    }
+
+    try {
+      const slides = await Promise.all(files.map(async (file) => ({
+        image: await this.readFileAsDataUrl(file),
+        alt: file.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' '),
+        enabled: true
+      })));
+
+      this.adminCatalog.hero.slides.push(...slides);
+      this.applyHeroSlides(this.adminCatalog.hero.slides);
+      this.adminMessage = `Added ${slides.length} landing slide image${slides.length === 1 ? '' : 's'}. Save changes to publish.`;
+      input.value = '';
+    } catch {
+      this.adminMessage = 'Unable to read those image files.';
+    }
+  }
+
+  updateHeroSlide(index: number, key: keyof HeroSlide, value: string | boolean) {
+    const slide = this.adminCatalog.hero.slides[index];
+
+    if (!slide) {
+      return;
+    }
+
+    if (key === 'enabled') {
+      slide.enabled = Boolean(value);
+    } else {
+      slide[key] = String(value);
+    }
+
+    this.applyHeroSlides(this.adminCatalog.hero.slides);
+  }
+
+  removeHeroSlide(index: number) {
+    this.adminCatalog.hero.slides.splice(index, 1);
+    this.applyHeroSlides(this.adminCatalog.hero.slides);
+  }
+
+  startHeroDrag(index: number) {
+    this.adminHeroDragIndex = index;
+  }
+
+  dropHeroSlide(index: number) {
+    const slides = this.adminCatalog.hero.slides;
+
+    if (this.adminHeroDragIndex < 0 || index < 0 || this.adminHeroDragIndex >= slides.length || index >= slides.length) {
+      return;
+    }
+
+    const [slide] = slides.splice(this.adminHeroDragIndex, 1);
+    slides.splice(index, 0, slide);
+    this.adminHeroDragIndex = -1;
+    this.applyHeroSlides(slides);
+  }
+
   async importAdminSkuFile(event: Event) {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
@@ -838,19 +951,71 @@ export class AppComponent implements OnInit {
         defaultMarkupPercent: 55,
         rounding: 'ending-99'
       },
+      hero: {
+        slides: [...this.defaultHeroSlides]
+      },
       categories
     };
   }
 
   private normalizeAdminCatalog(catalog: AdminCatalog): AdminCatalog {
+    const defaultCatalog = this.createDefaultAdminCatalog();
+
     return {
-      ...this.createDefaultAdminCatalog(),
+      ...defaultCatalog,
       ...catalog,
+      hero: {
+        slides: this.normalizeHeroSlides(catalog?.hero?.slides)
+      },
       categories: {
-        ...this.createDefaultAdminCatalog().categories,
+        ...defaultCatalog.categories,
         ...(catalog?.categories || {})
       }
     };
+  }
+
+  private normalizeHeroSlides(slides: unknown) {
+    if (!Array.isArray(slides)) {
+      return [...this.defaultHeroSlides];
+    }
+
+    const normalizedSlides = slides
+      .map((slide) => ({
+        image: String((slide as HeroSlide)?.image || '').trim(),
+        alt: String((slide as HeroSlide)?.alt || 'Cohen\'s Furniture landing slide').trim(),
+        enabled: (slide as HeroSlide)?.enabled !== false
+      }))
+      .filter((slide) => slide.image);
+
+    return normalizedSlides.length ? normalizedSlides : [...this.defaultHeroSlides];
+  }
+
+  private applyHeroSlides(slides: unknown) {
+    this.heroSlides = this.normalizeHeroSlides(slides);
+    this.activeHeroSlideIndex = Math.min(this.activeHeroSlideIndex, this.enabledHeroSlides.length - 1);
+  }
+
+  private startHeroCarousel() {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    window.setInterval(() => {
+      const slides = this.enabledHeroSlides;
+
+      if (slides.length > 1) {
+        this.activeHeroSlideIndex = (this.activeHeroSlideIndex + 1) % slides.length;
+      }
+    }, 5500);
+  }
+
+  private readFileAsDataUrl(file: File) {
+    return new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ''));
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
   }
 
   private numberOrDefault(value: string, fallback: number) {
@@ -941,6 +1106,7 @@ export class AppComponent implements OnInit {
       }
 
       const payload = await response.json();
+      this.applyHeroSlides(payload.hero?.slides);
       const products = Array.isArray(payload.products) ? payload.products : [];
       const usableProducts = products.filter((product: Product) => product.sku && product.name);
 

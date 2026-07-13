@@ -150,15 +150,53 @@ img {
 }
 
 .hero__media {
+  position: relative;
   width: 100%;
   height: 100%;
   min-height: 520px;
+  overflow: hidden;
+  background: #111;
 }
 
 .hero__media img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  opacity: 0;
+  transform: scale(1.02);
+  transition:
+    opacity 600ms ease,
+    transform 1600ms ease;
+}
+
+.hero__media img.hero__slide--active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.hero__controls {
+  position: absolute;
+  right: 28px;
+  bottom: 24px;
+  z-index: 2;
+  display: flex;
+  gap: 9px;
+}
+
+.hero__controls button {
+  width: 12px;
+  height: 12px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+}
+
+.hero__controls button.hero__dot--active {
+  background: #b42024;
 }
 
 .hero__content {
@@ -680,6 +718,29 @@ h3 {
   padding: 20px;
 }
 
+.admin-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid #dde1e7;
+}
+
+.admin-tabs button {
+  min-height: 42px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  padding: 0 14px;
+  background: transparent;
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.admin-tabs button.admin-tab--active {
+  border-bottom-color: #b42024;
+  color: #b42024;
+}
+
 .admin-toolbar {
   display: grid;
   grid-template-columns: 1.4fr repeat(3, minmax(130px, 0.5fr));
@@ -760,6 +821,44 @@ h3 {
   padding: 26px;
   color: #555;
   text-align: center;
+}
+
+.admin-landing {
+  display: grid;
+  gap: 18px;
+}
+
+.admin-hero-preview {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  align-items: center;
+  gap: 18px;
+  padding: 14px;
+  border: 1px solid #dde1e7;
+  background: #f7f7f7;
+}
+
+.admin-hero-preview img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  background: #ddd;
+}
+
+.admin-hero-preview h2 {
+  margin-bottom: 8px;
+  font-size: 24px;
+}
+
+.admin-hero-row {
+  grid-template-columns: 70px 80px 110px minmax(160px, 0.8fr) minmax(220px, 1.2fr) 90px;
+}
+
+.admin-hero-row img {
+  width: 88px;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  background: #ddd;
 }
 
 .category-browser {
@@ -1721,6 +1820,11 @@ h3 {
     order: -1;
   }
 
+  .hero__controls {
+    right: 18px;
+    bottom: 18px;
+  }
+
   h1 {
     font-size: 42px;
   }
@@ -1729,6 +1833,7 @@ h3 {
   .category-grid,
   .category-bubble-grid,
   .admin-layout,
+  .admin-hero-preview,
   .feature-layout,
   .checkout-grid,
   .finance-grid,
@@ -1825,7 +1930,12 @@ h3 {
   }
 
   .admin-row,
+  .admin-hero-row,
   .admin-row--head {
     grid-template-columns: 1fr;
+  }
+
+  .admin-hero-row img {
+    width: 100%;
   }
 }

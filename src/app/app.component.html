@@ -60,6 +60,24 @@
           </aside>
 
           <section class="admin-panel">
+            <div class="admin-tabs" role="tablist" aria-label="Admin sections">
+              <button
+                type="button"
+                [class.admin-tab--active]="selectedAdminTab === 'catalog'"
+                (click)="selectedAdminTab = 'catalog'"
+              >
+                Catalog
+              </button>
+              <button
+                type="button"
+                [class.admin-tab--active]="selectedAdminTab === 'landing'"
+                (click)="selectedAdminTab = 'landing'"
+              >
+                Landing Images
+              </button>
+            </div>
+
+            @if (selectedAdminTab === 'catalog') {
             <div class="admin-toolbar">
               <label>
                 Category
@@ -163,6 +181,82 @@
                 </div>
               }
             </div>
+            } @else {
+              <div class="admin-landing">
+                <div class="admin-import">
+                  <label>
+                    Add Image URL
+                    <span>
+                      <input
+                        type="url"
+                        [value]="newHeroImageUrl"
+                        (input)="newHeroImageUrl = $any($event.target).value"
+                        placeholder="https://example.com/landing-image.jpg"
+                      />
+                      <button type="button" (click)="addHeroImageUrl()">Add</button>
+                    </span>
+                  </label>
+                  <label>
+                    Upload Images
+                    <input type="file" accept="image/*" multiple (change)="importHeroImages($event)" />
+                  </label>
+                </div>
+
+                <div class="admin-hero-preview">
+                  <img [src]="activeHeroSlide.image" [alt]="activeHeroSlide.alt" />
+                  <div>
+                    <p class="eyebrow">Landing carousel</p>
+                    <h2>{{ enabledHeroSlides.length }} active slide{{ enabledHeroSlides.length === 1 ? '' : 's' }}</h2>
+                    <p>Drag saved slides into the order you want, then save changes to publish them.</p>
+                  </div>
+                </div>
+
+                <div class="admin-table admin-hero-table">
+                  <div class="admin-row admin-row--head admin-hero-row">
+                    <span>Order</span>
+                    <span>Enabled</span>
+                    <span>Preview</span>
+                    <span>Alt Text</span>
+                    <span>Image URL / Data</span>
+                    <span></span>
+                  </div>
+                  @for (slide of adminCatalog.hero.slides; track slide.image; let index = $index) {
+                    <div
+                      class="admin-row admin-hero-row"
+                      draggable="true"
+                      (dragstart)="startHeroDrag(index)"
+                      (dragover)="$event.preventDefault()"
+                      (drop)="dropHeroSlide(index)"
+                    >
+                      <span class="drag-handle">Drag</span>
+                      <label class="admin-check">
+                        <input
+                          type="checkbox"
+                          [checked]="slide.enabled"
+                          (change)="updateHeroSlide(index, 'enabled', $any($event.target).checked)"
+                        />
+                      </label>
+                      <img [src]="slide.image" [alt]="slide.alt" />
+                      <input
+                        type="text"
+                        [value]="slide.alt"
+                        (input)="updateHeroSlide(index, 'alt', $any($event.target).value)"
+                      />
+                      <input
+                        type="text"
+                        [value]="slide.image"
+                        (input)="updateHeroSlide(index, 'image', $any($event.target).value)"
+                      />
+                      <button class="text-button" type="button" (click)="removeHeroSlide(index)">Remove</button>
+                    </div>
+                  } @empty {
+                    <div class="admin-empty">
+                      Add a landing image URL or upload image files to build the homepage carousel.
+                    </div>
+                  }
+                </div>
+              </div>
+            }
           </section>
         </div>
       </section>
@@ -639,7 +733,23 @@
         </div>
       </div>
       <div class="hero__media">
-        <img [src]="heroImages[0]" alt="Stylish living room furniture at Cohen's Furniture" />
+        @for (slide of enabledHeroSlides; track slide.image; let index = $index) {
+          <img
+            [src]="slide.image"
+            [alt]="slide.alt"
+            [class.hero__slide--active]="index === activeHeroSlideIndex"
+          />
+        }
+        <div class="hero__controls" aria-label="Landing carousel slides">
+          @for (slide of enabledHeroSlides; track slide.image; let index = $index) {
+            <button
+              type="button"
+              [class.hero__dot--active]="index === activeHeroSlideIndex"
+              [attr.aria-label]="'Show landing slide ' + (index + 1)"
+              (click)="activeHeroSlideIndex = index"
+            ></button>
+          }
+        </div>
       </div>
     </section>
 

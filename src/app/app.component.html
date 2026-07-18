@@ -745,6 +745,112 @@
           <a class="btn btn--primary" [href]="activeCategory?.path + '?view=products'">View All {{ categoryTitle }} Products</a>
         </div>
       </section>
+    } @else if (isProductPage) {
+      <section class="wrap product-detail">
+        <nav class="product-breadcrumb" aria-label="Breadcrumb">
+          <a href="/">Home</a>
+          <span aria-hidden="true">›</span>
+          <span>{{ productDetailProduct?.name || activeProductSku }}</span>
+        </nav>
+
+        @if (catalogLoading) {
+          <div class="product-detail__loading">
+            <div class="product-loader">
+              <span></span>
+              <strong>Loading product</strong>
+            </div>
+          </div>
+        } @else {
+          @if (productDetailProduct; as product) {
+            <div class="product-detail__grid">
+              <div class="product-gallery">
+                <img class="product-gallery__main" [src]="product.image" [alt]="product.name" (error)="useImageFallback($event, product.name)" />
+              </div>
+
+              <aside class="product-buybox" aria-label="Product purchase options">
+                <h1>{{ product.name }}</h1>
+                <p class="product-buybox__price">Sale: {{ formatPrice(product.unitPrice) }}</p>
+                <div class="product-view-tools" aria-label="Product viewing tools">
+                  <button type="button">
+                    <span aria-hidden="true">360</span>
+                    View in 3D
+                  </button>
+                  <button type="button">
+                    <span aria-hidden="true">▣</span>
+                    View in Your Room
+                  </button>
+                </div>
+
+                <label class="product-qty">
+                  QTY
+                  <select #detailQty>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                  </select>
+                </label>
+
+                <div class="product-buybox__actions">
+                  <button type="button" (click)="addToCartQuantity(product, detailQty.value)">Add to Cart</button>
+                  <button type="button" (click)="buyNow(product, detailQty.value)">Buy Now</button>
+                </div>
+
+                <div class="product-share" aria-label="Share product">
+                  @for (social of socialLinks; track social.label) {
+                    <a [href]="social.href" target="_blank" rel="noopener" [attr.aria-label]="social.label">
+                      <img [src]="social.icon" [alt]="social.label" />
+                    </a>
+                  }
+                  <button type="button" aria-label="Print product">▣</button>
+                  <button type="button" aria-label="Email product">✉</button>
+                </div>
+
+                <div class="product-secondary-actions">
+                  <button type="button" aria-label="Add product to wishlist">♡</button>
+                  <button type="button" aria-label="Product information">i</button>
+                </div>
+              </aside>
+            </div>
+
+            <div class="product-thumbs" aria-label="Product images">
+              @for (image of productDetailImages(product); track image) {
+                <button type="button">
+                  <img [src]="image" [alt]="product.name" (error)="useImageFallback($event, product.name)" />
+                </button>
+              }
+            </div>
+
+            <div class="product-tabs" role="tablist" aria-label="Product details">
+              <button type="button" class="active">Description</button>
+              <button type="button">Related Products</button>
+              <button type="button">Recently Viewed</button>
+              <button type="button">Collection Items</button>
+            </div>
+
+            <section class="product-info-panel">
+              <div>
+                <p>{{ productDescription(product) }}</p>
+                <p><strong>SKU:</strong> {{ product.sku }}</p>
+              </div>
+              <div>
+                <h2>Dimensions</h2>
+                <ul>
+                  @for (detail of productDetails(product); track detail.label) {
+                    <li><strong>{{ detail.label }}:</strong> {{ detail.value }}</li>
+                  }
+                </ul>
+              </div>
+            </section>
+          } @else {
+            <div class="catalog-empty">
+              <h2>No product found.</h2>
+              <p>Try searching for another SKU or choose an Elkton category.</p>
+            </div>
+          }
+        }
+      </section>
     } @else if (isCategoryPage || isSearchPage) {
       <section class="category-hero">
         <div class="wrap category-hero__inner">
@@ -805,7 +911,7 @@
             <article class="catalog-card">
               <div class="catalog-card__media">
                 <img [src]="product.image" [alt]="product.name" (error)="useImageFallback($event, product.name)" />
-                <a class="quick-view" [href]="product.href">Quick View</a>
+                <a class="quick-view" [href]="productDetailHref(product)">Quick View</a>
               </div>
               <div class="catalog-card__body">
                 @if (product.kicker) {
@@ -826,7 +932,7 @@
                       <path d="M3 4h2.2l2.2 11.2a2 2 0 0 0 2 1.6h8.9a2 2 0 0 0 1.9-1.4L22 8H7"></path>
                     </svg>
                   </button>
-                  <a [href]="product.href" title="More information" [attr.aria-label]="'More information about ' + product.name">
+                  <a [href]="productDetailHref(product)" title="More information" [attr.aria-label]="'More information about ' + product.name">
                     <span aria-hidden="true">?</span>
                   </a>
                 </div>

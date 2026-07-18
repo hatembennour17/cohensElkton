@@ -667,15 +667,21 @@ function normalizeProduct(product, priceConfig, adminCatalog, category) {
   ]);
   const price = applyPriceRule(basePrice, priceConfig, adminCatalog, category);
   const image = firstImage(product);
+  const images = firstImages(product, image);
+  const description = firstDescription(product, name);
+  const details = productDetails(product);
 
   return {
     sku: String(sku),
     name: String(name),
     brand: brand ? String(brand) : 'Ashley',
     image,
+    images,
+    description,
+    details,
     ashleyPrice: basePrice || 0,
     unitPrice: price || 0,
-    href: `/search?q=${encodeURIComponent(String(sku))}`,
+    href: `/product/${encodeURIComponent(String(sku))}`,
     kicker: brand ? String(brand) : 'Ashley product'
   };
 }
@@ -763,4 +769,62 @@ function firstImage(product) {
   }
 
   return 'https://cdn.rencdn.com/Cohensfurniture/uploads/images/sofas.jpg';
+}
+
+function firstImages(product, fallbackImage) {
+  const imageCandidates = [
+    firstValue(product, [
+      'image',
+      'imageUrl',
+      'imageURL',
+      'primaryImage',
+      'primaryImageUrl',
+      'itemRoomImage',
+      'largeImageUrl',
+      'mediumImageUrl',
+      'knockout',
+      'dimensionSketch'
+    ]),
+    ...(Array.isArray(product?.imageSet) ? product.imageSet : []),
+    ...(Array.isArray(product?.images) ? product.images : []),
+    ...(Array.isArray(product?.media) ? product.media : []),
+    ...(Array.isArray(product?.assets) ? product.assets : [])
+  ];
+
+  const images = imageCandidates
+    .map((image) => String(image?.url || image?.imageUrl || image?.href || image || '').trim())
+    .filter(Boolean);
+
+  return [...new Set([fallbackImage, ...images].filter(Boolean))].slice(0, 8);
+}
+
+function firstDescription(product, fallbackName) {
+  const description = firstValue(product, [
+    'detailedDescription',
+    'consumerDescription',
+    'productDescription',
+    'seriesFeatures',
+    'longDescription',
+    'description'
+  ]);
+
+  return description
+    ? String(description).replace(/\s+/g, ' ').trim()
+    : `${fallbackName} is available through Cohen's Furniture in Elkton. Contact the showroom for availability, delivery timing, and package details.`;
+}
+
+function productDetails(product) {
+  const details = [
+    ['Weight', firstValue(product, ['weight', 'itemWeight', 'cartonWeight'])],
+    ['Width', firstValue(product, ['width', 'itemWidth', 'assembledWidth', 'cartonWidth'])],
+    ['Depth', firstValue(product, ['depth', 'itemDepth', 'assembledDepth', 'cartonDepth'])],
+    ['Height', firstValue(product, ['height', 'itemHeight', 'assembledHeight', 'cartonHeight'])]
+  ];
+
+  return details
+    .filter((detail) => detail[1] !== undefined && detail[1] !== null && detail[1] !== '')
+    .map(([label, value]) => ({
+      label,
+      value: String(value).match(/in|lb|kg|"/i) ? String(value) : `${value}`
+    }));
 }

@@ -4,10 +4,19 @@ type Product = {
   sku: string;
   name: string;
   image: string;
+  images?: string[];
   unitPrice: number;
   ashleyPrice?: number;
   href: string;
   kicker?: string;
+  brand?: string;
+  description?: string;
+  details?: ProductDetail[];
+};
+
+type ProductDetail = {
+  label: string;
+  value: string;
 };
 
 type CartItem = Product & {
@@ -494,6 +503,25 @@ export class AppComponent implements OnInit {
     return this.currentPath === '/admin';
   }
 
+  get isProductPage() {
+    return this.currentPath.startsWith('/product/');
+  }
+
+  get activeProductSku() {
+    return this.isProductPage
+      ? decodeURIComponent(this.currentPath.replace('/product/', '')).trim().toUpperCase()
+      : '';
+  }
+
+  get productDetailProduct() {
+    if (!this.activeProductSku) {
+      return undefined;
+    }
+
+    return [...this.catalogProducts, ...this.searchFallbackProducts, ...this.livingDeals, ...this.diningTiles]
+      .find((product) => product.sku.toUpperCase() === this.activeProductSku);
+  }
+
   get isCategoryPage() {
     return this.currentPath.startsWith('/c/');
   }
@@ -644,6 +672,29 @@ export class AppComponent implements OnInit {
     image.src = this.categoryImage(label);
   }
 
+  productDetailHref(product: Product) {
+    return `/product/${encodeURIComponent(product.sku)}`;
+  }
+
+  productDetailImages(product: Product) {
+    return [...new Set([product.image, ...(product.images || [])].filter(Boolean))].slice(0, 8);
+  }
+
+  productDescription(product: Product) {
+    return product.description || `${product.name} is available through Cohen's Furniture in Elkton. Contact the showroom for availability, delivery timing, and package details.`;
+  }
+
+  productDetails(product: Product) {
+    const details = product.details?.filter((detail) => detail.label && detail.value) || [];
+
+    return details.length
+      ? details
+      : [
+          { label: 'SKU', value: product.sku },
+          { label: 'Store', value: 'Cohen\'s Furniture in Elkton' }
+        ];
+  }
+
   addToCart(product: Product) {
     const existing = this.cartItems.find((item) => item.sku === product.sku);
 
@@ -654,6 +705,24 @@ export class AppComponent implements OnInit {
     }
 
     this.saveCart();
+  }
+
+  addToCartQuantity(product: Product, quantity: number | string) {
+    const normalizedQuantity = Math.max(1, Number(quantity) || 1);
+    const existing = this.cartItems.find((item) => item.sku === product.sku);
+
+    if (existing) {
+      existing.quantity += normalizedQuantity;
+    } else {
+      this.cartItems = [...this.cartItems, { ...product, quantity: normalizedQuantity }];
+    }
+
+    this.saveCart();
+  }
+
+  buyNow(product: Product, quantity: number | string) {
+    this.addToCartQuantity(product, quantity);
+    globalThis.location.href = this.links.checkout;
   }
 
   updateQuantity(sku: string, quantity: number) {
@@ -1434,7 +1503,7 @@ export class AppComponent implements OnInit {
     this.catalogMessage = 'Loading Ashley catalog products for the Elkton site.';
 
     try {
-      const catalogLimit = this.activeSubcategorySlug ? '1000' : this.isCategoryPage || this.isSearchPage ? '96' : '12';
+      const catalogLimit = this.activeProductSku ? '1' : this.activeSubcategorySlug ? '1000' : this.isCategoryPage || this.isSearchPage ? '96' : '12';
       const params = new URLSearchParams({ limit: catalogLimit });
 
       if (this.activeCategorySlug && !this.isCategoryLandingPage) {
@@ -1447,6 +1516,10 @@ export class AppComponent implements OnInit {
 
       if (this.searchQuery) {
         params.set('q', this.searchQuery);
+      }
+
+      if (this.activeProductSku) {
+        params.set('skus', this.activeProductSku);
       }
 
       const response = await fetch(`/.netlify/functions/ashley-products?${params}`);

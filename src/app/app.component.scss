@@ -143,19 +143,19 @@ img {
 .hero {
   min-height: 520px;
   display: grid;
-  grid-template-columns: minmax(360px, 0.9fr) minmax(0, 1.1fr);
+  grid-template-columns: minmax(360px,.82fr) minmax(0,1.18fr);
   align-items: center;
   overflow: hidden;
-  background: #181818;
+  background: #f7f1ea;
 }
 
 .hero__media {
   position: relative;
   width: 100%;
   height: 100%;
-  min-height: 520px;
+  min-height: 560px;
   overflow: hidden;
-  background: #111;
+  background: #f0eee9;
 }
 
 .hero__media img {
@@ -178,7 +178,7 @@ img {
 
 .hero__controls {
   position: absolute;
-  right: 28px;
+  right: 32px;
   bottom: 24px;
   z-index: 2;
   display: flex;
@@ -202,8 +202,8 @@ img {
 .hero__content {
   width: min(100% - 32px, 560px);
   justify-self: end;
-  color: #fff;
-  padding: 58px 34px 58px 0;
+  color: #171717;
+  padding:64px 42px 64px 0;
 }
 
 .eyebrow {
@@ -216,7 +216,7 @@ img {
 }
 
 .hero .eyebrow {
-  color: #ffd44d;
+  color: #b42024;
 }
 
 h1,
@@ -250,6 +250,7 @@ h3 {
 .hero__copy {
   max-width: 520px;
   margin-bottom: 28px;
+  color: #333;
   font-size: 20px;
   line-height: 1.55;
 }
@@ -258,7 +259,7 @@ h3 {
   display: grid;
   gap: 5px;
   margin: 0 0 24px;
-  color: #fff;
+  color: #171717;
   font-style: normal;
   line-height: 1.4;
 }
@@ -268,12 +269,12 @@ h3 {
 }
 
 .hero__location span {
-  color: #e1e1e1;
+  color: #555;
 }
 
 .hero__location a {
   width: fit-content;
-  color: #ffd44d;
+  color: #b42024;
   font-weight: 900;
 }
 
@@ -305,8 +306,8 @@ h3 {
 }
 
 .btn--outline {
-  color: #fff;
-  border: 2px solid #fff;
+  color: #171717;
+  border:2px solid #171717;
   background: transparent;
 }
 
@@ -1053,7 +1054,7 @@ h3 {
 
 .category-hero {
   color: #fff;
-  background: #181818;
+  background: #f7f1ea;
 }
 
 .category-hero__inner {
@@ -1065,7 +1066,7 @@ h3 {
 
 .category-hero__inner p:not(.eyebrow) {
   max-width: 760px;
-  color: #ededed;
+  color: #555;
   font-size: 19px;
   line-height: 1.6;
 }
@@ -1074,13 +1075,13 @@ h3 {
   display: grid;
   gap: 4px;
   margin-top: 16px;
-  color: #ededed;
+  color: #555;
   font-style: normal;
 }
 
 .category-hero address a {
   width: fit-content;
-  color: #ffd44d;
+  color: #b42024;
   font-weight: 900;
 }
 
@@ -1288,7 +1289,7 @@ h3 {
 
 .checkout-hero {
   color: #fff;
-  background: #181818;
+  background: #f7f1ea;
 }
 
 .checkout-hero__inner {
@@ -1300,7 +1301,7 @@ h3 {
 
 .checkout-hero p:not(.eyebrow) {
   max-width: 760px;
-  color: #ededed;
+  color: #555;
   font-size: 19px;
   line-height: 1.6;
 }

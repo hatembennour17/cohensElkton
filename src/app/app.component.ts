@@ -35,6 +35,17 @@ type CategoryTile = {
   image: string;
 };
 
+type SeoPage = {
+  path: string;
+  eyebrow: string;
+  title: string;
+  description: string;
+  primaryHref: string;
+  primaryLabel: string;
+  sections: { heading: string; body: string }[];
+  faqs: { question: string; answer: string }[];
+};
+
 type HeroSlide = {
   image: string;
   alt: string;
@@ -174,6 +185,119 @@ export class AppComponent implements OnInit {
     label: category.label,
     href: category.path
   }));
+
+  seoPages: SeoPage[] = [
+    {
+      path: '/living-room-furniture-elkton-md',
+      eyebrow: 'Living room furniture in Elkton, MD',
+      title: 'Living Room Furniture for Elkton and Cecil County Homes',
+      description: 'Shop sofas, sectionals, recliners, loveseats, tables, and entertainment furniture with help from the Cohen\'s Furniture team in Elkton, Maryland.',
+      primaryHref: '/c/living-room',
+      primaryLabel: 'Shop Living Room',
+      sections: [
+        {
+          heading: 'A local place to compare living room furniture',
+          body: 'Cohen\'s Furniture in Elkton helps Maryland shoppers compare living room pieces for real homes, apartments, family rooms, and rental properties across Cecil County. Instead of sending customers into a general multi-location checkout flow, this site keeps the shopping path focused on the Elkton showroom at 901 E. Pulaski Highway. Browse sectionals, sofa sets, recliners, loveseats, accent chairs, coffee tables, end tables, TV stands, storage cabinets, and home theater seating, then contact the Elkton team for availability, delivery timing, pickup options, and current order details.'
+        },
+        {
+          heading: 'Sofas, sectionals, recliners, and room packages',
+          body: 'Living room shoppers often need more than one item. A sectional may need an ottoman, a reclining sofa may need a matching loveseat, and a TV wall may need storage that fits the room. The Elkton team can help match Ashley catalog items, showroom specials, and practical room packages for customers in Elkton, North East, Chesapeake City, Perryville, Rising Sun, and nearby communities. Product pages on this site are built around Elkton-only checkout and request handling so local shoppers know which store will follow up.'
+        }
+      ],
+      faqs: [
+        { question: 'Can I buy living room furniture through the Elkton store?', answer: 'Yes. Add items to the cart and submit an Elkton order request, or call the showroom for current availability.' },
+        { question: 'Does the Elkton location handle delivery?', answer: 'Delivery and pickup details are confirmed by the Elkton team after the order request is reviewed.' }
+      ]
+    },
+    {
+      path: '/bedroom-furniture-elkton-md',
+      eyebrow: 'Bedroom furniture in Elkton, MD',
+      title: 'Bedroom Furniture, Beds, Dressers, and Nightstands in Elkton',
+      description: 'Find bedroom sets, beds, dressers, mirrors, chests, nightstands, headboards, and storage pieces available through Cohen\'s Furniture in Elkton.',
+      primaryHref: '/c/bedrooms',
+      primaryLabel: 'Shop Bedroom',
+      sections: [
+        {
+          heading: 'Bedroom furniture with local Elkton support',
+          body: 'The Maryland site is being built to help Elkton shoppers find bedroom furniture without being routed to another store location. Customers can browse Ashley bedroom products, compare prices, and submit an order request for the Elkton showroom. That matters because bedroom purchases often involve multiple pieces, room measurements, delivery planning, and questions about whether a bed, dresser, mirror, chest, or nightstand is part of a set or sold separately.'
+        },
+        {
+          heading: 'From complete bedroom sets to single pieces',
+          body: 'Shop for panel beds, storage beds, headboards, dressers, mirrored dressers, chests, media chests, nightstands, vanities, benches, and youth bedroom pieces. The local Elkton team can help confirm whether a collection has matching pieces, what sizes are available, and what options make sense for Cecil County homes. This page gives search engines and customers a clear Maryland-focused bedroom furniture page instead of relying only on a generic catalog page.'
+        }
+      ],
+      faqs: [
+        { question: 'Can I request a full bedroom set?', answer: 'Yes. Add the available items to the cart or contact the Elkton showroom to confirm matching pieces.' },
+        { question: 'Can the store help with bed sizes?', answer: 'Yes. The Elkton team can help compare twin, full, queen, and king options when available.' }
+      ]
+    },
+    {
+      path: '/dining-room-furniture-elkton-md',
+      eyebrow: 'Dining furniture in Elkton, MD',
+      title: 'Dining Room Furniture for Elkton Homes',
+      description: 'Browse dining room sets, tables, chairs, benches, servers, bar stools, and dining storage through Cohen\'s Furniture in Elkton.',
+      primaryHref: '/c/dining-room',
+      primaryLabel: 'Shop Dining Room',
+      sections: [
+        {
+          heading: 'Tables, chairs, benches, and dining storage',
+          body: 'Dining rooms work hard in Maryland homes. They host family meals, holidays, homework, and everyday gathering. Cohen\'s Furniture in Elkton gives local shoppers a focused place to compare dining room sets, tables, chairs, benches, bar stools, servers, buffets, and storage pieces. The goal is to keep shoppers connected to the Elkton store for product questions, delivery coordination, and pickup instead of sending them through a shared location path.'
+        },
+        {
+          heading: 'Useful local guidance before ordering',
+          body: 'Dining furniture choices depend on room size, seating needs, finish, durability, and whether the customer wants a complete set or individual chairs. The Elkton showroom can help Cecil County customers think through table shape, seating count, counter-height options, and matching storage. This landing page also gives Google a dedicated dining furniture page for Elkton searches, strengthening the Maryland domain beyond the homepage.'
+        }
+      ],
+      faqs: [
+        { question: 'Can I order dining sets from the Elkton location?', answer: 'Yes. Submit an order request and the Elkton team will review availability and next steps.' },
+        { question: 'Do dining chairs and tables come separately?', answer: 'Some items are sold separately and some are part of sets. The Elkton store can confirm the exact package.' }
+      ]
+    },
+    {
+      path: '/mattresses-elkton-md',
+      eyebrow: 'Mattresses in Elkton, MD',
+      title: 'Mattresses and Bedroom Comfort Options in Elkton',
+      description: 'Shop mattress sets, foundations, bedding, and bedroom comfort products with local help from Cohen\'s Furniture in Elkton.',
+      primaryHref: '/c/mattresses',
+      primaryLabel: 'Shop Mattresses',
+      sections: [
+        {
+          heading: 'Mattress shopping with a local contact',
+          body: 'A mattress purchase is personal, and customers often want local help before they decide. Cohen\'s Furniture in Elkton can help Maryland shoppers compare mattress sizes, foundations, bedding options, and bedroom furniture that works with the new mattress. This page is focused on Elkton and Cecil County searches so customers know exactly which showroom will help them after they submit a request.'
+        },
+        {
+          heading: 'Bedroom comfort, foundations, and financing questions',
+          body: 'Many mattress shoppers also ask about delivery, removal timing, financing, and whether a foundation or adjustable base is needed. The Elkton team can review current options and help customers understand which products are available through the Ashley catalog or the showroom. Keeping mattress content on a dedicated page gives the Maryland site a better chance to appear for local mattress store searches instead of relying on the homepage alone.'
+        }
+      ],
+      faqs: [
+        { question: 'Can I finance a mattress purchase?', answer: 'Financing and leasing options may be available. Review the financing page or call the Elkton showroom.' },
+        { question: 'Does Elkton handle mattress delivery?', answer: 'Delivery details are confirmed by the Elkton store after the order request is reviewed.' }
+      ]
+    },
+    {
+      path: '/sectionals-elkton-md',
+      eyebrow: 'Sectionals in Elkton, MD',
+      title: 'Sectional Sofas for Elkton, Maryland Living Rooms',
+      description: 'Compare sectional sofas, chaise sectionals, sleeper sectionals, and reclining sectionals available through Cohen\'s Furniture in Elkton.',
+      primaryHref: '/c/living-room?sub=sectionals',
+      primaryLabel: 'Shop Sectionals',
+      sections: [
+        {
+          heading: 'Sectionals sized for real rooms',
+          body: 'Sectional sofas can change the way a living room works, but they also need careful planning. Cohen\'s Furniture in Elkton can help customers compare chaise orientation, reclining features, sleeper options, fabric, color, and room measurements. This page focuses on sectional sofas for Elkton and Cecil County shoppers who want local store support before placing an order.'
+        },
+        {
+          heading: 'Local follow-up from the Elkton showroom',
+          body: 'Customers can browse sectionals online and submit an Elkton order request for follow-up. The store can help confirm availability, delivery timing, and whether matching loveseats, recliners, ottomans, or tables are available. A dedicated sectional landing page gives the site another useful entry point for long-tail searches such as sectional sofas Elkton MD and reclining sectionals near Cecil County.'
+        }
+      ],
+      faqs: [
+        { question: 'Can the store help confirm left-facing or right-facing pieces?', answer: 'Yes. Call the Elkton showroom before ordering if orientation matters for your room.' },
+        { question: 'Are sleeper sectionals available?', answer: 'Availability changes, but sleeper and reclining sectionals can be checked through the Elkton catalog.' }
+      ]
+    }
+  ];
 
   defaultHeroSlides: HeroSlide[] = [
     {
@@ -395,17 +519,19 @@ export class AppComponent implements OnInit {
   ];
 
   footerCategoryLinks = [
-    { label: 'Living Room', href: this.categoryUrls.livingRoom },
-    { label: 'Bedrooms', href: this.categoryUrls.bedrooms },
-    { label: 'Dining Room', href: this.categoryUrls.diningRoom },
+    { label: 'Living Room Furniture Elkton', href: '/living-room-furniture-elkton-md' },
+    { label: 'Bedroom Furniture Elkton', href: '/bedroom-furniture-elkton-md' },
+    { label: 'Dining Room Furniture Elkton', href: '/dining-room-furniture-elkton-md' },
+    { label: 'Sectionals Elkton', href: '/sectionals-elkton-md' },
     { label: 'Home Decor', href: this.categoryUrls.homeDecor },
     { label: 'Office', href: this.categoryUrls.office },
     { label: 'Kids', href: this.categoryUrls.kids },
-    { label: 'Mattresses', href: this.categoryUrls.mattresses },
+    { label: 'Mattresses Elkton', href: '/mattresses-elkton-md' },
     { label: 'Outdoor', href: this.categoryUrls.outdoor }
   ];
 
   footerCompanyLinks = [
+    { label: 'About Cohen\'s Elkton', href: '/about' },
     { label: 'Financing & Leasing Options', href: this.links.financing },
     { label: 'Delivery', href: this.links.delivery },
     { label: 'Contact Us', href: this.links.contact },
@@ -454,6 +580,7 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     this.startHeroCarousel();
+    this.updatePageMetadata();
 
     if (this.isAdminPage) {
       this.catalogLoading = false;
@@ -463,7 +590,7 @@ export class AppComponent implements OnInit {
     this.startAnalyticsTracking();
     void this.loadStorefrontConfig();
 
-    if (this.isCategoryLandingPage || this.isAccountPage || this.isWishlistPage || this.isContactPage) {
+    if (this.isCategoryLandingPage || this.isSeoPage || this.isAboutPage || this.isAccountPage || this.isWishlistPage || this.isContactPage) {
       this.catalogLoading = false;
       return;
     }
@@ -503,8 +630,20 @@ export class AppComponent implements OnInit {
     return this.currentPath === '/contact';
   }
 
+  get isAboutPage() {
+    return this.currentPath === '/about';
+  }
+
   get isAdminPage() {
     return this.currentPath === '/admin';
+  }
+
+  get activeSeoPage() {
+    return this.seoPages.find((page) => page.path === this.currentPath);
+  }
+
+  get isSeoPage() {
+    return Boolean(this.activeSeoPage);
   }
 
   get isProductPage() {
@@ -1405,6 +1544,90 @@ export class AppComponent implements OnInit {
     return Array.isArray(counts)
       ? counts.map((item) => ({ label: String(item.label || 'Unknown'), count: Number(item.count || 0) }))
       : [];
+  }
+
+  private updatePageMetadata() {
+    const seoPage = this.activeSeoPage;
+    const title = seoPage
+      ? `${seoPage.title} | Cohen's Furniture Elkton`
+      : this.isAboutPage
+        ? 'About Cohen\'s Furniture in Elkton, MD'
+        : this.isContactPage
+          ? 'Contact Cohen\'s Furniture in Elkton, MD'
+          : 'Cohen\'s Furniture in Elkton, MD';
+    const description = seoPage?.description || 'Shop Cohen\'s Furniture in Elkton for discount living room, bedroom, dining room, mattress, office, outdoor, and home decor furniture in Elkton, Maryland.';
+    const canonicalUrl = `https://cohensfurnituremaryland.com${this.currentPath === '/' ? '/' : this.currentPath}`;
+
+    globalThis.document.title = title;
+    this.setMeta('description', description);
+    this.setMeta('og:title', title, 'property');
+    this.setMeta('og:description', description, 'property');
+    this.setMeta('og:url', canonicalUrl, 'property');
+    this.setMeta('og:type', 'website', 'property');
+    this.setCanonical(canonicalUrl);
+    this.setStructuredData(seoPage);
+  }
+
+  private setMeta(name: string, content: string, attribute = 'name') {
+    let element = globalThis.document?.head.querySelector(`meta[${attribute}="${name}"]`) as HTMLMetaElement | null;
+
+    if (!element) {
+      element = globalThis.document.createElement('meta');
+      element.setAttribute(attribute, name);
+      globalThis.document.head.appendChild(element);
+    }
+
+    element.setAttribute('content', content);
+  }
+
+  private setCanonical(url: string) {
+    let element = globalThis.document?.head.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+
+    if (!element) {
+      element = globalThis.document.createElement('link');
+      element.setAttribute('rel', 'canonical');
+      globalThis.document.head.appendChild(element);
+    }
+
+    element.setAttribute('href', url);
+  }
+
+  private setStructuredData(seoPage: SeoPage | undefined) {
+    const id = 'cohens-localbusiness-schema';
+    let element = globalThis.document?.getElementById(id) as HTMLScriptElement | null;
+
+    if (!element) {
+      element = globalThis.document.createElement('script');
+      element.id = id;
+      element.type = 'application/ld+json';
+      globalThis.document.head.appendChild(element);
+    }
+
+    element.textContent = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'FurnitureStore',
+      name: 'Cohen\'s Furniture',
+      image: this.logoUrl,
+      url: 'https://cohensfurnituremaryland.com/',
+      telephone: this.location.phone,
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: this.location.street,
+        addressLocality: 'Elkton',
+        addressRegion: 'MD',
+        postalCode: '21921',
+        addressCountry: 'US'
+      },
+      geo: {
+        '@type': 'GeoCoordinates',
+        latitude: 39.6069,
+        longitude: -75.8333
+      },
+      areaServed: ['Elkton MD', 'Cecil County MD', 'North East MD', 'Perryville MD', 'Chesapeake City MD'],
+      sameAs: this.socialLinks.map((social) => social.href),
+      priceRange: '$$',
+      department: seoPage ? [{ '@type': 'FurnitureStore', name: seoPage.title, url: `https://cohensfurnituremaryland.com${seoPage.path}` }] : undefined
+    });
   }
 
   private createDefaultAdminCatalog(): AdminCatalog {

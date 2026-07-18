@@ -1085,6 +1085,88 @@ h3 {
   font-weight: 900;
 }
 
+.local-seo-hero {
+  padding: 62px 0;
+  background: #f7f1ea;
+}
+
+.local-seo-hero h1 {
+  max-width: 900px;
+  margin: 0 0 16px;
+  color: #161616;
+}
+
+.local-seo-hero p:not(.eyebrow) {
+  max-width: 790px;
+  color: #444;
+  font-size: 20px;
+  line-height: 1.55;
+}
+
+.local-seo-page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 330px;
+  gap: 32px;
+  align-items: start;
+  padding: 46px 0 64px;
+}
+
+.local-seo-content {
+  display: grid;
+  gap: 28px;
+  color: #222;
+  line-height: 1.68;
+}
+
+.local-seo-content h2,
+.local-seo-card h2,
+.local-faq h2 {
+  margin: 0 0 10px;
+  color: #b42024;
+  font-size: 26px;
+}
+
+.local-seo-content p {
+  margin: 0;
+}
+
+.local-seo-card {
+  position: sticky;
+  top: 18px;
+  display: grid;
+  gap: 14px;
+  padding: 24px;
+  border: 1px solid #ddd;
+  background: #fff;
+}
+
+.local-seo-card a:not(.btn) {
+  color: #b42024;
+  font-weight: 900;
+}
+
+.local-faq {
+  display: grid;
+  gap: 12px;
+  padding-top: 12px;
+}
+
+.local-faq details {
+  border: 1px solid #ddd;
+  background: #fff;
+}
+
+.local-faq summary {
+  padding: 14px 16px;
+  color: #111;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.local-faq details p {
+  padding: 0 16px 16px;
+}
+
 .catalog-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -2230,6 +2312,7 @@ h3 {
   .footer-main,
   .catalog-grid,
   .explore-grid,
+  .local-seo-page,
   .product-detail__grid,
   .product-info-panel,
   .deal-grid {
@@ -2301,6 +2384,7 @@ h3 {
   .footer-main,
   .catalog-grid,
   .explore-grid,
+  .local-seo-page,
   .product-detail__grid,
   .product-info-panel,
   .product-tabs,

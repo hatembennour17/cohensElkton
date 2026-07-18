@@ -639,6 +639,80 @@
           </article>
         </div>
       </section>
+    } @else if (isSeoPage) {
+      @if (activeSeoPage; as page) {
+        <section class="local-seo-hero">
+          <div class="wrap">
+            <p class="eyebrow">{{ page.eyebrow }}</p>
+            <h1>{{ page.title }}</h1>
+            <p>{{ page.description }}</p>
+            <div class="hero__actions">
+              <a class="btn btn--primary" [href]="page.primaryHref">{{ page.primaryLabel }}</a>
+              <a class="btn btn--light" [href]="links.contact">Contact Elkton</a>
+              <a class="btn btn--dark" [href]="location.phoneHref">Call {{ location.shortName }}</a>
+            </div>
+          </div>
+        </section>
+
+        <section class="wrap local-seo-page">
+          <article class="local-seo-content">
+            @for (section of page.sections; track section.heading) {
+              <section>
+                <h2>{{ section.heading }}</h2>
+                <p>{{ section.body }}</p>
+              </section>
+            }
+
+            <section class="local-faq">
+              <h2>Elkton Furniture FAQs</h2>
+              @for (faq of page.faqs; track faq.question) {
+                <details>
+                  <summary>{{ faq.question }}</summary>
+                  <p>{{ faq.answer }}</p>
+                </details>
+              }
+            </section>
+          </article>
+
+          <aside class="local-seo-card">
+            <p class="eyebrow">Cohen's Furniture in Elkton</p>
+            <h2>{{ location.street }}</h2>
+            <p>{{ location.cityLine }}</p>
+            <a [href]="location.phoneHref">{{ location.phone }}</a>
+            <hr />
+            <p>Serving Elkton, Cecil County, North East, Perryville, Chesapeake City, Rising Sun, and nearby Maryland shoppers.</p>
+            <a class="btn btn--primary" [href]="links.directions">Get Directions</a>
+          </aside>
+        </section>
+      }
+    } @else if (isAboutPage) {
+      <section class="local-seo-hero">
+        <div class="wrap">
+          <p class="eyebrow">About the Elkton showroom</p>
+          <h1>Cohen's Furniture in Elkton, Maryland</h1>
+          <p>Local furniture shopping, order requests, pickup questions, delivery coordination, and product help for Elkton and Cecil County customers.</p>
+        </div>
+      </section>
+
+      <section class="wrap local-seo-page">
+        <article class="local-seo-content">
+          <section>
+            <h2>A Maryland-focused Cohen's Furniture site</h2>
+            <p>This website is built for customers shopping through Cohen's Furniture in Elkton. The goal is to keep product browsing, cart requests, delivery questions, and store contact focused on the Elkton showroom instead of routing Maryland shoppers through another location.</p>
+          </section>
+          <section>
+            <h2>Local help before and after the order request</h2>
+            <p>Customers can browse living room, bedroom, dining room, mattress, office, home decor, outdoor, and clearance products, then submit a local Elkton order request. The showroom team can help confirm availability, pricing, delivery timing, pickup options, financing questions, and matching collection pieces.</p>
+          </section>
+        </article>
+        <aside class="local-seo-card">
+          <p class="eyebrow">Visit or call</p>
+          <h2>{{ location.street }}</h2>
+          <p>{{ location.cityLine }}</p>
+          <a [href]="location.phoneHref">{{ location.phone }}</a>
+          <a class="btn btn--primary" [href]="links.contact">Contact Elkton</a>
+        </aside>
+      </section>
     } @else if (isAccountPage || isWishlistPage || isContactPage) {
       <section class="checkout-hero">
         <div class="wrap checkout-hero__inner">

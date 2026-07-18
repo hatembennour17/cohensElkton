@@ -954,16 +954,55 @@
 
             @if (productModal !== 'none') {
               <div class="product-modal" role="dialog" aria-modal="true" aria-label="Product viewer">
-                <div class="product-modal__panel">
+                <div class="product-modal__panel" [class.product-modal__panel--spin]="productModal === '3d'">
                   <button class="product-modal__close" type="button" aria-label="Close product viewer" (click)="closeProductModal()">x</button>
                   @if (productModal === 'room') {
                     <h2>View in Your Room</h2>
                     <p>Scan this QR code with your mobile device's camera to view this product page.</p>
                     <img class="product-modal__qr" [src]="productRoomQrUrl(product)" alt="QR code for this product" />
                   } @else {
-                    <h2>View in 3D</h2>
-                    <p>A 3D model is not available for this item yet. Please call the Elkton store for help seeing this product in person.</p>
-                    <img class="product-modal__image" [src]="product.image" [alt]="product.name" />
+                    <div class="product-modal__topline">
+                      <h2>{{ product.name }}</h2>
+                      <div class="product-modal__share" aria-label="Share product">
+                        @for (social of socialLinks; track social.label) {
+                          <button type="button" (click)="shareProduct(social.label, product)" [attr.aria-label]="'Share on ' + social.label">
+                            <img [src]="social.icon" [alt]="social.label" />
+                          </button>
+                        }
+                      </div>
+                    </div>
+                    <div
+                      class="spin-viewer"
+                      role="img"
+                      [attr.aria-label]="'Interactive 3D view for ' + product.name"
+                      (pointerdown)="startProductSpin(product, $event)"
+                      (pointermove)="moveProductSpin(product, $event)"
+                      (pointerup)="endProductSpin($event)"
+                      (pointercancel)="endProductSpin($event)"
+                      (pointerleave)="endProductSpin($event)"
+                    >
+                      <img class="product-modal__spin-image" [src]="activeProductSpinImage(product)" [alt]="product.name" draggable="false" (error)="useImageFallback($event, product.name)" />
+                    </div>
+                    <p class="spin-help">
+                      @if (productSpinImages(product).length > 1) {
+                        Drag left or right to rotate through the available product views.
+                      } @else {
+                        Ashley has not provided extra 360 frames for this item yet. This view will update automatically when those images are available in the feed.
+                      }
+                    </p>
+                    <div class="spin-controls">
+                      <button type="button" (click)="stepProductSpin(product, -1)" [disabled]="productSpinImages(product).length < 2">Previous</button>
+                      <input
+                        type="range"
+                        min="0"
+                        [max]="productSpinFrameMax(product)"
+                        [value]="productSpinFrame(product)"
+                        [disabled]="productSpinImages(product).length < 2"
+                        (input)="setProductSpinFrame(product, $any($event.target).value)"
+                        aria-label="Rotate product view"
+                      />
+                      <button type="button" (click)="stepProductSpin(product, 1)" [disabled]="productSpinImages(product).length < 2">Next</button>
+                    </div>
                   }
                 </div>
               </div>

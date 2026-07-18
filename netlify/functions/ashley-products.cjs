@@ -668,6 +668,7 @@ function normalizeProduct(product, priceConfig, adminCatalog, category) {
   const price = applyPriceRule(basePrice, priceConfig, adminCatalog, category);
   const image = firstImage(product);
   const images = firstImages(product, image);
+  const spinImages = firstSpinImages(product, images);
   const description = firstDescription(product, name);
   const details = productDetails(product);
 
@@ -677,6 +678,7 @@ function normalizeProduct(product, priceConfig, adminCatalog, category) {
     brand: brand ? String(brand) : 'Ashley',
     image,
     images,
+    spinImages,
     description,
     details,
     ashleyPrice: basePrice || 0,
@@ -796,6 +798,74 @@ function firstImages(product, fallbackImage) {
     .filter(Boolean);
 
   return [...new Set([fallbackImage, ...images].filter(Boolean))].slice(0, 8);
+}
+
+function firstSpinImages(product, fallbackImages) {
+  const directSpinSources = [
+    product?.spinImages,
+    product?.spinImageSet,
+    product?.spinSet,
+    product?.images360,
+    product?.image360,
+    product?.viewer360,
+    product?.threeSixtyImages,
+    product?.threeDImages,
+    product?.media360,
+    product?.product360,
+    product?.arImages
+  ];
+
+  const taggedSources = [
+    ...(Array.isArray(product?.imageSet) ? product.imageSet : []),
+    ...(Array.isArray(product?.images) ? product.images : []),
+    ...(Array.isArray(product?.media) ? product.media : []),
+    ...(Array.isArray(product?.assets) ? product.assets : [])
+  ].filter((entry) => /360|spin|3d|three/i.test(JSON.stringify(entry)));
+
+  const spinImages = extractImageUrls([...directSpinSources, ...taggedSources]);
+  return spinImages.length ? spinImages.slice(0, 36) : fallbackImages;
+}
+
+function extractImageUrls(values) {
+  const urls = [];
+  const imageKeys = [
+    'url',
+    'href',
+    'src',
+    'image',
+    'imageUrl',
+    'imageURL',
+    'largeImageUrl',
+    'mediumImageUrl',
+    'thumbnailUrl',
+    'fileUrl'
+  ];
+
+  const visit = (value) => {
+    if (!value) {
+      return;
+    }
+
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (/^https?:\/\//i.test(trimmed) && /\.(png|jpe?g|webp|gif)(\?|#|$)/i.test(trimmed)) {
+        urls.push(trimmed);
+      }
+      return;
+    }
+
+    if (Array.isArray(value)) {
+      value.forEach(visit);
+      return;
+    }
+
+    if (typeof value === 'object') {
+      imageKeys.forEach((key) => visit(value[key]));
+    }
+  };
+
+  values.forEach(visit);
+  return [...new Set(urls)];
 }
 
 function firstDescription(product, fallbackName) {

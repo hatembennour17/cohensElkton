@@ -1623,6 +1623,14 @@ h3 {
   text-align: center;
 }
 
+.product-modal__panel--spin {
+  width: min(1120px, 100%);
+  min-height: 620px;
+  align-content: start;
+  gap: 20px;
+  padding: 34px 42px 38px;
+}
+
 .product-modal__panel h2 {
   margin: 0;
   color: #555;
@@ -1655,6 +1663,99 @@ h3 {
   width: min(360px, 100%);
   max-height: 240px;
   object-fit: contain;
+}
+
+.product-modal__topline {
+  width: 100%;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  justify-content: space-between;
+  text-align: left;
+}
+
+.product-modal__topline h2 {
+  color: #bd1b24;
+  font-size: 28px;
+}
+
+.product-modal__share {
+  display: flex;
+  gap: 8px;
+}
+
+.product-modal__share button {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  padding: 5px;
+  background: #111;
+  cursor: pointer;
+}
+
+.product-modal__share img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.spin-viewer {
+  width: 100%;
+  min-height: 430px;
+  display: grid;
+  place-items: center;
+  user-select: none;
+  touch-action: none;
+  cursor: grab;
+  background:
+    radial-gradient(circle at 50% 78%, rgba(0, 0, 0, 0.12), transparent 26%),
+    #fff;
+}
+
+.spin-viewer:active {
+  cursor: grabbing;
+}
+
+.product-modal__spin-image {
+  width: min(660px, 86vw);
+  max-height: 420px;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.spin-help {
+  color: #555;
+  font-size: 15px;
+}
+
+.spin-controls {
+  width: min(620px, 100%);
+  display: grid;
+  grid-template-columns: auto minmax(160px, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.spin-controls button {
+  min-height: 42px;
+  border: 1px solid #bd1b24;
+  padding: 0 18px;
+  color: #bd1b24;
+  background: #fff;
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.spin-controls button:disabled,
+.spin-controls input:disabled {
+  cursor: not-allowed;
+  opacity: .45;
+}
+
+.spin-controls input {
+  width: 100%;
+  accent-color: #bd1b24;
 }
 
 .checkout-hero {

@@ -5,6 +5,7 @@ type Product = {
   name: string;
   image: string;
   images?: string[];
+  spinImages?: string[];
   unitPrice: number;
   ashleyPrice?: number;
   href: string;
@@ -590,6 +591,13 @@ export class AppComponent implements OnInit {
   activeProductTab: 'description' | 'related' | 'recent' | 'collection' = 'description';
   productModal: 'none' | '3d' | 'room' = 'none';
   selectedProductImages: Record<string, string> = {};
+  productSpinFrames: Record<string, number> = {};
+  productSpinDrag = {
+    sku: '',
+    startX: 0,
+    startFrame: 0,
+    active: false
+  };
   catalogLoading = true;
   catalogMessage = 'Loading Ashley catalog products for the Elkton site.';
   catalogSort = this.currentSearchParams.get('sort') || 'relevance';
@@ -844,6 +852,80 @@ export class AppComponent implements OnInit {
 
   productDetailImages(product: Product) {
     return [...new Set([product.image, ...(product.images || [])].filter(Boolean))].slice(0, 8);
+  }
+
+  productSpinImages(product: Product) {
+    return [...new Set([...(product.spinImages || []), ...this.productDetailImages(product)].filter(Boolean))];
+  }
+
+  productSpinFrame(product: Product) {
+    return this.productSpinFrames[product.sku] || 0;
+  }
+
+  productSpinFrameMax(product: Product) {
+    return Math.max(0, this.productSpinImages(product).length - 1);
+  }
+
+  activeProductSpinImage(product: Product) {
+    const images = this.productSpinImages(product);
+    return images[this.productSpinFrame(product)] || product.image;
+  }
+
+  setProductSpinFrame(product: Product, value: number | string) {
+    const images = this.productSpinImages(product);
+
+    if (!images.length) {
+      return;
+    }
+
+    const frame = Number(value) || 0;
+    const wrappedFrame = ((frame % images.length) + images.length) % images.length;
+    this.productSpinFrames = {
+      ...this.productSpinFrames,
+      [product.sku]: wrappedFrame
+    };
+  }
+
+  stepProductSpin(product: Product, direction: number) {
+    this.setProductSpinFrame(product, this.productSpinFrame(product) + direction);
+  }
+
+  startProductSpin(product: Product, event: Event) {
+    const pointerEvent = event as PointerEvent;
+    pointerEvent.preventDefault();
+
+    this.productSpinDrag = {
+      sku: product.sku,
+      startX: pointerEvent.clientX,
+      startFrame: this.productSpinFrame(product),
+      active: true
+    };
+
+    (pointerEvent.currentTarget as HTMLElement)?.setPointerCapture?.(pointerEvent.pointerId);
+  }
+
+  moveProductSpin(product: Product, event: Event) {
+    if (!this.productSpinDrag.active || this.productSpinDrag.sku !== product.sku) {
+      return;
+    }
+
+    const pointerEvent = event as PointerEvent;
+    const frameDelta = Math.round((pointerEvent.clientX - this.productSpinDrag.startX) / 24);
+    this.setProductSpinFrame(product, this.productSpinDrag.startFrame + frameDelta);
+  }
+
+  endProductSpin(event?: Event) {
+    if (event) {
+      const pointerEvent = event as PointerEvent;
+      (pointerEvent.currentTarget as HTMLElement)?.releasePointerCapture?.(pointerEvent.pointerId);
+    }
+
+    this.productSpinDrag = {
+      sku: '',
+      startX: 0,
+      startFrame: 0,
+      active: false
+    };
   }
 
   selectedProductImage(product: Product) {

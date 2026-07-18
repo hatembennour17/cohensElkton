@@ -1,76 +1,90 @@
 <div class="site-shell">
-  <header class="topbar">
-    <div class="wrap topbar__inner">
-      <a [href]="links.contact">Furniture store in {{ location.cityState }}</a>
-      <a [href]="location.phoneHref">{{ location.phone }}</a>
-      <a [href]="links.financing">Financing</a>
-      <a [href]="links.delivery">Delivery</a>
-      <a [href]="links.wishlist">Wishlist</a>
-    </div>
-  </header>
-
-  <header class="main-header">
-    <div class="wrap header-grid">
-      <a class="brand" [href]="links.home" aria-label="Cohen's Furniture in Elkton home">
-        <img [src]="logoUrl" alt="Cohen's Furniture" />
-      </a>
-
-      <form class="search" [action]="links.search" method="get" aria-label="Search products">
-        <span>Search</span>
-        <input type="search" name="q" [value]="searchQuery" placeholder="Search furniture, mattresses, decor" />
-        <button type="submit">Go</button>
-      </form>
-
-      <div class="header-actions">
-        <a [href]="links.login">My Account</a>
-        <a [href]="links.cart">Cart ({{ cartCount }})</a>
+  @if (!isAdminPage) {
+    <header class="topbar">
+      <div class="wrap topbar__inner">
+        <a [href]="links.contact">Furniture store in {{ location.cityState }}</a>
+        <a [href]="location.phoneHref">{{ location.phone }}</a>
+        <a [href]="links.financing">Financing</a>
+        <a [href]="links.delivery">Delivery</a>
+        <a [href]="links.wishlist">Wishlist</a>
       </div>
-    </div>
+    </header>
 
-    <nav class="category-nav" aria-label="Main categories">
-      <div class="wrap nav-scroll">
-        @for (item of navItems; track item.label) {
-          <a [href]="item.href">{{ item.label }}</a>
-        }
+    <header class="main-header">
+      <div class="wrap header-grid">
+        <a class="brand" [href]="links.home" aria-label="Cohen's Furniture in Elkton home">
+          <img [src]="logoUrl" alt="Cohen's Furniture" />
+        </a>
+
+        <form class="search" [action]="links.search" method="get" aria-label="Search products">
+          <span>Search</span>
+          <input type="search" name="q" [value]="searchQuery" placeholder="Search furniture, mattresses, decor" />
+          <button type="submit">Go</button>
+        </form>
+
+        <div class="header-actions">
+          <a [href]="links.login">My Account</a>
+          <a [href]="links.cart">Cart ({{ cartCount }})</a>
+        </div>
       </div>
-    </nav>
-  </header>
+
+      <nav class="category-nav" aria-label="Main categories">
+        <div class="wrap nav-scroll">
+          @for (item of navItems; track item.label) {
+            <a [href]="item.href">{{ item.label }}</a>
+          }
+        </div>
+      </nav>
+    </header>
+  }
 
   <main>
     @if (isAdminPage) {
       <section class="admin-shell">
-        <div class="wrap admin-layout">
-          <aside class="admin-sidebar">
+        @if (!adminAuthenticated) {
+          <div class="wrap admin-sidebar admin-login">
             <p class="eyebrow">Elkton admin</p>
-            <h1>Catalog Controls</h1>
-            <label>
-              Username
-              <input
-                type="text"
-                [value]="adminUsername"
-                (input)="adminUsername = $any($event.target).value"
-                autocomplete="username"
-                placeholder="Enter username"
-              />
-            </label>
-            <label>
-              Password
-              <input
-                type="password"
-                [value]="adminPassword"
-                (input)="adminPassword = $any($event.target).value"
-                autocomplete="current-password"
-                placeholder="Enter password"
-              />
-            </label>
-            <button class="btn btn--primary" type="button" (click)="loadAdminCatalog()">Load Catalog</button>
-            <button class="btn btn--dark" type="button" (click)="saveAdminCatalog()">Save Changes</button>
+            <h1>Admin Login</h1>
+            <form (submit)="adminLogin(); $event.preventDefault()">
+              <label>
+                Username
+                <input
+                  type="text"
+                  [value]="adminUsername"
+                  (input)="adminUsername = $any($event.target).value"
+                  autocomplete="username"
+                  placeholder="Enter username"
+                />
+              </label>
+              <label>
+                Password
+                <input
+                  type="password"
+                  [value]="adminPassword"
+                  (input)="adminPassword = $any($event.target).value"
+                  autocomplete="current-password"
+                  placeholder="Enter password"
+                />
+              </label>
+              <button class="btn btn--primary" type="submit">Login</button>
+            </form>
             @if (adminMessage) {
               <p class="form-message">{{ adminMessage }}</p>
             }
-          </aside>
+          </div>
+        } @else {
+          <div class="wrap admin-layout">
+            <aside class="admin-sidebar">
+              <p class="eyebrow">Elkton admin</p>
+              <h1>Catalog Controls</h1>
+              <button class="btn btn--dark" type="button" (click)="saveAdminCatalog()">Save Changes</button>
+              <button class="btn btn--primary" type="button" (click)="adminLogout()">Log Out</button>
+              @if (adminMessage) {
+                <p class="form-message">{{ adminMessage }}</p>
+              }
+            </aside>
 
-          <section class="admin-panel">
+            <section class="admin-panel">
             <div class="admin-tabs" role="tablist" aria-label="Admin sections">
               <button
                 type="button"
@@ -390,7 +404,8 @@
               </div>
             }
           </section>
-        </div>
+          </div>
+        }
       </section>
     } @else if (isCartPage) {
       <section class="checkout-hero">

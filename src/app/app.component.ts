@@ -412,12 +412,13 @@ export class AppComponent implements OnInit {
   cartItems: CartItem[] = this.loadCart();
   catalogProducts: Product[] = [];
   adminUsername = globalThis.localStorage?.getItem('cohens-elkton-admin-username') || 'admin';
-  adminPassword = globalThis.localStorage?.getItem('cohens-elkton-admin-password') || globalThis.localStorage?.getItem('cohens-elkton-admin-token') || '';
+  adminPassword = '';
   adminCatalog: AdminCatalog = this.createDefaultAdminCatalog();
   selectedAdminTab: 'catalog' | 'landing' | 'visitors' = 'catalog';
   selectedAdminCategory = 'living-room';
   newAdminSku = '';
   newHeroImageUrl = '';
+  adminAuthenticated = false;
   adminMessage = '';
   adminDragIndex = -1;
   adminHeroDragIndex = -1;
@@ -442,11 +443,6 @@ export class AppComponent implements OnInit {
     this.startHeroCarousel();
 
     if (this.isAdminPage) {
-      this.loadAdminDraft();
-      if (this.hasAdminCredentials()) {
-        void this.loadAdminCatalog({ silent: true });
-        void this.loadAnalytics({ silent: true });
-      }
       this.catalogLoading = false;
       return;
     }
@@ -745,12 +741,41 @@ export class AppComponent implements OnInit {
     this.financingMessage = `Financing request ready for ${this.location.name}. The next step is connecting this form to the Elkton financing inbox or provider endpoint.`;
   }
 
+  async adminLogin() {
+    if (!this.hasAdminCredentials()) {
+      this.adminMessage = 'Enter your admin username and password to continue.';
+      return;
+    }
+
+    this.adminMessage = 'Signing in...';
+    const loaded = await this.loadAdminCatalog();
+
+    if (!loaded) {
+      return;
+    }
+
+    this.adminAuthenticated = true;
+    this.loadAdminDraft();
+    void this.loadAnalytics({ silent: true });
+    this.adminMessage = 'Signed in. Admin catalog loaded.';
+  }
+
+  adminLogout() {
+    this.adminAuthenticated = false;
+    this.adminPassword = '';
+    this.analyticsSummary = null;
+    this.analyticsMessage = '';
+    this.adminMessage = 'Signed out.';
+    globalThis.localStorage?.removeItem('cohens-elkton-admin-password');
+    globalThis.localStorage?.removeItem('cohens-elkton-admin-token');
+  }
+
   async loadAdminCatalog(options: { silent?: boolean } = {}) {
     if (!this.hasAdminCredentials()) {
       if (!options.silent) {
         this.adminMessage = 'Enter your admin username and password before loading the catalog.';
       }
-      return;
+      return false;
     }
 
     try {
@@ -763,7 +788,7 @@ export class AppComponent implements OnInit {
         if (!options.silent) {
           this.adminMessage = payload.error || 'Unable to load admin catalog.';
         }
-        return;
+        return false;
       }
 
       this.adminCatalog = this.normalizeAdminCatalog(payload.catalog);
@@ -771,14 +796,21 @@ export class AppComponent implements OnInit {
       this.rememberAdminLogin();
       globalThis.localStorage?.removeItem(this.adminDraftStorageKey);
       this.adminMessage = options.silent ? 'Loaded the published admin catalog.' : 'Admin catalog loaded.';
+      return true;
     } catch {
       if (!options.silent) {
         this.adminMessage = 'Unable to reach the admin catalog service.';
       }
+      return false;
     }
   }
 
   async saveAdminCatalog() {
+    if (!this.adminAuthenticated) {
+      this.adminMessage = 'Sign in before saving admin changes.';
+      return;
+    }
+
     if (!this.hasAdminCredentials()) {
       this.adminMessage = 'Enter your admin username and password before saving.';
       return;
@@ -811,6 +843,11 @@ export class AppComponent implements OnInit {
   }
 
   async loadAnalytics(options: { silent?: boolean } = {}) {
+    if (!this.adminAuthenticated && !options.silent) {
+      this.analyticsMessage = 'Sign in before loading visitor data.';
+      return;
+    }
+
     if (!this.hasAdminCredentials()) {
       if (!options.silent) {
         this.analyticsMessage = 'Enter your admin username and password before loading visitor data.';
@@ -1087,7 +1124,7 @@ export class AppComponent implements OnInit {
 
   private rememberAdminLogin() {
     globalThis.localStorage?.setItem('cohens-elkton-admin-username', this.adminUsername.trim());
-    globalThis.localStorage?.setItem('cohens-elkton-admin-password', this.adminPassword);
+    globalThis.localStorage?.removeItem('cohens-elkton-admin-password');
     globalThis.localStorage?.removeItem('cohens-elkton-admin-token');
   }
 

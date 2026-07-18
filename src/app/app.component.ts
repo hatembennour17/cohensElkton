@@ -296,6 +296,28 @@ export class AppComponent implements OnInit {
         { question: 'Can the store help confirm left-facing or right-facing pieces?', answer: 'Yes. Call the Elkton showroom before ordering if orientation matters for your room.' },
         { question: 'Are sleeper sectionals available?', answer: 'Availability changes, but sleeper and reclining sectionals can be checked through the Elkton catalog.' }
       ]
+    },
+    {
+      path: '/furniture-financing-elkton-md',
+      eyebrow: 'Furniture financing in Elkton, MD',
+      title: 'Furniture Financing and Leasing Options in Elkton',
+      description: 'Review furniture financing and leasing options for Cohen\'s Furniture in Elkton, including Snap Finance and Progressive Leasing information.',
+      primaryHref: '/financing',
+      primaryLabel: 'View Financing Options',
+      sections: [
+        {
+          heading: 'Financing support for Elkton furniture shoppers',
+          body: 'Cohen\'s Furniture in Elkton can help local shoppers review financing and leasing options for living room, bedroom, dining room, mattress, office, and home decor purchases. This Maryland-focused financing page gives customers a clear local path for questions about applications, payment programs, and next steps before submitting an Elkton order request.'
+        },
+        {
+          heading: 'Snap Finance and Progressive Leasing',
+          body: 'Available providers may include Snap Finance and Progressive Leasing, depending on approval, purchase amount, and program terms. Snap applicants can use the Elkton store code shown on the financing page, and customers can call the showroom for current Progressive details. Approval is not guaranteed, and lease-to-own programs may cost more than the cash price.'
+        }
+      ],
+      faqs: [
+        { question: 'Can I apply for furniture financing before visiting the Elkton store?', answer: 'Yes. Review the financing page for current provider details or call the Elkton showroom for help.' },
+        { question: 'Does financing apply to mattresses and bedroom furniture?', answer: 'Financing and leasing options may apply to eligible purchases, subject to provider approval and terms.' }
+      ]
     }
   ];
 
@@ -532,6 +554,7 @@ export class AppComponent implements OnInit {
 
   footerCompanyLinks = [
     { label: 'About Cohen\'s Elkton', href: '/about' },
+    { label: 'Furniture Financing Elkton', href: '/furniture-financing-elkton-md' },
     { label: 'Financing & Leasing Options', href: this.links.financing },
     { label: 'Delivery', href: this.links.delivery },
     { label: 'Contact Us', href: this.links.contact },

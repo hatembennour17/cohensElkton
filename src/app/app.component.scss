@@ -1716,6 +1716,31 @@ h3 {
   cursor: grabbing;
 }
 
+.model-viewer-shell {
+  position: relative;
+  width: 100%;
+  min-height: 460px;
+  display: grid;
+  place-items: center;
+  background: #fff;
+}
+
+.product-model-viewer {
+  width: 100%;
+  height: min(68vh, 560px);
+  min-height: 430px;
+  --poster-color: transparent;
+}
+
+.model-viewer-loader {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, .78);
+}
+
 .product-modal__spin-image {
   width: min(660px, 86vw);
   max-height: 420px;

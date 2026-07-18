@@ -669,6 +669,16 @@ function normalizeProduct(product, priceConfig, adminCatalog, category) {
   const image = firstImage(product);
   const images = firstImages(product, image);
   const spinImages = firstSpinImages(product, images);
+  const modelId = firstValue(product, [
+    'modelId',
+    'modelSku',
+    'threeDModelId',
+    'threeDModelSku',
+    'webArSku',
+    'arSku',
+    'arProductId',
+    'product3dId'
+  ]) || sku;
   const description = firstDescription(product, name);
   const details = productDetails(product);
 
@@ -679,6 +689,7 @@ function normalizeProduct(product, priceConfig, adminCatalog, category) {
     image,
     images,
     spinImages,
+    modelId: String(modelId),
     description,
     details,
     ashleyPrice: basePrice || 0,

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit } from '@angular/core';
 
 type Product = {
   sku: string;
@@ -6,6 +6,7 @@ type Product = {
   image: string;
   images?: string[];
   spinImages?: string[];
+  modelId?: string;
   unitPrice: number;
   ashleyPrice?: number;
   href: string;
@@ -113,6 +114,7 @@ type AnalyticsSummary = {
 @Component({
   selector: 'app-root',
   standalone: true,
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
@@ -135,6 +137,8 @@ export class AppComponent implements OnInit {
   private readonly cartStorageKey = 'cohens-elkton-cart';
   private readonly adminDraftStorageKey = 'cohens-elkton-admin-draft';
   private readonly analyticsSessionStorageKey = 'cohens-elkton-analytics-session';
+  private readonly threeDCloudApiKey = 'AIzaSyDnPvID8qhKrITVGePACdp1cZ1zCM8lkm8';
+  private readonly threeDCloudStoreId = '000002';
   private analyticsVisitId = '';
   private analyticsSessionId = '';
   private analyticsStartedAt = 0;
@@ -588,6 +592,9 @@ export class AppComponent implements OnInit {
   orderSubmitting = false;
   financingMessage = '';
   productMessage = '';
+  product3dMessage = '';
+  product3dLoading = false;
+  product3dUsingModel = false;
   activeProductTab: 'description' | 'related' | 'recent' | 'collection' = 'description';
   productModal: 'none' | '3d' | 'room' = 'none';
   selectedProductImages: Record<string, string> = {};
@@ -1004,10 +1011,17 @@ export class AppComponent implements OnInit {
 
   openProductModal(modal: '3d' | 'room') {
     this.productModal = modal;
+
+    if (modal === '3d' && this.productDetailProduct) {
+      this.loadProduct3dModel(this.productDetailProduct);
+    }
   }
 
   closeProductModal() {
     this.productModal = 'none';
+    this.product3dLoading = false;
+    this.product3dUsingModel = false;
+    this.product3dMessage = '';
   }
 
   productRoomQrUrl(product: Product) {
@@ -1041,6 +1055,61 @@ export class AppComponent implements OnInit {
     }
 
     this.productMessage = `${label} sharing is not available here yet.`;
+  }
+
+  private loadProduct3dModel(product: Product) {
+    this.product3dLoading = true;
+    this.product3dUsingModel = true;
+    this.product3dMessage = 'Loading interactive 3D model...';
+
+    globalThis.setTimeout(() => {
+      const modelViewer = globalThis.document?.querySelector('#spin') as HTMLElement | null;
+
+      if (!modelViewer) {
+        this.useProduct3dFallback();
+        return;
+      }
+
+      modelViewer.setAttribute('poster', product.image);
+      modelViewer.setAttribute('alt', product.name);
+      modelViewer.setAttribute('src', '');
+
+      const modelId = product.modelId || product.sku;
+      const webAr = (globalThis as unknown as {
+        MxtWebAR?: {
+          MxtWebArPregenerated?: new (config: { apiKey: string; clientId: string }) => { getGlb: (sku: string) => Promise<string> };
+        };
+      }).MxtWebAR;
+
+      if (!webAr?.MxtWebArPregenerated) {
+        this.useProduct3dFallback();
+        return;
+      }
+
+      const pregenerated = new webAr.MxtWebArPregenerated({
+        apiKey: this.threeDCloudApiKey,
+        clientId: this.threeDCloudStoreId
+      });
+
+      pregenerated.getGlb(String(modelId))
+        .then((url) => {
+          if (!url || this.productModal !== '3d') {
+            this.useProduct3dFallback();
+            return;
+          }
+
+          modelViewer.setAttribute('src', url);
+          this.product3dLoading = false;
+          this.product3dMessage = 'Drag the product to rotate. Pinch or scroll to zoom.';
+        })
+        .catch(() => this.useProduct3dFallback());
+    }, 0);
+  }
+
+  private useProduct3dFallback() {
+    this.product3dLoading = false;
+    this.product3dUsingModel = false;
+    this.product3dMessage = 'An interactive 3D model is not available for this item yet. Use the product image viewer below or call the Elkton store for help.';
   }
 
   updateQuantity(sku: string, quantity: number) {

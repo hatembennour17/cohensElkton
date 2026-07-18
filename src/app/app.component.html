@@ -971,38 +971,63 @@
                         }
                       </div>
                     </div>
-                    <div
-                      class="spin-viewer"
-                      role="img"
-                      [attr.aria-label]="'Interactive 3D view for ' + product.name"
-                      (pointerdown)="startProductSpin(product, $event)"
-                      (pointermove)="moveProductSpin(product, $event)"
-                      (pointerup)="endProductSpin($event)"
-                      (pointercancel)="endProductSpin($event)"
-                      (pointerleave)="endProductSpin($event)"
-                    >
-                      <img class="product-modal__spin-image" [src]="activeProductSpinImage(product)" [alt]="product.name" draggable="false" (error)="useImageFallback($event, product.name)" />
-                    </div>
+                    @if (product3dUsingModel) {
+                      <div class="model-viewer-shell">
+                        @if (product3dLoading) {
+                          <div class="model-viewer-loader">
+                            <div class="product-loader"><span></span><strong>Loading 3D model</strong></div>
+                          </div>
+                        }
+                        <model-viewer
+                          id="spin"
+                          class="product-model-viewer"
+                          ar-status="not-presenting"
+                          src=""
+                          [attr.poster]="product.image"
+                          camera-controls
+                          camera-orbit="0.9677rad 1.2427rad auto"
+                          shadow-intensity="1"
+                          [attr.alt]="product.name"
+                        ></model-viewer>
+                      </div>
+                    } @else {
+                      <div
+                        class="spin-viewer"
+                        role="img"
+                        [attr.aria-label]="'Interactive product image view for ' + product.name"
+                        (pointerdown)="startProductSpin(product, $event)"
+                        (pointermove)="moveProductSpin(product, $event)"
+                        (pointerup)="endProductSpin($event)"
+                        (pointercancel)="endProductSpin($event)"
+                        (pointerleave)="endProductSpin($event)"
+                      >
+                        <img class="product-modal__spin-image" [src]="activeProductSpinImage(product)" [alt]="product.name" draggable="false" (error)="useImageFallback($event, product.name)" />
+                      </div>
+                    }
                     <p class="spin-help">
-                      @if (productSpinImages(product).length > 1) {
+                      @if (product3dUsingModel) {
+                        {{ product3dMessage }}
+                      } @else if (productSpinImages(product).length > 1) {
                         Drag left or right to rotate through the available product views.
                       } @else {
-                        Ashley has not provided extra 360 frames for this item yet. This view will update automatically when those images are available in the feed.
+                        {{ product3dMessage }}
                       }
                     </p>
-                    <div class="spin-controls">
-                      <button type="button" (click)="stepProductSpin(product, -1)" [disabled]="productSpinImages(product).length < 2">Previous</button>
-                      <input
-                        type="range"
-                        min="0"
-                        [max]="productSpinFrameMax(product)"
-                        [value]="productSpinFrame(product)"
-                        [disabled]="productSpinImages(product).length < 2"
-                        (input)="setProductSpinFrame(product, $any($event.target).value)"
-                        aria-label="Rotate product view"
-                      />
-                      <button type="button" (click)="stepProductSpin(product, 1)" [disabled]="productSpinImages(product).length < 2">Next</button>
-                    </div>
+                    @if (!product3dUsingModel) {
+                      <div class="spin-controls">
+                        <button type="button" (click)="stepProductSpin(product, -1)" [disabled]="productSpinImages(product).length < 2">Previous</button>
+                        <input
+                          type="range"
+                          min="0"
+                          [max]="productSpinFrameMax(product)"
+                          [value]="productSpinFrame(product)"
+                          [disabled]="productSpinImages(product).length < 2"
+                          (input)="setProductSpinFrame(product, $any($event.target).value)"
+                          aria-label="Rotate product image view"
+                        />
+                        <button type="button" (click)="stepProductSpin(product, 1)" [disabled]="productSpinImages(product).length < 2">Next</button>
+                      </div>
+                    }
                   }
                 </div>
               </div>

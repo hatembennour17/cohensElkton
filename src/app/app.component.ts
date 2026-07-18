@@ -137,8 +137,6 @@ export class AppComponent implements OnInit {
   private readonly cartStorageKey = 'cohens-elkton-cart';
   private readonly adminDraftStorageKey = 'cohens-elkton-admin-draft';
   private readonly analyticsSessionStorageKey = 'cohens-elkton-analytics-session';
-  private readonly threeDCloudApiKey = 'AIzaSyDnPvID8qhKrITVGePACdp1cZ1zCM8lkm8';
-  private readonly threeDCloudStoreId = '000002';
   private analyticsVisitId = '';
   private analyticsSessionId = '';
   private analyticsStartedAt = 0;
@@ -1074,31 +1072,19 @@ export class AppComponent implements OnInit {
       modelViewer.setAttribute('alt', product.name);
       modelViewer.setAttribute('src', '');
 
-      const modelId = product.modelId || product.sku;
-      const webAr = (globalThis as unknown as {
-        MxtWebAR?: {
-          MxtWebArPregenerated?: new (config: { apiKey: string; clientId: string }) => { getGlb: (sku: string) => Promise<string> };
-        };
-      }).MxtWebAR;
+      const modelId = encodeURIComponent(product.modelId || product.sku);
 
-      if (!webAr?.MxtWebArPregenerated) {
-        this.useProduct3dFallback();
-        return;
-      }
-
-      const pregenerated = new webAr.MxtWebArPregenerated({
-        apiKey: this.threeDCloudApiKey,
-        clientId: this.threeDCloudStoreId
-      });
-
-      pregenerated.getGlb(String(modelId))
+      fetch(`/.netlify/functions/three-d-model?sku=${modelId}`)
+        .then((response) => response.ok ? response.json() : null)
         .then((url) => {
-          if (!url || this.productModal !== '3d') {
+          const modelUrl = typeof url === 'string' ? url : url?.url;
+
+          if (!modelUrl || this.productModal !== '3d') {
             this.useProduct3dFallback();
             return;
           }
 
-          modelViewer.setAttribute('src', url);
+          modelViewer.setAttribute('src', modelUrl);
           this.product3dLoading = false;
           this.product3dMessage = 'Drag the product to rotate. Pinch or scroll to zoom.';
         })

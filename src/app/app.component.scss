@@ -1399,8 +1399,9 @@ h3 {
 
 .product-share a,
 .product-share button {
-  width: 34px;
+  min-width: 34px;
   height: 34px;
+  padding: 0 7px;
   display: grid;
   place-items: center;
   border: 0;
@@ -1409,6 +1410,7 @@ h3 {
   color: #fff;
   font: inherit;
   font-weight: 900;
+  cursor: pointer;
 }
 
 .product-share img {
@@ -1422,7 +1424,17 @@ h3 {
   background: #fff;
   color: #111;
   font: inherit;
-  font-size: 20px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.product-message {
+  margin: 0;
+  padding: 12px;
+  border-left: 4px solid #c52229;
+  background: #f3f3f3;
+  color: #222;
+  font-weight: 700;
 }
 
 .product-thumbs {
@@ -1436,8 +1448,15 @@ h3 {
 .product-thumbs button {
   width: 118px;
   height: 82px;
-  border: 0;
+  border: 2px solid transparent;
   background: #fff;
+  cursor: pointer;
+}
+
+.product-thumbs button.active,
+.product-thumbs button:hover,
+.product-thumbs button:focus-visible {
+  border-color: #c52229;
 }
 
 .product-thumbs img {
@@ -1487,8 +1506,73 @@ h3 {
   padding-left: 18px;
 }
 
+.product-info-thumb {
+  width: min(280px, 100%);
+  max-height: 190px;
+  object-fit: contain;
+  background: #fff;
+}
+
 .product-detail__loading {
   min-height: 420px;
+}
+
+.product-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.product-modal__panel {
+  position: relative;
+  width: min(780px, 100%);
+  min-height: 420px;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 16px;
+  padding: 44px;
+  background: #fff;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+  text-align: center;
+}
+
+.product-modal__panel h2 {
+  margin: 0;
+  color: #555;
+  font-size: 22px;
+}
+
+.product-modal__panel p {
+  margin: 0;
+  max-width: 560px;
+}
+
+.product-modal__close {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  border: 0;
+  background: transparent;
+  color: #999;
+  font-size: 26px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.product-modal__qr {
+  width: 240px;
+  height: 240px;
+}
+
+.product-modal__image {
+  width: min(360px, 100%);
+  max-height: 240px;
+  object-fit: contain;
 }
 
 .checkout-hero {

@@ -437,6 +437,10 @@ export class AppComponent implements OnInit {
   orderMessage = '';
   orderSubmitting = false;
   financingMessage = '';
+  productMessage = '';
+  activeProductTab: 'description' | 'related' | 'recent' | 'collection' = 'description';
+  productModal: 'none' | '3d' | 'room' = 'none';
+  selectedProductImages: Record<string, string> = {};
   catalogLoading = true;
   catalogMessage = 'Loading Ashley catalog products for the Elkton site.';
   catalogSort = this.currentSearchParams.get('sort') || 'relevance';
@@ -680,6 +684,17 @@ export class AppComponent implements OnInit {
     return [...new Set([product.image, ...(product.images || [])].filter(Boolean))].slice(0, 8);
   }
 
+  selectedProductImage(product: Product) {
+    return this.selectedProductImages[product.sku] || product.image;
+  }
+
+  selectProductImage(product: Product, image: string) {
+    this.selectedProductImages = {
+      ...this.selectedProductImages,
+      [product.sku]: image
+    };
+  }
+
   productDescription(product: Product) {
     return product.description || `${product.name} is available through Cohen's Furniture in Elkton. Contact the showroom for availability, delivery timing, and package details.`;
   }
@@ -718,11 +733,70 @@ export class AppComponent implements OnInit {
     }
 
     this.saveCart();
+    this.productMessage = `${normalizedQuantity} ${product.name} added to cart.`;
   }
 
   buyNow(product: Product, quantity: number | string) {
     this.addToCartQuantity(product, quantity);
     globalThis.location.href = this.links.checkout;
+  }
+
+  showProductUnavailable(feature: string) {
+    this.productMessage = `${feature} is not available for this item yet. Please call the Elkton store for help.`;
+  }
+
+  addProductToWishlist(product: Product) {
+    this.productMessage = `${product.name} was saved to your wishlist for this visit.`;
+  }
+
+  scrollToProductInfo() {
+    globalThis.document?.querySelector('.product-info-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  setProductTab(tab: 'description' | 'related' | 'recent' | 'collection') {
+    this.activeProductTab = tab;
+    this.scrollToProductInfo();
+  }
+
+  openProductModal(modal: '3d' | 'room') {
+    this.productModal = modal;
+  }
+
+  closeProductModal() {
+    this.productModal = 'none';
+  }
+
+  productRoomQrUrl(product: Product) {
+    const productUrl = encodeURIComponent(globalThis.location?.href || `https://cohensfurnituremaryland.com${this.productDetailHref(product)}`);
+    return `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=16&data=${productUrl}`;
+  }
+
+  printProduct() {
+    globalThis.print?.();
+  }
+
+  emailProduct(product: Product) {
+    const subject = encodeURIComponent(`Cohen's Furniture item: ${product.name}`);
+    const body = encodeURIComponent(`${product.name}\nSKU: ${product.sku}\nPrice: ${this.formatPrice(product.unitPrice)}\n${globalThis.location?.href || ''}`);
+    globalThis.location.href = `mailto:?subject=${subject}&body=${body}`;
+  }
+
+  shareProduct(label: string, product: Product) {
+    const url = encodeURIComponent(globalThis.location?.href || `https://cohensfurnituremaryland.com${this.productDetailHref(product)}`);
+    const text = encodeURIComponent(product.name);
+    const shareUrls: Record<string, string> = {
+      Facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}`,
+      Pinterest: `https://pinterest.com/pin/create/button/?url=${url}&description=${text}`,
+      Twitter: `https://twitter.com/intent/tweet?url=${url}&text=${text}`
+    };
+
+    const shareUrl = shareUrls[label];
+    if (shareUrl) {
+      globalThis.open?.(shareUrl, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    this.productMessage = `${label} sharing is not available here yet.`;
   }
 
   updateQuantity(sku: string, quantity: number) {

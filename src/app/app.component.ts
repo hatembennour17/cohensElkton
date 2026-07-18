@@ -411,7 +411,8 @@ export class AppComponent implements OnInit {
 
   cartItems: CartItem[] = this.loadCart();
   catalogProducts: Product[] = [];
-  adminToken = globalThis.localStorage?.getItem('cohens-elkton-admin-token') || '';
+  adminUsername = globalThis.localStorage?.getItem('cohens-elkton-admin-username') || 'admin';
+  adminPassword = globalThis.localStorage?.getItem('cohens-elkton-admin-password') || globalThis.localStorage?.getItem('cohens-elkton-admin-token') || '';
   adminCatalog: AdminCatalog = this.createDefaultAdminCatalog();
   selectedAdminTab: 'catalog' | 'landing' | 'visitors' = 'catalog';
   selectedAdminCategory = 'living-room';
@@ -442,7 +443,7 @@ export class AppComponent implements OnInit {
 
     if (this.isAdminPage) {
       this.loadAdminDraft();
-      if (this.adminToken) {
+      if (this.hasAdminCredentials()) {
         void this.loadAdminCatalog({ silent: true });
         void this.loadAnalytics({ silent: true });
       }
@@ -745,9 +746,9 @@ export class AppComponent implements OnInit {
   }
 
   async loadAdminCatalog(options: { silent?: boolean } = {}) {
-    if (!this.adminToken) {
+    if (!this.hasAdminCredentials()) {
       if (!options.silent) {
-        this.adminMessage = 'Enter the admin token before loading the catalog.';
+        this.adminMessage = 'Enter your admin username and password before loading the catalog.';
       }
       return;
     }
@@ -767,7 +768,7 @@ export class AppComponent implements OnInit {
 
       this.adminCatalog = this.normalizeAdminCatalog(payload.catalog);
       this.applyHeroSlides(this.adminCatalog.hero.slides);
-      globalThis.localStorage?.setItem('cohens-elkton-admin-token', this.adminToken);
+      this.rememberAdminLogin();
       globalThis.localStorage?.removeItem(this.adminDraftStorageKey);
       this.adminMessage = options.silent ? 'Loaded the published admin catalog.' : 'Admin catalog loaded.';
     } catch {
@@ -778,8 +779,8 @@ export class AppComponent implements OnInit {
   }
 
   async saveAdminCatalog() {
-    if (!this.adminToken) {
-      this.adminMessage = 'Enter the admin token before saving.';
+    if (!this.hasAdminCredentials()) {
+      this.adminMessage = 'Enter your admin username and password before saving.';
       return;
     }
 
@@ -801,7 +802,7 @@ export class AppComponent implements OnInit {
 
       this.adminCatalog = this.normalizeAdminCatalog(payload.catalog);
       this.applyHeroSlides(this.adminCatalog.hero.slides);
-      globalThis.localStorage?.setItem('cohens-elkton-admin-token', this.adminToken);
+      this.rememberAdminLogin();
       globalThis.localStorage?.removeItem(this.adminDraftStorageKey);
       this.adminMessage = 'Admin catalog saved. The storefront will use these SKU lists on the next refresh.';
     } catch {
@@ -810,9 +811,9 @@ export class AppComponent implements OnInit {
   }
 
   async loadAnalytics(options: { silent?: boolean } = {}) {
-    if (!this.adminToken) {
+    if (!this.hasAdminCredentials()) {
       if (!options.silent) {
-        this.analyticsMessage = 'Enter the admin token before loading visitor data.';
+        this.analyticsMessage = 'Enter your admin username and password before loading visitor data.';
       }
       return;
     }
@@ -832,7 +833,7 @@ export class AppComponent implements OnInit {
 
       this.analyticsSummary = this.normalizeAnalyticsSummary(payload);
       this.analyticsMessage = options.silent ? '' : 'Visitor data refreshed.';
-      globalThis.localStorage?.setItem('cohens-elkton-admin-token', this.adminToken);
+      this.rememberAdminLogin();
     } catch {
       this.analyticsMessage = 'Unable to reach the visitor analytics service.';
     } finally {
@@ -1075,8 +1076,19 @@ export class AppComponent implements OnInit {
 
   private adminHeaders() {
     return {
-      'x-admin-token': this.adminToken
+      'x-admin-username': this.adminUsername.trim(),
+      'x-admin-password': this.adminPassword
     };
+  }
+
+  private hasAdminCredentials() {
+    return Boolean(this.adminUsername.trim() && this.adminPassword);
+  }
+
+  private rememberAdminLogin() {
+    globalThis.localStorage?.setItem('cohens-elkton-admin-username', this.adminUsername.trim());
+    globalThis.localStorage?.setItem('cohens-elkton-admin-password', this.adminPassword);
+    globalThis.localStorage?.removeItem('cohens-elkton-admin-token');
   }
 
   private loadAdminDraft() {

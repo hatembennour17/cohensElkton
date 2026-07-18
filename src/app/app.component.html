@@ -44,12 +44,23 @@
             <p class="eyebrow">Elkton admin</p>
             <h1>Catalog Controls</h1>
             <label>
-              Admin Token
+              Username
+              <input
+                type="text"
+                [value]="adminUsername"
+                (input)="adminUsername = $any($event.target).value"
+                autocomplete="username"
+                placeholder="Enter username"
+              />
+            </label>
+            <label>
+              Password
               <input
                 type="password"
-                [value]="adminToken"
-                (input)="adminToken = $any($event.target).value"
-                placeholder="Enter ADMIN_TOKEN"
+                [value]="adminPassword"
+                (input)="adminPassword = $any($event.target).value"
+                autocomplete="current-password"
+                placeholder="Enter password"
               />
             </label>
             <button class="btn btn--primary" type="button" (click)="loadAdminCatalog()">Load Catalog</button>
@@ -374,7 +385,7 @@
                     }
                   </div>
                 } @else {
-                  <div class="admin-empty">Enter the admin token and refresh visitor data.</div>
+                  <div class="admin-empty">Enter your admin username and password, then refresh visitor data.</div>
                 }
               </div>
             }

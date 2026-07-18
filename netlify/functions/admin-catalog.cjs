@@ -1,4 +1,5 @@
 const { getBlob, setJSONBlob } = require('./blob-store.cjs');
+const { jsonResponse, validateAdmin } = require('./admin-auth.cjs');
 
 const CATALOG_BLOB_KEY = 'catalog';
 const CATALOG_FILE_PATH = 'data/elkton-catalog.json';
@@ -35,15 +36,6 @@ const defaultCatalog = {
   }
 };
 
-const jsonResponse = (statusCode, body) => ({
-  statusCode,
-  headers: {
-    'content-type': 'application/json',
-    'cache-control': 'no-store'
-  },
-  body: JSON.stringify(body)
-});
-
 exports.handler = async (event) => {
   const authError = validateAdmin(event);
 
@@ -79,27 +71,6 @@ exports.handler = async (event) => {
     });
   }
 };
-
-function validateAdmin(event) {
-  const expectedToken = process.env.ADMIN_TOKEN;
-
-  if (!expectedToken) {
-    return jsonResponse(500, {
-      error: 'Admin API is not configured.',
-      missing: ['ADMIN_TOKEN']
-    });
-  }
-
-  const suppliedToken = event.headers?.['x-admin-token'] || event.headers?.['X-Admin-Token'];
-
-  if (suppliedToken !== expectedToken) {
-    return jsonResponse(401, {
-      error: 'Unauthorized.'
-    });
-  }
-
-  return null;
-}
 
 async function readCatalog(event) {
   const savedCatalog = await readBlobCatalog(event) || await readGitHubCatalog();

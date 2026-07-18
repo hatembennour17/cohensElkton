@@ -1,15 +1,7 @@
 const { getBlob, setBlob } = require('./blob-store.cjs');
+const { jsonResponse, validateAdmin } = require('./admin-auth.cjs');
 
 const IMAGE_PREFIX = 'landing/';
-
-const jsonResponse = (statusCode, body) => ({
-  statusCode,
-  headers: {
-    'content-type': 'application/json',
-    'cache-control': 'no-store'
-  },
-  body: JSON.stringify(body)
-});
 
 exports.handler = async (event) => {
   if (event.httpMethod === 'GET') {
@@ -61,27 +53,6 @@ exports.handler = async (event) => {
     });
   }
 };
-
-function validateAdmin(event) {
-  const expectedToken = process.env.ADMIN_TOKEN;
-
-  if (!expectedToken) {
-    return jsonResponse(500, {
-      error: 'Admin API is not configured.',
-      missing: ['ADMIN_TOKEN']
-    });
-  }
-
-  const suppliedToken = event.headers?.['x-admin-token'] || event.headers?.['X-Admin-Token'];
-
-  if (suppliedToken !== expectedToken) {
-    return jsonResponse(401, {
-      error: 'Unauthorized.'
-    });
-  }
-
-  return null;
-}
 
 function safeFileName(fileName) {
   const cleaned = String(fileName || '')

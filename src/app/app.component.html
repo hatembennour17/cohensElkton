@@ -6,7 +6,7 @@
         <a [href]="location.phoneHref">{{ location.phone }}</a>
         <a [href]="links.financing">Financing</a>
         <a [href]="links.delivery">Delivery</a>
-        <a [href]="links.wishlist">Wishlist</a>
+        <a [href]="links.wishlist">Wishlist ({{ wishlistCount }})</a>
       </div>
     </header>
 
@@ -24,6 +24,7 @@
 
         <div class="header-actions">
           <a [href]="links.login">My Account</a>
+          <a [href]="links.wishlist">Wishlist ({{ wishlistCount }})</a>
           <a [href]="links.cart">Cart ({{ cartCount }})</a>
         </div>
       </div>
@@ -713,16 +714,13 @@
           <a class="btn btn--primary" [href]="links.contact">Contact Elkton</a>
         </aside>
       </section>
-    } @else if (isAccountPage || isWishlistPage || isContactPage) {
+    } @else if (isAccountPage || isContactPage) {
       <section class="checkout-hero">
         <div class="wrap checkout-hero__inner">
           <p class="eyebrow">Elkton service</p>
           @if (isAccountPage) {
             <h1>Customer accounts for the Elkton site are coming next.</h1>
             <p>For now, call the Elkton showroom for order questions, account help, or product availability.</p>
-          } @else if (isWishlistPage) {
-            <h1>Your Elkton wishlist will stay on this site.</h1>
-            <p>Wishlist storage is a next step after the local product catalog and checkout are finalized.</p>
           } @else {
             <h1>Contact Cohen's Furniture in Elkton.</h1>
             <p>Questions from this site should go to the Elkton showroom, not the shared Cohen's Direct location flow.</p>
@@ -746,6 +744,56 @@
           <h2>Kept on the Elkton domain</h2>
           <p>This page is intentionally local so shoppers do not get redirected to Cohen's Direct.</p>
         </aside>
+      </section>
+    } @else if (isWishlistPage) {
+      <section class="checkout-hero wishlist-hero">
+        <div class="wrap checkout-hero__inner">
+          <p class="eyebrow">Elkton wishlist</p>
+          <h1>Your saved furniture picks.</h1>
+          <p>Items saved here stay on this device so you can come back, compare pieces, and send an Elkton-only cart request when ready.</p>
+        </div>
+      </section>
+
+      <section class="wrap wishlist-page">
+        <div class="wishlist-page__header">
+          <div>
+            <p class="eyebrow">Saved products</p>
+            <h2>{{ wishlistCount }} item{{ wishlistCount === 1 ? '' : 's' }}</h2>
+          </div>
+          @if (wishlistItems.length) {
+            <button type="button" class="text-button" (click)="clearWishlist()">Clear Wishlist</button>
+          }
+        </div>
+
+        @if (wishlistItems.length) {
+          <div class="wishlist-grid">
+            @for (product of wishlistItems; track product.sku) {
+              <article class="wishlist-card">
+                <a class="wishlist-card__media" [href]="productDetailHref(product)">
+                  <img [src]="product.image" [alt]="product.name" (error)="useImageFallback($event, product.name)" />
+                </a>
+                <div class="wishlist-card__body">
+                  @if (product.kicker) {
+                    <p class="eyebrow">{{ product.kicker }}</p>
+                  }
+                  <h3><a [href]="productDetailHref(product)">{{ product.name }}</a></h3>
+                  <p class="wishlist-card__sku">{{ product.sku }}</p>
+                  <strong>{{ formatPrice(product.unitPrice) }}</strong>
+                  <div class="wishlist-card__actions">
+                    <button type="button" class="btn btn--primary" (click)="addToCart(product)">Add to Cart</button>
+                    <button type="button" class="text-button" (click)="removeFromWishlist(product.sku)">Remove</button>
+                  </div>
+                </div>
+              </article>
+            }
+          </div>
+        } @else {
+          <div class="wishlist-empty">
+            <h2>Your wishlist is empty.</h2>
+            <p>Use the heart buttons on product cards or product pages to save items for later.</p>
+            <a class="btn btn--primary" [href]="links.livingRoom">Shop Living Room</a>
+          </div>
+        }
       </section>
     } @else if (isDeliveryPage) {
       <section class="checkout-hero delivery-hero">
@@ -882,7 +930,9 @@
                 </div>
 
                 <div class="product-secondary-actions">
-                  <button type="button" aria-label="Add product to wishlist" (click)="addProductToWishlist(product)">Wishlist</button>
+                  <button type="button" [class.is-active]="isInWishlist(product)" [attr.aria-label]="isInWishlist(product) ? 'Remove product from wishlist' : 'Add product to wishlist'" (click)="toggleWishlist(product)">
+                    {{ isInWishlist(product) ? 'Saved' : 'Wishlist' }}
+                  </button>
                   <button type="button" aria-label="Product information" (click)="scrollToProductInfo()">Info</button>
                 </div>
 
@@ -1111,8 +1161,12 @@
                   <strong>{{ formatPrice(product.unitPrice) }}</strong>
                 </div>
                 <div class="catalog-actions" aria-label="Product actions">
-                  <button type="button" title="Add to wishlist" [attr.aria-label]="'Add ' + product.name + ' to wishlist'">
-                    <span aria-hidden="true">&#9825;</span>
+                  <button type="button" title="Wishlist" [class.is-active]="isInWishlist(product)" [attr.aria-label]="isInWishlist(product) ? 'Remove ' + product.name + ' from wishlist' : 'Add ' + product.name + ' to wishlist'" (click)="toggleWishlist(product)">
+                    @if (isInWishlist(product)) {
+                      <span aria-hidden="true">&#9829;</span>
+                    } @else {
+                      <span aria-hidden="true">&#9825;</span>
+                    }
                   </button>
                   <button type="button" title="Add to cart" [attr.aria-label]="'Add ' + product.name + ' to cart'" (click)="addToCart(product)">
                     <svg aria-hidden="true" viewBox="0 0 24 24">

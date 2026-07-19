@@ -135,6 +135,7 @@ export class AppComponent implements OnInit {
   private readonly currentPath = globalThis.location?.pathname ?? '/';
   private readonly currentSearchParams = new URLSearchParams(globalThis.location?.search || '');
   private readonly cartStorageKey = 'cohens-elkton-cart';
+  private readonly wishlistStorageKey = 'cohens-elkton-wishlist';
   private readonly adminDraftStorageKey = 'cohens-elkton-admin-draft';
   private readonly analyticsSessionStorageKey = 'cohens-elkton-analytics-session';
   private analyticsVisitId = '';
@@ -571,6 +572,7 @@ export class AppComponent implements OnInit {
   ];
 
   cartItems: CartItem[] = this.loadCart();
+  wishlistItems: Product[] = this.loadWishlist();
   catalogProducts: Product[] = [];
   adminUsername = globalThis.localStorage?.getItem('cohens-elkton-admin-username') || 'admin';
   adminPassword = '';
@@ -814,6 +816,10 @@ export class AppComponent implements OnInit {
     return this.cartItems.reduce((total, item) => total + item.quantity, 0);
   }
 
+  get wishlistCount() {
+    return this.wishlistItems.length;
+  }
+
   formatPrice(value: number) {
     return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
   }
@@ -995,7 +1001,38 @@ export class AppComponent implements OnInit {
   }
 
   addProductToWishlist(product: Product) {
-    this.productMessage = `${product.name} was saved to your wishlist for this visit.`;
+    if (this.isInWishlist(product)) {
+      this.productMessage = `${product.name} is already in your wishlist.`;
+      return;
+    }
+
+    this.wishlistItems = [...this.wishlistItems, this.compactProduct(product)];
+    this.saveWishlist();
+    this.productMessage = `${product.name} added to your wishlist.`;
+  }
+
+  toggleWishlist(product: Product) {
+    if (this.isInWishlist(product)) {
+      this.removeFromWishlist(product.sku);
+      this.productMessage = `${product.name} removed from your wishlist.`;
+      return;
+    }
+
+    this.addProductToWishlist(product);
+  }
+
+  removeFromWishlist(sku: string) {
+    this.wishlistItems = this.wishlistItems.filter((item) => item.sku !== sku);
+    this.saveWishlist();
+  }
+
+  clearWishlist() {
+    this.wishlistItems = [];
+    this.saveWishlist();
+  }
+
+  isInWishlist(product: Product) {
+    return this.wishlistItems.some((item) => item.sku === product.sku);
   }
 
   scrollToProductInfo() {
@@ -1553,6 +1590,16 @@ export class AppComponent implements OnInit {
     }
   }
 
+  private loadWishlist(): Product[] {
+    try {
+      const storedWishlist = globalThis.localStorage?.getItem(this.wishlistStorageKey);
+      const parsedWishlist = storedWishlist ? JSON.parse(storedWishlist) : [];
+      return Array.isArray(parsedWishlist) ? parsedWishlist : [];
+    } catch {
+      return [];
+    }
+  }
+
   private adminHeaders() {
     return {
       'x-admin-username': this.adminUsername.trim(),
@@ -1953,6 +2000,22 @@ export class AppComponent implements OnInit {
     } catch {
       // Cart still works for the current page view if storage is unavailable.
     }
+  }
+
+  private saveWishlist() {
+    try {
+      globalThis.localStorage?.setItem(this.wishlistStorageKey, JSON.stringify(this.wishlistItems));
+    } catch {
+      // Wishlist still works for the current page view if storage is unavailable.
+    }
+  }
+
+  private compactProduct(product: Product): Product {
+    return {
+      ...product,
+      images: product.images?.slice(0, 8),
+      spinImages: product.spinImages?.slice(0, 16)
+    };
   }
 
   private async loadAshleyProducts() {

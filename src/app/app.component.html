@@ -714,17 +714,78 @@
           <a class="btn btn--primary" [href]="links.contact">Contact Elkton</a>
         </aside>
       </section>
-    } @else if (isAccountPage || isContactPage) {
+    } @else if (isAccountPage) {
+      <section class="checkout-hero account-hero">
+        <div class="wrap checkout-hero__inner">
+          <p class="eyebrow">Customer account</p>
+          @if (isAccountSignedIn) {
+            <h1>Your Cohen's Elkton account.</h1>
+            <p>Your wishlist is saved to {{ account?.email }} and can be loaded from another device after signing in.</p>
+          } @else {
+            <h1>Sign in to save your wishlist.</h1>
+            <p>Create a simple Elkton account so furniture picks stay connected to your email instead of only this browser.</p>
+          }
+        </div>
+      </section>
+
+      <section class="wrap account-page">
+        @if (isAccountSignedIn) {
+          <div class="account-card">
+            <p class="eyebrow">Signed in</p>
+            <h2>{{ account?.name || account?.email }}</h2>
+            <p>{{ wishlistCount }} wishlist item{{ wishlistCount === 1 ? '' : 's' }} saved to this account.</p>
+            <div class="account-card__actions">
+              <a class="btn btn--primary" [href]="links.wishlist">View Wishlist</a>
+              <button type="button" class="btn btn--dark" [disabled]="accountLoading" (click)="accountLogout()">Sign Out</button>
+            </div>
+            @if (accountMessage) {
+              <p class="form-message">{{ accountMessage }}</p>
+            }
+          </div>
+        } @else {
+          <form class="account-card account-form" (submit)="submitAccount($event)">
+            <div class="account-tabs" role="tablist" aria-label="Account options">
+              <button type="button" [class.account-tab--active]="accountMode === 'login'" (click)="switchAccountMode('login')">Sign In</button>
+              <button type="button" [class.account-tab--active]="accountMode === 'register'" (click)="switchAccountMode('register')">Create Account</button>
+            </div>
+
+            @if (accountMode === 'register') {
+              <label>
+                Name
+                <input type="text" [value]="accountName" (input)="accountName = $any($event.target).value" autocomplete="name" placeholder="Enter your name" />
+              </label>
+            }
+
+            <label>
+              Email
+              <input type="email" [value]="accountEmail" (input)="accountEmail = $any($event.target).value" autocomplete="email" placeholder="you@example.com" />
+            </label>
+
+            <label>
+              Password
+              <input type="password" [value]="accountPassword" (input)="accountPassword = $any($event.target).value" [autocomplete]="accountMode === 'register' ? 'new-password' : 'current-password'" placeholder="At least 8 characters" />
+            </label>
+
+            <button class="btn btn--primary" type="submit" [disabled]="accountLoading">
+              {{ accountMode === 'register' ? 'Create Account' : 'Sign In' }}
+            </button>
+
+            <p class="account-note">
+              Your current wishlist will be saved to this account after signing in.
+            </p>
+
+            @if (accountMessage) {
+              <p class="form-message">{{ accountMessage }}</p>
+            }
+          </form>
+        }
+      </section>
+    } @else if (isContactPage) {
       <section class="checkout-hero">
         <div class="wrap checkout-hero__inner">
           <p class="eyebrow">Elkton service</p>
-          @if (isAccountPage) {
-            <h1>Customer accounts for the Elkton site are coming next.</h1>
-            <p>For now, call the Elkton showroom for order questions, account help, or product availability.</p>
-          } @else {
-            <h1>Contact Cohen's Furniture in Elkton.</h1>
-            <p>Questions from this site should go to the Elkton showroom, not the shared Cohen's Direct location flow.</p>
-          }
+          <h1>Contact Cohen's Furniture in Elkton.</h1>
+          <p>Questions from this site should go to the Elkton showroom, not the shared Cohen's Direct location flow.</p>
         </div>
       </section>
 
@@ -750,7 +811,11 @@
         <div class="wrap checkout-hero__inner">
           <p class="eyebrow">Elkton wishlist</p>
           <h1>Your saved furniture picks.</h1>
-          <p>Items saved here stay on this device so you can come back, compare pieces, and send an Elkton-only cart request when ready.</p>
+          @if (isAccountSignedIn) {
+            <p>These items are saved to {{ account?.email }} and stay available after signing in from another device.</p>
+          } @else {
+            <p>Items saved here stay on this device. Sign in or create an account to save them across devices.</p>
+          }
         </div>
       </section>
 
@@ -760,9 +825,14 @@
             <p class="eyebrow">Saved products</p>
             <h2>{{ wishlistCount }} item{{ wishlistCount === 1 ? '' : 's' }}</h2>
           </div>
-          @if (wishlistItems.length) {
-            <button type="button" class="text-button" (click)="clearWishlist()">Clear Wishlist</button>
-          }
+          <div class="wishlist-page__tools">
+            @if (!isAccountSignedIn) {
+              <a class="btn btn--primary" [href]="links.login">Sign In to Save</a>
+            }
+            @if (wishlistItems.length) {
+              <button type="button" class="text-button" (click)="clearWishlist()">Clear Wishlist</button>
+            }
+          </div>
         </div>
 
         @if (wishlistItems.length) {

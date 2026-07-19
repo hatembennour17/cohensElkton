@@ -25,6 +25,11 @@ type CartItem = Product & {
   quantity: number;
 };
 
+type CustomerAccount = {
+  email: string;
+  name: string;
+};
+
 type CategoryPage = {
   label: string;
   path: string;
@@ -136,6 +141,8 @@ export class AppComponent implements OnInit {
   private readonly currentSearchParams = new URLSearchParams(globalThis.location?.search || '');
   private readonly cartStorageKey = 'cohens-elkton-cart';
   private readonly wishlistStorageKey = 'cohens-elkton-wishlist';
+  private readonly accountSessionStorageKey = 'cohens-elkton-account-session';
+  private readonly accountEmailStorageKey = 'cohens-elkton-account-email';
   private readonly adminDraftStorageKey = 'cohens-elkton-admin-draft';
   private readonly analyticsSessionStorageKey = 'cohens-elkton-analytics-session';
   private analyticsVisitId = '';
@@ -573,6 +580,14 @@ export class AppComponent implements OnInit {
 
   cartItems: CartItem[] = this.loadCart();
   wishlistItems: Product[] = this.loadWishlist();
+  account: CustomerAccount | null = this.loadStoredAccount();
+  accountSessionToken = globalThis.localStorage?.getItem(this.accountSessionStorageKey) || '';
+  accountMode: 'login' | 'register' = 'login';
+  accountEmail = globalThis.localStorage?.getItem(this.accountEmailStorageKey) || '';
+  accountName = '';
+  accountPassword = '';
+  accountLoading = false;
+  accountMessage = '';
   catalogProducts: Product[] = [];
   adminUsername = globalThis.localStorage?.getItem('cohens-elkton-admin-username') || 'admin';
   adminPassword = '';
@@ -627,6 +642,7 @@ export class AppComponent implements OnInit {
 
     this.startAnalyticsTracking();
     void this.loadStorefrontConfig();
+    void this.loadAccountWishlist();
 
     if (this.isCategoryLandingPage || this.isSeoPage || this.isAboutPage || this.isAccountPage || this.isWishlistPage || this.isContactPage) {
       this.catalogLoading = false;
@@ -820,6 +836,10 @@ export class AppComponent implements OnInit {
     return this.wishlistItems.length;
   }
 
+  get isAccountSignedIn() {
+    return Boolean(this.account && this.accountSessionToken);
+  }
+
   formatPrice(value: number) {
     return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
   }
@@ -1000,7 +1020,7 @@ export class AppComponent implements OnInit {
     this.productMessage = `${feature} is not available for this item yet. Please call the Elkton store for help.`;
   }
 
-  addProductToWishlist(product: Product) {
+  async addProductToWishlist(product: Product) {
     if (this.isInWishlist(product)) {
       this.productMessage = `${product.name} is already in your wishlist.`;
       return;
@@ -1008,27 +1028,42 @@ export class AppComponent implements OnInit {
 
     this.wishlistItems = [...this.wishlistItems, this.compactProduct(product)];
     this.saveWishlist();
-    this.productMessage = `${product.name} added to your wishlist.`;
+
+    if (this.isAccountSignedIn) {
+      await this.saveAccountWishlist();
+      this.productMessage = `${product.name} added to your account wishlist.`;
+      return;
+    }
+
+    this.productMessage = `${product.name} added to your wishlist. Sign in to save it to your account.`;
   }
 
-  toggleWishlist(product: Product) {
+  async toggleWishlist(product: Product) {
     if (this.isInWishlist(product)) {
-      this.removeFromWishlist(product.sku);
+      await this.removeFromWishlist(product.sku);
       this.productMessage = `${product.name} removed from your wishlist.`;
       return;
     }
 
-    this.addProductToWishlist(product);
+    await this.addProductToWishlist(product);
   }
 
-  removeFromWishlist(sku: string) {
+  async removeFromWishlist(sku: string) {
     this.wishlistItems = this.wishlistItems.filter((item) => item.sku !== sku);
     this.saveWishlist();
+
+    if (this.isAccountSignedIn) {
+      await this.saveAccountWishlist();
+    }
   }
 
-  clearWishlist() {
+  async clearWishlist() {
     this.wishlistItems = [];
     this.saveWishlist();
+
+    if (this.isAccountSignedIn) {
+      await this.saveAccountWishlist();
+    }
   }
 
   isInWishlist(product: Product) {
@@ -1218,6 +1253,99 @@ export class AppComponent implements OnInit {
   submitFinancingRequest(event: Event) {
     event.preventDefault();
     this.financingMessage = `Financing request ready for ${this.location.name}. The next step is connecting this form to the Elkton financing inbox or provider endpoint.`;
+  }
+
+  async submitAccount(event: Event) {
+    event.preventDefault();
+
+    if (!this.accountEmail.trim() || !this.accountPassword) {
+      this.accountMessage = 'Enter your email and password.';
+      return;
+    }
+
+    this.accountLoading = true;
+    this.accountMessage = this.accountMode === 'register' ? 'Creating your account...' : 'Signing in...';
+
+    try {
+      const response = await fetch('/.netlify/functions/customer-account', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          action: this.accountMode,
+          email: this.accountEmail,
+          password: this.accountPassword,
+          name: this.accountName,
+          wishlist: this.wishlistItems
+        })
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload.error || 'Unable to sign in.');
+      }
+
+      this.applyAccountPayload(payload);
+      this.accountPassword = '';
+      this.accountMessage = this.accountMode === 'register'
+        ? 'Account created. Your wishlist is now saved to your login.'
+        : 'Signed in. Your wishlist is now synced to your account.';
+    } catch (error) {
+      this.accountMessage = error instanceof Error ? error.message : 'Unable to sign in.';
+    } finally {
+      this.accountLoading = false;
+    }
+  }
+
+  async loadAccountWishlist() {
+    if (!this.accountSessionToken) {
+      return;
+    }
+
+    try {
+      const response = await fetch('/.netlify/functions/customer-account', {
+        headers: this.accountHeaders()
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        this.clearStoredAccount();
+        return;
+      }
+
+      this.applyAccountPayload(payload);
+    } catch {
+      // Keep the local wishlist available if the account API is temporarily unavailable.
+    }
+  }
+
+  async accountLogout() {
+    this.accountLoading = true;
+    this.accountMessage = 'Signing out...';
+
+    try {
+      await fetch('/.netlify/functions/customer-account', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          ...this.accountHeaders()
+        },
+        body: JSON.stringify({ action: 'logout' })
+      });
+    } finally {
+      this.account = null;
+      this.accountSessionToken = '';
+      this.accountPassword = '';
+      this.clearStoredAccount();
+      this.accountLoading = false;
+      this.accountMessage = 'Signed out. Wishlist items on this device are still available locally.';
+    }
+  }
+
+  switchAccountMode(mode: 'login' | 'register') {
+    this.accountMode = mode;
+    this.accountMessage = '';
   }
 
   async adminLogin() {
@@ -1598,6 +1726,19 @@ export class AppComponent implements OnInit {
     } catch {
       return [];
     }
+  }
+
+  private loadStoredAccount(): CustomerAccount | null {
+    const email = globalThis.localStorage?.getItem(this.accountEmailStorageKey) || '';
+
+    if (!email) {
+      return null;
+    }
+
+    return {
+      email,
+      name: ''
+    };
   }
 
   private adminHeaders() {
@@ -2016,6 +2157,67 @@ export class AppComponent implements OnInit {
       images: product.images?.slice(0, 8),
       spinImages: product.spinImages?.slice(0, 16)
     };
+  }
+
+  private async saveAccountWishlist() {
+    if (!this.accountSessionToken) {
+      return;
+    }
+
+    try {
+      const response = await fetch('/.netlify/functions/customer-account', {
+        method: 'PUT',
+        headers: {
+          'content-type': 'application/json',
+          ...this.accountHeaders()
+        },
+        body: JSON.stringify({
+          wishlist: this.wishlistItems
+        })
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload.error || 'Unable to save account wishlist.');
+      }
+
+      this.applyAccountPayload(payload);
+    } catch {
+      this.accountMessage = 'Wishlist saved locally, but could not sync to your account right now.';
+    }
+  }
+
+  private applyAccountPayload(payload: { token?: string; account?: CustomerAccount & { wishlist?: Product[] } }) {
+    if (payload.token) {
+      this.accountSessionToken = payload.token;
+      globalThis.localStorage?.setItem(this.accountSessionStorageKey, payload.token);
+    }
+
+    if (payload.account) {
+      this.account = {
+        email: payload.account.email,
+        name: payload.account.name || ''
+      };
+      this.accountEmail = payload.account.email;
+      this.accountName = payload.account.name || '';
+      globalThis.localStorage?.setItem(this.accountEmailStorageKey, payload.account.email);
+    }
+
+    if (Array.isArray(payload.account?.wishlist)) {
+      this.wishlistItems = payload.account.wishlist;
+      this.saveWishlist();
+    }
+  }
+
+  private accountHeaders() {
+    return {
+      authorization: `Bearer ${this.accountSessionToken}`
+    };
+  }
+
+  private clearStoredAccount() {
+    globalThis.localStorage?.removeItem(this.accountSessionStorageKey);
+    globalThis.localStorage?.removeItem(this.accountEmailStorageKey);
   }
 
   private async loadAshleyProducts() {

@@ -316,6 +316,11 @@ h3 {
   background: #171717;
 }
 
+.btn:disabled {
+  cursor: wait;
+  opacity: 0.68;
+}
+
 .social-links {
   display: flex;
   align-items: center;
@@ -1873,6 +1878,86 @@ h3 {
 
 .wishlist-hero {
   background: linear-gradient(90deg, #161616 0%, #272727 100%);
+}
+
+.account-hero {
+  background: linear-gradient(90deg, #171717 0%, #383838 100%);
+}
+
+.account-page {
+  display: grid;
+  min-height: 420px;
+  place-items: start center;
+  padding: 42px 0 64px;
+}
+
+.account-card {
+  display: grid;
+  width: min(100%, 560px);
+  gap: 18px;
+  border: 1px solid #dedede;
+  background: #fff;
+  padding: 28px;
+}
+
+.account-card h2 {
+  margin: 0;
+  font-size: 34px;
+}
+
+.account-card p {
+  margin: 0;
+  color: #555;
+}
+
+.account-form label {
+  display: grid;
+  gap: 8px;
+  font-weight: 900;
+}
+
+.account-form input {
+  min-height: 48px;
+  border: 1px solid #cfcfcf;
+  padding: 0 12px;
+  font: inherit;
+}
+
+.account-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-bottom: 1px solid #dedede;
+}
+
+.account-tabs button {
+  border: 0;
+  border-bottom: 3px solid transparent;
+  padding: 0 0 12px;
+  color: #111;
+  background: transparent;
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.account-tabs .account-tab--active {
+  color: #b42024;
+  border-bottom-color: #b42024;
+}
+
+.account-note {
+  padding: 12px;
+  border-left: 4px solid #b42024;
+  background: #f4f4f4;
+  font-weight: 700;
+}
+
+.account-card__actions,
+.wishlist-page__tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
 }
 
 .wishlist-page {

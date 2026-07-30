@@ -103,6 +103,13 @@
               </button>
               <button
                 type="button"
+                [class.admin-tab--active]="selectedAdminTab === 'estimates'"
+                (click)="selectAdminTab('estimates')"
+              >
+                Estimates
+              </button>
+              <button
+                type="button"
                 [class.admin-tab--active]="selectedAdminTab === 'visitors'"
                 (click)="selectAdminTab('visitors')"
               >
@@ -285,6 +292,115 @@
                   } @empty {
                     <div class="admin-empty">
                       Add a landing image URL or upload image files to build the homepage carousel.
+                    </div>
+                  }
+                </div>
+              </div>
+            } @else if (selectedAdminTab === 'estimates') {
+              <div class="admin-estimates">
+                <div class="admin-analytics__header">
+                  <div>
+                    <p class="eyebrow">Customer requests</p>
+                    <h2>Estimate History</h2>
+                    <p>Review incoming Elkton estimate requests, customer details, products, totals, and follow-up status.</p>
+                  </div>
+                  <button class="btn btn--primary" type="button" (click)="loadEstimates()">
+                    {{ estimatesLoading ? 'Loading...' : 'Refresh Estimates' }}
+                  </button>
+                </div>
+
+                @if (estimatesMessage) {
+                  <p class="form-message">{{ estimatesMessage }}</p>
+                }
+
+                <div class="estimate-summary">
+                  <article>
+                    <span>Total Requests</span>
+                    <strong>{{ estimates.length }}</strong>
+                  </article>
+                  <article>
+                    <span>New</span>
+                    <strong>{{ estimateStatusCount('new') }}</strong>
+                  </article>
+                  <article>
+                    <span>In Progress</span>
+                    <strong>{{ estimateStatusCount('contacted') + estimateStatusCount('quoted') }}</strong>
+                  </article>
+                </div>
+
+                <div class="estimate-list">
+                  @for (estimate of estimates; track estimate.id) {
+                    <article class="estimate-card">
+                      <button class="estimate-card__summary" type="button" (click)="toggleEstimateDetails(estimate.id)">
+                        <span>
+                          <small>{{ formatVisitDate(estimate.createdAt) }}</small>
+                          <strong>{{ estimateCustomerName(estimate) }}</strong>
+                        </span>
+                        <span>
+                          <small>Contact</small>
+                          <strong>{{ estimate.customer.phone }}</strong>
+                          <small>{{ estimate.customer.email }}</small>
+                        </span>
+                        <span>
+                          <small>Items</small>
+                          <strong>{{ estimateItemCount(estimate) }}</strong>
+                        </span>
+                        <span>
+                          <small>Estimate Total</small>
+                          <strong>{{ formatPrice(estimate.subtotal) }}</strong>
+                        </span>
+                        <span class="estimate-toggle">{{ expandedEstimateId === estimate.id ? 'Hide' : 'View' }}</span>
+                      </button>
+
+                      <div class="estimate-card__status">
+                        <label>
+                          Status
+                          <select
+                            [value]="estimate.status"
+                            (change)="updateEstimateStatus(estimate, $any($event.target).value)"
+                          >
+                            <option value="new">New</option>
+                            <option value="contacted">Contacted</option>
+                            <option value="quoted">Quoted</option>
+                            <option value="closed">Closed</option>
+                          </select>
+                        </label>
+                        <span class="estimate-badge" [attr.data-status]="estimate.status">{{ estimate.status }}</span>
+                      </div>
+
+                      @if (expandedEstimateId === estimate.id) {
+                        <div class="estimate-card__details">
+                          <section>
+                            <h3>Customer & Fulfillment</h3>
+                            <p>
+                              <strong>{{ estimate.fulfillment === 'pickup' ? 'Pickup' : 'Delivery' }}</strong><br />
+                              {{ estimate.address.street }}<br />
+                              {{ estimate.address.city }}, {{ estimate.address.state }} {{ estimate.address.zip }}
+                            </p>
+                            <p>
+                              <a [href]="'mailto:' + estimate.customer.email">{{ estimate.customer.email }}</a><br />
+                              <a [href]="'tel:' + estimate.customer.phone">{{ estimate.customer.phone }}</a>
+                            </p>
+                          </section>
+                          <section class="estimate-items">
+                            <h3>Requested Products</h3>
+                            @for (item of estimate.items; track item.sku) {
+                              <div class="estimate-item">
+                                <img [src]="item.image" [alt]="item.name" />
+                                <span>
+                                  <strong>{{ item.name }}</strong>
+                                  <small>SKU {{ item.sku }} · Qty {{ item.quantity }}</small>
+                                </span>
+                                <strong>{{ formatPrice(item.unitPrice * item.quantity) }}</strong>
+                              </div>
+                            }
+                          </section>
+                        </div>
+                      }
+                    </article>
+                  } @empty {
+                    <div class="admin-empty">
+                      No estimates have been stored yet. New order requests will appear here after this release is deployed.
                     </div>
                   }
                 </div>

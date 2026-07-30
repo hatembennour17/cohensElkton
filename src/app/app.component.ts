@@ -116,6 +116,37 @@ type AnalyticsSummary = {
   recentVisits: AnalyticsVisit[];
 };
 
+type EstimateStatus = 'new' | 'contacted' | 'quoted' | 'closed';
+
+type Estimate = {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  status: EstimateStatus;
+  fulfillment: 'delivery' | 'pickup';
+  storeLocation: string;
+  customer: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+  };
+  address: {
+    street: string;
+    city: string;
+    state: string;
+    zip: string;
+  };
+  subtotal: number;
+  items: {
+    sku: string;
+    name: string;
+    quantity: number;
+    unitPrice: number;
+    image: string;
+  }[];
+};
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -592,7 +623,7 @@ export class AppComponent implements OnInit {
   adminUsername = globalThis.localStorage?.getItem('cohens-elkton-admin-username') || 'admin';
   adminPassword = '';
   adminCatalog: AdminCatalog = this.createDefaultAdminCatalog();
-  selectedAdminTab: 'catalog' | 'landing' | 'visitors' = 'catalog';
+  selectedAdminTab: 'catalog' | 'landing' | 'estimates' | 'visitors' = 'catalog';
   selectedAdminCategory = 'living-room';
   newAdminSku = '';
   newHeroImageUrl = '';
@@ -603,6 +634,10 @@ export class AppComponent implements OnInit {
   analyticsLoading = false;
   analyticsMessage = '';
   analyticsSummary: AnalyticsSummary | null = null;
+  estimatesLoading = false;
+  estimatesMessage = '';
+  estimates: Estimate[] = [];
+  expandedEstimateId = '';
   orderMessage = '';
   orderSubmitting = false;
   financingMessage = '';
@@ -1221,6 +1256,34 @@ export class AppComponent implements OnInit {
         .join('\n')
     );
 
+    const estimate = {
+      id: globalThis.crypto?.randomUUID?.() || `estimate-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      status: 'new',
+      fulfillment: this.formValue(formData, 'fulfillment'),
+      storeLocation: `${this.location.name} - ${this.location.street}, ${this.location.cityLine}`,
+      customer: {
+        firstName: this.formValue(formData, 'firstName'),
+        lastName: this.formValue(formData, 'lastName'),
+        email: this.formValue(formData, 'email'),
+        phone: this.formValue(formData, 'phone')
+      },
+      address: {
+        street: this.formValue(formData, 'address'),
+        city: this.formValue(formData, 'city'),
+        state: this.formValue(formData, 'state'),
+        zip: this.formValue(formData, 'zip')
+      },
+      subtotal: this.cartSubtotal,
+      items: this.cartItems.map((item) => ({
+        sku: item.sku,
+        name: item.name,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        image: item.image
+      }))
+    };
+
     this.orderSubmitting = true;
     this.orderMessage = 'Submitting your Elkton order request...';
 
@@ -1235,6 +1298,18 @@ export class AppComponent implements OnInit {
 
       if (!response.ok) {
         throw new Error(`Netlify Forms returned ${response.status}`);
+      }
+
+      const historyResponse = await fetch('/.netlify/functions/estimates', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify(estimate)
+      });
+
+      if (!historyResponse.ok) {
+        throw new Error(`Estimate history returned ${historyResponse.status}`);
       }
 
       this.clearCart();
@@ -1364,6 +1439,7 @@ export class AppComponent implements OnInit {
     this.adminAuthenticated = true;
     this.loadAdminDraft();
     void this.loadAnalytics({ silent: true });
+    void this.loadEstimates({ silent: true });
     this.adminMessage = 'Signed in. Admin catalog loaded.';
   }
 
@@ -1372,6 +1448,8 @@ export class AppComponent implements OnInit {
     this.adminPassword = '';
     this.analyticsSummary = null;
     this.analyticsMessage = '';
+    this.estimates = [];
+    this.estimatesMessage = '';
     this.adminMessage = 'Signed out.';
     globalThis.localStorage?.removeItem('cohens-elkton-admin-password');
     globalThis.localStorage?.removeItem('cohens-elkton-admin-token');
@@ -1485,11 +1563,97 @@ export class AppComponent implements OnInit {
     }
   }
 
-  selectAdminTab(tab: 'catalog' | 'landing' | 'visitors') {
+  async loadEstimates(options: { silent?: boolean } = {}) {
+    if (!this.adminAuthenticated && !options.silent) {
+      this.estimatesMessage = 'Sign in before loading estimates.';
+      return;
+    }
+
+    if (!this.hasAdminCredentials()) {
+      if (!options.silent) {
+        this.estimatesMessage = 'Enter your admin username and password before loading estimates.';
+      }
+      return;
+    }
+
+    this.estimatesLoading = true;
+
+    try {
+      const response = await fetch('/.netlify/functions/estimates', {
+        headers: this.adminHeaders()
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        this.estimatesMessage = payload.error || 'Unable to load estimates.';
+        return;
+      }
+
+      this.estimates = Array.isArray(payload.estimates) ? payload.estimates : [];
+      this.estimatesMessage = options.silent ? '' : 'Estimate history refreshed.';
+      this.rememberAdminLogin();
+    } catch {
+      this.estimatesMessage = 'Unable to reach the estimate history service.';
+    } finally {
+      this.estimatesLoading = false;
+    }
+  }
+
+  async updateEstimateStatus(estimate: Estimate, status: EstimateStatus) {
+    const previousStatus = estimate.status;
+    estimate.status = status;
+    this.estimatesMessage = 'Saving estimate status...';
+
+    try {
+      const response = await fetch('/.netlify/functions/estimates', {
+        method: 'PATCH',
+        headers: {
+          ...this.adminHeaders(),
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({ id: estimate.id, status })
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        estimate.status = previousStatus;
+        this.estimatesMessage = payload.error || 'Unable to update estimate status.';
+        return;
+      }
+
+      estimate.updatedAt = payload.estimate?.updatedAt || new Date().toISOString();
+      this.estimatesMessage = 'Estimate status updated.';
+    } catch {
+      estimate.status = previousStatus;
+      this.estimatesMessage = 'Unable to reach the estimate history service.';
+    }
+  }
+
+  toggleEstimateDetails(id: string) {
+    this.expandedEstimateId = this.expandedEstimateId === id ? '' : id;
+  }
+
+  estimateCustomerName(estimate: Estimate) {
+    return `${estimate.customer.firstName} ${estimate.customer.lastName}`.trim() || 'Customer';
+  }
+
+  estimateItemCount(estimate: Estimate) {
+    return estimate.items.reduce((total, item) => total + item.quantity, 0);
+  }
+
+  estimateStatusCount(status: EstimateStatus) {
+    return this.estimates.filter((estimate) => estimate.status === status).length;
+  }
+
+  selectAdminTab(tab: 'catalog' | 'landing' | 'estimates' | 'visitors') {
     this.selectedAdminTab = tab;
 
     if (tab === 'visitors') {
       void this.loadAnalytics({ silent: true });
+    }
+
+    if (tab === 'estimates') {
+      void this.loadEstimates({ silent: true });
     }
   }
 
